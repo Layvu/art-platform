@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Запуск проекта:
 
-## Getting Started
+# 1) установить пакеты, добавить payload клиент
 
-First, run the development server:
+pnpm install
+pnpm add -D payload
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+# 2) поднять БД + dev сервер Next + Payload
+
 pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Отдельно поднять и потушить БД
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+docker compose up -d
+docker compose down
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## проверить состояние
 
-## Learn More
+docker compose ps
 
-To learn more about Next.js, take a look at the following resources:
+# URLs:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# - frontend: http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# - payload admin: http://localhost:3000/admin
 
-## Deploy on Vercel
+# - api: http://localhost:3000/api/products
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Заметки
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+в next js правильный подход такой:
+
+- Каждая папка в app - отдельный роут.
+- Если папка в круглых скобках, то новый роут не создаётся - это группирующая папка, которая не влияет на URL, но позволяет создавать внутри неё роуты и применять для них общий layout, loading, error и т.п. к группе страниц
+- Если папка в квадратных скобках - значит этот путь является динамическим, значение которого доступно через params в компоненте. Если он лежит в другой папке, то роут складывается из внешней папки и внутренней: папка products, в ней [product] => products/some_product.
+- При этом в каждой папке должен быть обязательно page.tsx - это серверный компонент, без него не будет обнаружен роут. Рядом можно создать клиентский файл, тот же Product.tsx где описать клиентскую логику с хуками, указав 'use client'
+- Хороший подход - в page.tsx фетчи, работа с бд, логика, в клиентском файле хуки, вёрстка, работа с отображением
+
+- Клиентская работа с параметрами заключается в том, чтобы не перезагружать страницу, а отрисовывать на существующей, например, новое модальное окно/фильтр и при это менять параметры роута. В остальном лучше использовать серверные переходы между страницами для SEO и производительности
+
+- Dynamic Import Converter for Next.js - для ленивой загрузки компонентов
