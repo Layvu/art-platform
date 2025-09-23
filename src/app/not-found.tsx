@@ -1,5 +1,6 @@
-import { PAGES } from '@/config/public-pages.config';
 import Link from 'next/link';
+
+import { PAGES } from '@/config/public-pages.config';
 
 export default function NotFound() {
     return (

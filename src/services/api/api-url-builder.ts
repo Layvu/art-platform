@@ -10,10 +10,10 @@ export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_S
 export type QueryParams = {
     limit?: number;
     page?: number;
-    where?: Record<string, any>;
+    where?: Record<string, unknown>;
     sort?: string;
     depth?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 };
 
 export class ApiUrlBuilder {

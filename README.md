@@ -5,7 +5,16 @@
 pnpm install
 pnpm add -D payload
 
-# 2) поднять БД + dev сервер Next + Payload
+# 2) Создать БД
+
+psql -U art_user -d postgres -c "CREATE DATABASE art_platform;"
+psql -U art_user -d art_platform -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+
+# 3) Выполнить миграцию триггеров (для автоматического обновления зависимых таблиц)
+
+psql -U art_user -d art_platform -f src/migrations/create_author_stats_triggers.sql
+
+# 3) поднять БД + dev сервер Next + Payload
 
 pnpm dev
 
@@ -25,6 +34,11 @@ docker compose ps
 # - payload admin: http://localhost:3000/admin
 
 # - api: http://localhost:3000/api/products
+
+# Триггеры:
+
+- products_update_count: пересчитывает authors.products_count после операций с products
+- products_update_categories: обновляет authors_product_categories с категориями товаров, которые продают авторы
 
 ## Заметки
 

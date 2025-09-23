@@ -1,9 +1,10 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { MenuItem } from './MenuItem';
-import { MENU } from './menu.data';
 import { match } from 'path-to-regexp';
+
+import { MENU } from './menu.data';
+import { MenuItem } from './MenuItem';
 
 export function Menu() {
     const pathName = usePathname();

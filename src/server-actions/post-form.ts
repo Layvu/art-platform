@@ -1,7 +1,7 @@
 'use server';
 
-import { getPayload } from 'payload';
 import config from '@payload-config';
+import { getPayload } from 'payload';
 
 export async function postForm(formData: FormData) {
     const content = formData.get('content');

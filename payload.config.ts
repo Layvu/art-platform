@@ -1,13 +1,12 @@
-import { buildConfig } from 'payload';
-import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { postgresAdapter } from '@payloadcms/db-postgres';
-
+import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { en } from '@payloadcms/translations/languages/en';
 import { ru } from '@payloadcms/translations/languages/ru';
+import { buildConfig } from 'payload';
 
-import { UsersCollection } from '@/collections/users.collection';
-import { ProductsCollection } from '@/collections/products.collection';
 import { AuthorsCollection } from '@/collections/authors.collection';
+import { ProductsCollection } from '@/collections/products.collection';
+import { UsersCollection } from '@/collections/users.collection';
 
 export default buildConfig({
     serverURL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',

@@ -1,5 +1,6 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+
 import { PAGES } from '@/config/public-pages.config';
 import type { IProduct } from '@/shared/types/product.interface';
 
@@ -10,7 +11,7 @@ export default function ProductCard({ id, title, description, price, author, ima
             <Link href={PAGES.PRODUCT(title)} className="text-blue-500 hover:underline">
                 {title}
             </Link>
-            <p>{description.slice(0, 100)}</p>
+            {description ? <p>{description.slice(0, 100)}</p> : ''}
             <span>{price}</span>
 
             <p className="text-sm text-gray-500">

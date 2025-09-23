@@ -1,7 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Menu } from './Menu/Menu';
+
 import { PAGES } from '@/config/public-pages.config';
+
+import { Menu } from './Menu/Menu';
 
 export function Header() {
     return (

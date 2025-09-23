@@ -1,9 +1,10 @@
-import { PRODUCTS } from '@/shared/data/products.data';
-import ProductCard from '../../../components/ProductCard';
 import { PayloadService } from '@/services/api/payload-service';
+import { PRODUCTS } from '@/shared/data/products.data';
+
+import ProductCard from '../../../components/ProductCard';
 
 export default async function HomePage() {
-    // TODO: Запрашивать из стора, в нём loading и error
+    // TODO: loading и error
     const payloadService = new PayloadService();
     const products = await payloadService.getProducts();
 

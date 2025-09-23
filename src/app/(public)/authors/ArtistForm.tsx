@@ -8,7 +8,7 @@ export function ArtistForm() {
                 placeholder="Ты кто такой?"
                 className="w-full px-3 py-2 border border-gray-300 rounded"
             />
-            <button type="submit" className="w-full py-2 mt-2 bg-blue-600 text-white rounded hover:cursor-pointer">
+            <button type="submit" className="w-full py-2 mt-2 bg-blue-600 text-white rounded hover:cursor-pointer mb-5">
                 Отправить
             </button>
         </form>

@@ -1,6 +1,9 @@
-import type { IProduct } from '@/shared/types/product.interface';
-import { ApiUrlBuilder, COLLECTION_SLUGS, type CollectionSlug, type QueryParams } from './api-url-builder';
 import type { IAuthor } from '@/shared/types/author.interface';
+import type { PayloadAuthor, PayloadCollection, PayloadProduct } from '@/shared/types/payload-types';
+import type { IProduct } from '@/shared/types/product.interface';
+
+import { ApiUrlBuilder, COLLECTION_SLUGS, type CollectionSlug, type QueryParams } from './api-url-builder';
+import { mapPayloadAuthorToIAuthor } from './utils';
 
 // Сервис для работы с Payload CMS API
 export class PayloadService {
@@ -26,7 +29,28 @@ export class PayloadService {
 
         if (!json.docs) throw new Error(`No ${slug} found`);
 
-        return json.docs;
+        // Не используем спред оператор, чтобы не записать на клиент лишние типы из бд (created_at, updated_at)
+        return json.docs.map((doc: PayloadCollection) => {
+            switch (slug) {
+                case COLLECTION_SLUGS.Authors:
+                    return mapPayloadAuthorToIAuthor(doc as PayloadAuthor);
+                case COLLECTION_SLUGS.Products: {
+                    const product = doc as PayloadProduct;
+                    return {
+                        id: product.id,
+                        title: product.title,
+                        description: product.description || '',
+                        price: product.price,
+                        category: product.category,
+                        author:
+                            typeof product.author === 'string'
+                                ? { id: product.author }
+                                : mapPayloadAuthorToIAuthor(product.author),
+                        image: product.image,
+                    } as IProduct;
+                }
+            }
+        });
     }
 
     // Методы для каждой коллекции
@@ -35,7 +59,7 @@ export class PayloadService {
     }
 
     async getAuthors(params: QueryParams = {}): Promise<IAuthor[]> {
-        return this.getCollection(COLLECTION_SLUGS.Authors, params);
+        return this.getCollection(COLLECTION_SLUGS.Authors, { ...params, depth: 1 }); // depth=1 подтянет категории
     }
 }
 
