@@ -1,9 +1,9 @@
 import type { IAuthor } from '@/shared/types/author.interface';
-import type { PayloadAuthor, PayloadCollection, PayloadProduct } from '@/shared/types/payload-types';
+import type { IPayloadAuthor, IPayloadProduct, PayloadCollection } from '@/shared/types/payload-types';
 import type { IProduct } from '@/shared/types/product.interface';
 
 import { ApiUrlBuilder, COLLECTION_SLUGS, type CollectionSlug, type QueryParams } from './api-url-builder';
-import { mapPayloadAuthorToIAuthor } from './utils';
+import { mapIPayloadAuthorToIAuthor } from './utils';
 
 // Сервис для работы с Payload CMS API
 export class PayloadService {
@@ -33,9 +33,9 @@ export class PayloadService {
         return json.docs.map((doc: PayloadCollection) => {
             switch (slug) {
                 case COLLECTION_SLUGS.Authors:
-                    return mapPayloadAuthorToIAuthor(doc as PayloadAuthor);
+                    return mapIPayloadAuthorToIAuthor(doc as IPayloadAuthor);
                 case COLLECTION_SLUGS.Products: {
-                    const product = doc as PayloadProduct;
+                    const product = doc as IPayloadProduct;
                     return {
                         id: product.id,
                         title: product.title,
@@ -45,7 +45,7 @@ export class PayloadService {
                         author:
                             typeof product.author === 'string'
                                 ? { id: product.author }
-                                : mapPayloadAuthorToIAuthor(product.author),
+                                : mapIPayloadAuthorToIAuthor(product.author),
                         image: product.image,
                     } as IProduct;
                 }

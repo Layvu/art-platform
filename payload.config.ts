@@ -5,6 +5,7 @@ import { ru } from '@payloadcms/translations/languages/ru';
 import { buildConfig } from 'payload';
 
 import { AuthorsCollection } from '@/collections/authors.collection';
+import { FormsCollection } from '@/collections/forms.collection';
 import { ProductsCollection } from '@/collections/products.collection';
 import { UsersCollection } from '@/collections/users.collection';
 
@@ -15,7 +16,7 @@ export default buildConfig({
         user: 'users',
     },
     editor: lexicalEditor(),
-    collections: [ProductsCollection, AuthorsCollection, UsersCollection],
+    collections: [ProductsCollection, AuthorsCollection, UsersCollection, FormsCollection],
     i18n: {
         fallbackLanguage: 'en',
         supportedLanguages: { en, ru },

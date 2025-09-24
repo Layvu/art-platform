@@ -11,8 +11,8 @@ import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
 import type { AuthorsSortOption, IAuthorsFilters, IAuthorsUIProps } from '@/shared/types/author.interface';
 
 import { filterAndSortAuthors, parseQueryToAuthorFilters } from './utils/authors';
-import { ArtistForm } from './ArtistForm';
 import AuthorFiltersBar from './AuthorFiltersBar';
+import { AuthorForm } from './AuthorForm';
 import { AUTHORS_PER_PAGE } from './constants';
 
 // TODO: loading и error
@@ -88,7 +88,7 @@ export default function AuthorsUI({ authors }: IAuthorsUIProps) {
             <div className="max-w-6xl mx-auto p-4">
                 <h1 className="text-2xl font-bold mb-6">Authors</h1>
 
-                <ArtistForm />
+                <AuthorForm />
 
                 {/* Поиск, фильтры и сортировка */}
                 <div className="flex items-center gap-4 mb-6">

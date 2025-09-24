@@ -1,7 +1,7 @@
 import type { IAuthor } from '@/shared/types/author.interface';
-import type { PayloadAuthor } from '@/shared/types/payload-types';
+import type { IPayloadAuthor } from '@/shared/types/payload-types';
 
-export const mapPayloadAuthorToIAuthor = (author: PayloadAuthor): IAuthor => ({
+export const mapIPayloadAuthorToIAuthor = (author: IPayloadAuthor): IAuthor => ({
     id: author.id,
     name: author.name,
     bio: author.bio,

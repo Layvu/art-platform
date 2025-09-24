@@ -1,6 +1,6 @@
 import { postForm } from '@/server-actions/post-form';
 
-export function ArtistForm() {
+export function AuthorForm() {
     return (
         <form action={postForm} className="w-80">
             <input

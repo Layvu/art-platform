@@ -1,6 +1,6 @@
 import type { ProductCategory } from './product.interface';
 
-export interface PayloadAuthor {
+export interface IPayloadAuthor {
     id: string;
     name: string;
     bio?: string | undefined;
@@ -11,16 +11,23 @@ export interface PayloadAuthor {
     updatedAt: string;
 }
 
-export interface PayloadProduct {
+export interface IPayloadProduct {
     id: string;
     title: string;
     description?: string | null;
     price: number;
     category: ProductCategory;
-    author: string | PayloadAuthor;
+    author: string | IPayloadAuthor;
     image?: string | null;
     createdAt: string;
     updatedAt: string;
 }
 
-export type PayloadCollection = PayloadAuthor | PayloadProduct;
+export interface IPayloadForm {
+    id: string;
+    content: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export type PayloadCollection = IPayloadAuthor | IPayloadProduct;

@@ -4,17 +4,16 @@ import config from '@payload-config';
 import { getPayload } from 'payload';
 
 export async function postForm(formData: FormData) {
-    const content = formData.get('content');
+    const content = formData.get('content') as string;
 
-    // TODO: Добавить сохранение письма в Payload
-    // const payload = await getPayload({ config });
+    const payload = await getPayload({ config });
 
-    // await payload.create({
-    //     collection: 'forms',
-    //     data: {
-    //         content,
-    //     },
-    // });
+    await payload.create({
+        collection: 'forms',
+        data: {
+            content,
+        },
+    });
 
-    console.log('На бэк отправляем заявку:', content);
+    console.log('Анкета сохранена:', content);
 }
