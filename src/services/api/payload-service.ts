@@ -39,7 +39,8 @@ export class PayloadService {
                     return {
                         id: product.id,
                         title: product.title,
-                        description: product.description || '',
+                        slug: product.slug,
+                        description: product.description,
                         price: product.price,
                         category: product.category,
                         author:
@@ -49,6 +50,8 @@ export class PayloadService {
                         image: product.image,
                     } as IProduct;
                 }
+                default:
+                    return doc;
             }
         });
     }
@@ -58,8 +61,26 @@ export class PayloadService {
         return this.getCollection(COLLECTION_SLUGS.Products, { ...params, depth: 1 }); // depth=1 подтянет автора
     }
 
+    async getProductBySlug(slug: string): Promise<IProduct | null> {
+        const [product] = await this.getProducts({
+            where: { slug: { equals: slug } },
+            limit: 1,
+            pagination: false,
+        });
+        return product ?? null;
+    }
+
     async getAuthors(params: QueryParams = {}): Promise<IAuthor[]> {
         return this.getCollection(COLLECTION_SLUGS.Authors, { ...params, depth: 1 }); // depth=1 подтянет категории
+    }
+
+    async getAuthorBySlug(slug: string): Promise<IAuthor | null> {
+        const [product] = await this.getAuthors({
+            where: { slug: { equals: slug } },
+            limit: 1,
+            pagination: false,
+        });
+        return product ?? null;
     }
 }
 

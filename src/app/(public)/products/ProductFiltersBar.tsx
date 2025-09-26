@@ -21,6 +21,7 @@ export default function ProductFiltersBar({ filters, sortBy, onFilterChange, onS
                 }
                 className="px-4 py-2 border border-gray-300 rounded-md"
             >
+                <option value="">Все категории</option>
                 {PRODUCT_CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>
                         {c.label}
@@ -34,6 +35,7 @@ export default function ProductFiltersBar({ filters, sortBy, onFilterChange, onS
                 onChange={(e) => onSortChange((e.target.value as ProductsSortOption) || null)}
                 className="px-4 py-2 border border-gray-300 rounded-md"
             >
+                <option value="">Сортировка по умолчанию</option>
                 {PRODUCTS_SORT_OPTIONS.map((s) => (
                     <option key={s.value} value={s.value}>
                         {s.label}

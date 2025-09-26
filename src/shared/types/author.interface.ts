@@ -5,6 +5,7 @@ import type { ProductCategory } from './product.interface';
 export interface IAuthor {
     id: string;
     name: string;
+    slug: string;
     bio?: string;
     productsCount: number; // Общее кличество товаров автора (вычисляемое)
     productCategories: ProductCategory[]; // Категории продуктов, которые автор толкает (вычисляемое), создаёт новую таблицу

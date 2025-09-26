@@ -5,6 +5,7 @@ import type { IAuthor } from './author.interface';
 export interface IProduct {
     id: string;
     title: string;
+    slug: string;
     description: string;
     price: number;
     category: ProductCategory;
@@ -17,7 +18,7 @@ export interface IProductsUIProps {
 }
 
 export interface IProductsFilters {
-    category: ProductCategory;
+    category: ProductCategory | null;
     author: string | null;
 }
 

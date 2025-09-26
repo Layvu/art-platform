@@ -4,18 +4,18 @@ import Link from 'next/link';
 import { PAGES } from '@/config/public-pages.config';
 import type { IProduct } from '@/shared/types/product.interface';
 
-export default function ProductCard({ id, title, description, price, author, image }: IProduct) {
+export default function ProductCard({ id, title, slug, description, price, author, image }: IProduct) {
     return (
         <div className="flex flex-col gap-2 border bg-slate-200 p-4 rounded-lg my-4 mx-4">
-            <div>{id}</div>
-            <Link href={PAGES.PRODUCT(title)} className="text-blue-500 hover:underline">
+            <div>Id: {id}</div>
+            <Link href={PAGES.PRODUCT(slug)} className="text-blue-500 hover:underline">
                 {title}
             </Link>
-            {description ? <p>{description.slice(0, 100)}</p> : ''}
-            <span>{price}</span>
+            {description ? <p>Описание: {description.slice(0, 100)}</p> : ''}
+            <span>Цена: {price}</span>
 
             <p className="text-sm text-gray-500">
-                <Link href={PAGES.AUTHOR(author.name)} className="hover:underline">
+                <Link href={PAGES.AUTHOR(author.slug)} className="hover:underline">
                     @{author.name}
                 </Link>
             </p>

@@ -1,3 +1,5 @@
+import { stringify } from 'qs-esm';
+
 export const COLLECTION_SLUGS = {
     Products: 'products',
     Authors: 'authors',
@@ -30,20 +32,8 @@ export class ApiUrlBuilder {
 
     // Получить URL с параметрами запроса
     collectionWithParams(slug: string, params: QueryParams = {}): string {
-        const url = this.collection(slug);
-        const query = new URLSearchParams();
-
-        Object.entries(params).forEach(([key, value]) => {
-            if (value != undefined) {
-                if (typeof value === 'object') {
-                    query.append(key, JSON.stringify(value));
-                } else {
-                    query.append(key, String(value));
-                }
-            }
-        });
-
-        return query.toString() ? `${url}?${query.toString()}` : url;
+        const query = stringify(params, { addQueryPrefix: true });
+        return `${this.collection(slug)}${query}`;
     }
 
     // Для удобства общий метод

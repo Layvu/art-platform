@@ -1,10 +1,15 @@
 {
     "compilerOptions": {
-        "target": "ES2017",
-        "lib": ["dom", "dom.iterable", "esnext"],
+        "target": "ES2022",
+        "lib": ["dom", "dom.iterable", "ES2022", "esnext"],
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUncheckedIndexedAccess": true,
         "noEmit": true,
         "esModuleInterop": true,
         "module": "esnext",
@@ -14,6 +19,7 @@
         "isolatedModules": true,
         "jsx": "preserve",
         "incremental": true,
+        "forceConsistentCasingInFileNames": true,
         "plugins": [
             {
                 "name": "next"

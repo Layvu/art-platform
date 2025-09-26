@@ -21,7 +21,7 @@ export default function ProductsUI({ products }: IProductsUIProps) {
 
     // локальные состояния
     const [search, setSearch] = useState<string>('');
-    const [filters, setFilters] = useState<IProductsFilters>({ category: '', author: null });
+    const [filters, setFilters] = useState<IProductsFilters>({ category: null, author: null });
     const [sortBy, setSortBy] = useState<ProductsSortOption>(null);
     const [page, setPage] = useState<number>(1);
 

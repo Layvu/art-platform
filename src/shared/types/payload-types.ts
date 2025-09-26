@@ -3,6 +3,7 @@ import type { ProductCategory } from './product.interface';
 export interface IPayloadAuthor {
     id: string;
     name: string;
+    slug: string;
     bio?: string | undefined;
     avatar?: string | undefined;
     products_count: number;
@@ -14,6 +15,7 @@ export interface IPayloadAuthor {
 export interface IPayloadProduct {
     id: string;
     title: string;
+    slug: string;
     description?: string | null;
     price: number;
     category: ProductCategory;
