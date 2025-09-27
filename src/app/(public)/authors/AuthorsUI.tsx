@@ -7,6 +7,7 @@ import { useDebounce } from 'use-debounce';
 
 import AuthorCard from '@/components/AuthorCard';
 import SearchBar from '@/components/SearchBar';
+import { Button } from '@/components/ui/button';
 import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
 import type { AuthorsSortOption, IAuthorsFilters, IAuthorsUIProps } from '@/shared/types/author.interface';
 
@@ -102,7 +103,7 @@ export default function AuthorsUI({ authors }: IAuthorsUIProps) {
                 </div>
 
                 {/* Список продуктов */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-6">
                     {paginatedAuthors.map((author) => (
                         <AuthorCard key={author.id} {...author} />
                     ))}
@@ -113,12 +114,9 @@ export default function AuthorsUI({ authors }: IAuthorsUIProps) {
                 {/* Пагинация */}
                 {/* TODO: вынести в отдельный компонент */}
                 {hasMore && (
-                    <button
-                        onClick={onNextPage}
-                        className="mt-4 bg-primary text-white hover:bg-primary/90 rounded-md px-4 py-2 disabled:opacity-50"
-                    >
+                    <Button onClick={onNextPage} disabled={!hasMore} className="mt-4">
                         Загрузить ещё
-                    </button>
+                    </Button>
                 )}
             </div>
         </>

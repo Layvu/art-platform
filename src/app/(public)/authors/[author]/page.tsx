@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { PayloadService } from '@/services/api/payload-service';
 
 type Params = { author: string }; // authorSlug
@@ -34,17 +35,23 @@ export default async function AuthorPage({ params }: { params: Promise<Params> }
     const { id, name, slug, bio, productsCount, productCategories, avatar } = authorData;
 
     return (
-        <article className="max-w-[800px] mx-auto mt-8 flex flex-col gap-6 border bg-slate-200 p-4 rounded-lg">
-            <div>Name: {name}</div>
-            <div>Id: {id}</div>
-            <div>Slug: {slug}</div>
+        <Card className="max-w-[800px] mx-auto mt-8">
+            <CardHeader>
+                <div className="flex items-center gap-4">
+                    {avatar && <Image src={avatar} alt={name} width={48} height={48} />}
+                    <div>
+                        <h2 className="text-lg font-semibold">{name}</h2>
+                        <p className="text-sm text-gray-500">Id: {id}</p>
+                        <p className="text-sm text-gray-500">Slug: {slug}</p>
+                    </div>
+                </div>
+            </CardHeader>
 
-            {bio ? <p>Описание: {bio.slice(0, 100)}</p> : ''}
-
-            <span>Общее количество товаров: {productsCount}</span>
-            <span>Категории товаров: {productCategories?.join(', ') || ''}</span>
-
-            {avatar ? <Image alt="Картинка" src={avatar} width={100} height={52} /> : ''}
-        </article>
+            <CardContent className="flex flex-col gap-2">
+                {bio && <p>{bio.slice(0, 100)}</p>}
+                <span>Общее количество товаров: {productsCount}</span>
+                <span>Категории товаров: {productCategories?.join(', ') || '—'}</span>
+            </CardContent>
+        </Card>
     );
 }

@@ -2,18 +2,23 @@
 
 import config from '@payload-config';
 import { getPayload } from 'payload';
+import type z from 'zod';
 
-export async function postForm(formData: FormData) {
-    const content = formData.get('content') as string;
+import type { authorFormSchema } from '@/app/(public)/authors/AuthorForm';
 
-    const payload = await getPayload({ config });
+export async function postForm(data: z.infer<typeof authorFormSchema>) {
+    try {
+        console.log('Анкета сохранена:', data);
 
-    await payload.create({
-        collection: 'forms',
-        data: {
-            content,
-        },
-    });
+        const payload = await getPayload({ config });
+        await payload.create({
+            collection: 'forms',
+            data: { content: data.content },
+        });
 
-    console.log('Анкета сохранена:', content);
+        return { success: true, message: 'Form submitted successfully' };
+    } catch (error) {
+        console.error('Form submission error:', error);
+        return { success: false, error: 'Failed to submit form' };
+    }
 }

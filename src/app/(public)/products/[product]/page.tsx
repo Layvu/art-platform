@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { PayloadService } from '@/services/api/payload-service';
 
@@ -36,21 +37,30 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     const { id, title, slug, description, price, author, image } = productData;
 
     return (
-        <article className="max-w-[800px] mx-auto mt-8 flex flex-col gap-6 border bg-slate-200 p-4 rounded-lg">
-            <div>Title: {title}</div>
-            <div>Id: {id}</div>
-            <div>Slug: {slug}</div>
+        <Card className="max-w-[800px] mx-auto mt-8">
+            <CardHeader>
+                <div className="flex items-center gap-4">
+                    {image && <Image src={image} alt={title} width={48} height={48} />}
+                    <div>
+                        <h2 className="text-lg font-semibold">{title}</h2>
+                        <p className="text-sm text-gray-500">Id: {id}</p>
+                        <p className="text-sm text-gray-500">Slug: {slug}</p>
+                    </div>
+                </div>
+            </CardHeader>
 
-            {description ? <p>{description.slice(0, 100)}</p> : ''}
-            <span>{price}</span>
+            <CardContent className="flex flex-col gap-2">
+                {description && <p>{description.slice(0, 100)}</p>}
+                <span>Цена: {price}</span>
+            </CardContent>
 
-            <p className="text-sm text-gray-500">
-                <Link href={PAGES.AUTHOR(author.slug)} className="hover:underline text-blue-500">
-                    @{author.name}
-                </Link>
-            </p>
-
-            {image ? <Image alt="Картинка" src={image} width={100} height={52} /> : ''}
-        </article>
+            <CardFooter>
+                <p className="text-sm text-gray-500">
+                    <Link href={PAGES.AUTHOR(author.slug)} className="hover:underline text-blue-500">
+                        @{author.name}
+                    </Link>
+                </p>
+            </CardFooter>
+        </Card>
     );
 }
