@@ -8,6 +8,7 @@ export interface IPayloadAuthor {
     avatar?: string | undefined;
     products_count: number;
     product_categories: { id: string; category: ProductCategory; _order: number }[];
+    user?: string;
     createdAt: string;
     updatedAt: string;
 }

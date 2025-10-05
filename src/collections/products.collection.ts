@@ -1,13 +1,39 @@
+import config from '@payload-config';
 import { nanoid } from 'nanoid';
-import type { CollectionConfig } from 'payload';
+import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';
 
 import { PRODUCT_CATEGORIES } from '@/app/(public)/products/constants';
 
+// TODO: enum 'admin', 'author'
+
 export const ProductsCollection: CollectionConfig = {
     slug: 'products',
     labels: { singular: 'Product', plural: 'Products' },
-    access: { read: () => true }, // публичный read
+    admin: { useAsTitle: 'title' },
+
+    access: {
+        read: async ({ req: { user } }) => {
+            // Публичный доступ для фронтенда (анонимные запросы)
+            if (!user) return true;
+
+            // Админы видят все товары
+            if (user.role === 'admin') return true;
+
+            // Авторы видят только свои товары
+            const payload = await getPayload({ config });
+            const authorRes = await payload.find({
+                collection: 'authors',
+                where: { user: { equals: user.id } },
+                limit: 1,
+            });
+            const author = authorRes.docs[0];
+            if (!author) return false;
+
+            return { author: { equals: author.id } };
+        },
+    },
+
     fields: [
         { name: 'title', type: 'text', required: true },
         {
@@ -17,6 +43,7 @@ export const ProductsCollection: CollectionConfig = {
             unique: true,
             admin: {
                 position: 'sidebar',
+                readOnly: true,
             },
         },
         { name: 'price', type: 'number', required: true },
@@ -31,12 +58,41 @@ export const ProductsCollection: CollectionConfig = {
         {
             name: 'author',
             type: 'relationship',
-            relationTo: 'authors', // связь с коллекцией authors
+            relationTo: 'authors',
             required: true,
+            // Текущий автор не может добавить товар другому автору
+            access: {
+                create: ({ req }) => req.user?.role === 'admin',
+                update: ({ req }) => req.user?.role === 'admin',
+            },
+            admin: {
+                position: 'sidebar',
+            },
         },
     ],
     hooks: {
         beforeChange: [
+            async ({ data, req, operation }) => {
+                const { user, payload } = req;
+
+                if (operation === 'create' && user?.role === 'author') {
+                    const authorRes = await payload.find({
+                        collection: 'authors',
+                        where: { user: { equals: user.id } },
+                        limit: 1,
+                    });
+
+                    const author = authorRes.docs[0];
+                    if (author) {
+                        data.author = author.id; // автор автоматически устанавливается
+                    }
+                }
+
+                return data;
+            },
+
+            // TODO: вынести, такой же у authors.collection.ts
+            // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;
 

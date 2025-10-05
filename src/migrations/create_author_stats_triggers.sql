@@ -1,22 +1,28 @@
 -- Удаляем старые функции и триггеры
-DROP FUNCTION IF EXISTS update_author_stats();
-DROP TRIGGER IF EXISTS products_update_author_stats ON products;
+DROP TRIGGER IF EXISTS products_update_count ON products;
+DROP TRIGGER IF EXISTS products_update_categories ON products;
+DROP FUNCTION IF EXISTS update_author_products_count();
+DROP FUNCTION IF EXISTS update_author_product_categories();
 
--- 1. Функция для обновления products_count (триггер на products)
+-- 1. Подсчёт количества товаров у автора
 CREATE OR REPLACE FUNCTION update_author_products_count()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Всегда обновляем для new_author_id (INSERT/UPDATE)
+    -- Для вставки или обновления
     IF NEW.author_id IS NOT NULL THEN
         UPDATE authors
-        SET products_count = (SELECT COUNT(*) FROM products WHERE author_id = NEW.author_id)
+        SET products_count = (
+            SELECT COUNT(*) FROM products WHERE author_id = NEW.author_id
+        )
         WHERE id = NEW.author_id;
     END IF;
 
-    -- Для old_author_id (UPDATE/DELETE)
-    IF OLD.author_id IS NOT NULL AND (TG_OP = 'UPDATE' OR TG_OP = 'DELETE') THEN
+    -- Для удаления или смены автора
+    IF (TG_OP = 'DELETE' OR TG_OP = 'UPDATE') AND OLD.author_id IS NOT NULL THEN
         UPDATE authors
-        SET products_count = (SELECT COUNT(*) FROM products WHERE author_id = OLD.author_id)
+        SET products_count = (
+            SELECT COUNT(*) FROM products WHERE author_id = OLD.author_id
+        )
         WHERE id = OLD.author_id;
     END IF;
 
@@ -24,31 +30,47 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 2. Функция для обновления product_categories (триггер на products)
+-- 2. Обновление категорий автора
 CREATE OR REPLACE FUNCTION update_author_product_categories()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Для new_author_id (INSERT/UPDATE)
+    -- Для вставки или обновления
     IF NEW.author_id IS NOT NULL THEN
         DELETE FROM authors_product_categories WHERE _parent_id = NEW.author_id;
+
         INSERT INTO authors_product_categories (_parent_id, id, category, _order)
-        SELECT NEW.author_id, gen_random_uuid()::text, category::text, ROW_NUMBER() OVER (ORDER BY category)
-        FROM (SELECT DISTINCT category FROM products WHERE author_id = NEW.author_id AND category IS NOT NULL) AS unique_cats;
+        SELECT
+            NEW.author_id,
+            gen_random_uuid()::text,
+            category::text,
+            ROW_NUMBER() OVER (ORDER BY category)
+        FROM (
+            SELECT DISTINCT category FROM products
+            WHERE author_id = NEW.author_id AND category IS NOT NULL
+        ) AS unique_cats;
     END IF;
 
-    -- Для old_author_id (UPDATE/DELETE)
-    IF OLD.author_id IS NOT NULL AND (TG_OP = 'UPDATE' OR TG_OP = 'DELETE') AND OLD.author_id <> NEW.author_id THEN
+    -- Для удаления или смены автора
+    IF (TG_OP = 'DELETE' OR TG_OP = 'UPDATE') AND OLD.author_id IS NOT NULL AND (NEW.author_id IS NULL OR OLD.author_id <> NEW.author_id) THEN
         DELETE FROM authors_product_categories WHERE _parent_id = OLD.author_id;
+
         INSERT INTO authors_product_categories (_parent_id, id, category, _order)
-        SELECT OLD.author_id, gen_random_uuid()::text, category::text, ROW_NUMBER() OVER (ORDER BY category)
-        FROM (SELECT DISTINCT category FROM products WHERE author_id = OLD.author_id AND category IS NOT NULL) AS unique_cats;
+        SELECT
+            OLD.author_id,
+            gen_random_uuid()::text,
+            category::text,
+            ROW_NUMBER() OVER (ORDER BY category)
+        FROM (
+            SELECT DISTINCT category FROM products
+            WHERE author_id = OLD.author_id AND category IS NOT NULL
+        ) AS unique_cats;
     END IF;
 
     RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
--- Триггеры
+-- 3. Триггеры
 CREATE TRIGGER products_update_count
 AFTER INSERT OR UPDATE OR DELETE ON products
 FOR EACH ROW EXECUTE FUNCTION update_author_products_count();

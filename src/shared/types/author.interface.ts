@@ -10,6 +10,7 @@ export interface IAuthor {
     productsCount: number; // Общее кличество товаров автора (вычисляемое)
     productCategories: ProductCategory[]; // Категории продуктов, которые автор толкает (вычисляемое), создаёт новую таблицу
     avatar?: string;
+    user?: string;
 }
 
 export interface IAuthorsUIProps {

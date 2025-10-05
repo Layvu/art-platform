@@ -9,4 +9,5 @@ export const mapIPayloadAuthorToIAuthor = (author: IPayloadAuthor): IAuthor => (
     avatar: author.avatar,
     productsCount: author.products_count,
     productCategories: author.product_categories?.map((c) => c.category) || [],
+    user: author.user,
 });

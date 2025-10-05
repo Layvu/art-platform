@@ -1,11 +1,27 @@
 import { nanoid } from 'nanoid';
-import type { CollectionConfig } from 'payload';
+import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
+
+// TODO: вынести хуки в переменную / файл
 
 export const AuthorsCollection: CollectionConfig = {
     slug: 'authors',
     labels: { singular: 'Author', plural: 'Authors' },
-    access: { read: () => true }, // публичный read
+    admin: { useAsTitle: 'name' },
+
+    access: {
+        read: async ({ req: { user } }) => {
+            // Публичный доступ для фронтенда (анонимные запросы)
+            if (!user) return true;
+
+            // Админы видят всех авторов
+            if (user.role === 'admin') return true;
+
+            // Авторы не видят других авторов
+            return false;
+        },
+    },
+
     fields: [
         { name: 'name', type: 'text', required: true },
         {
@@ -15,6 +31,7 @@ export const AuthorsCollection: CollectionConfig = {
             unique: true,
             admin: {
                 position: 'sidebar',
+                readOnly: true,
             },
         },
         { name: 'bio', type: 'textarea' },
@@ -36,9 +53,19 @@ export const AuthorsCollection: CollectionConfig = {
             access: { create: () => false, update: () => false },
             fields: [{ name: 'category', type: 'text' }],
         },
+        {
+            name: 'user',
+            type: 'relationship',
+            relationTo: 'users',
+            required: false,
+            unique: true,
+            admin: { position: 'sidebar' },
+        },
     ],
     hooks: {
         beforeChange: [
+            // TODO: вынести, такой же у products.collection.ts
+            // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;
 

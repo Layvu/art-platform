@@ -6,7 +6,15 @@ import type { IPayloadForm } from '@/shared/types/payload-types';
 export const FormsCollection: CollectionConfig = {
     slug: 'forms',
     labels: { singular: 'Form', plural: 'Forms' },
-    access: { read: () => true },
+
+    // access: { read: () => true },
+    access: {
+        read: ({ req: { user } }) => user?.role === 'admin',
+        create: ({ req: { user } }) => user?.role === 'admin',
+        update: ({ req: { user } }) => user?.role === 'admin',
+        delete: ({ req: { user } }) => user?.role === 'admin',
+    },
+
     fields: [
         {
             name: 'content',
@@ -17,6 +25,7 @@ export const FormsCollection: CollectionConfig = {
         // { name: 'name', type: 'text' },
         // { name: 'email', type: 'email', required: true },
     ],
+
     hooks: {
         afterChange: [
             async ({ operation, doc }) => {
