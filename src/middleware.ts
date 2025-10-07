@@ -8,8 +8,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
 }
 
+const protectedPath = `/${PAGES.PRODUCTS}/:path*`;
+
 export const config = {
-    matcher: [PAGES.PRODUCTS + '/:path*'], // защищённые роуты
+  //  matcher: [protectedPath],  // защищённые роуты
+  matcher: ['/products/:path*'],
 };
 
 // middleware в next во многом как guard в angular
