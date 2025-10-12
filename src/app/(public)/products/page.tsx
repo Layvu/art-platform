@@ -1,12 +1,23 @@
-import { PayloadService } from '@/services/api/payload-service';
+import { PayloadService, payloadService } from '@/services/api/payload-service';
 
 import ProductsUI from './ProductsUI';
+import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { getQueryClient } from '@/lib/utils/get-query-client';
 
 export default async function ProductsPage() {
-    const payloadService = new PayloadService();
-    const products = await payloadService.getProducts();
+    const queryClient = getQueryClient();
 
-    return <ProductsUI products={products} />;
+    // можно будет заменить на prefetchInfiniteQuery
+    await queryClient.prefetchQuery({
+        queryKey: ['products'],
+        queryFn: () => payloadService.getProducts(),
+    });
+
+    return (
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <ProductsUI />
+        </HydrationBoundary>
+    );
 }
 
 // TODO: Метатеги

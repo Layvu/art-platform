@@ -8,7 +8,7 @@ export const filterAndSortAuthors = (
     sortBy: AuthorsSortOption,
 ): IAuthor[] => {
     return authors
-        .filter((a) => a.name.toLowerCase().includes(search.toLowerCase()))
+        .filter((a) => a.name.toLowerCase().includes(search.toLowerCase())) // TODO или description
         .filter((a) => filters.productCategories.every((category) => a.productCategories.includes(category)))
         .sort((a, b) => {
             switch (sortBy) {

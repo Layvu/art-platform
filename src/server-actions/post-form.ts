@@ -1,6 +1,6 @@
 'use server';
 
-import config from '@payload-config';
+import config from '@/payload.config';
 import { getPayload } from 'payload';
 import type z from 'zod';
 

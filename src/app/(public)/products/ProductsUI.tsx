@@ -14,9 +14,10 @@ import type { IProductsFilters, IProductsUIProps, ProductsSortOption } from '@/s
 import { filterAndSortProducts, parseQueryToProductFilters } from './utils/products';
 import { PRODUCTS_PER_PAGE } from './constants';
 import ProductFiltersBar from './ProductFiltersBar';
+import ProductsList from './productsList';
 
 // TODO: loading и error
-export default function ProductsUI({ products }: IProductsUIProps) {
+export default function ProductsUI() {
     const updateQueryParams = useUpdateQueryParams();
     const searchParams = useSearchParams();
 
@@ -40,20 +41,7 @@ export default function ProductsUI({ products }: IProductsUIProps) {
         setPage(page);
     }, [searchParams]);
 
-    // Фильтрация, сортировка и пагинация
-    const filteredProducts = useMemo(() => {
-        // фильтруем по debouncedSearch, что уменьшит частоту пересчётов
-        return filterAndSortProducts(products, debouncedSearch, filters, sortBy);
-    }, [products, debouncedSearch, filters, sortBy]);
-
-    const paginatedProducts = useMemo(() => {
-        return filteredProducts.slice(0, page * PRODUCTS_PER_PAGE);
-    }, [filteredProducts, page]);
-
-    const hasMore = filteredProducts.length > paginatedProducts.length;
-
     // Хэндлеры
-
     // Синхронизируем debouncedSearch и URL (replace, чтобы не засорять историю)
     useEffect(() => {
         updateQueryParams({ search: debouncedSearch || null }, { replace: true, resetPage: true });
@@ -99,19 +87,7 @@ export default function ProductsUI({ products }: IProductsUIProps) {
             </div>
 
             {/* Список продуктов */}
-            <div className="grid grid-cols-4 gap-6">
-                {paginatedProducts.map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                ))}
-            </div>
-
-            {/* Пагинация */}
-            {/* TODO: вынести в отдельный компонент */}
-            {hasMore && (
-                <Button onClick={onNextPage} disabled={!hasMore} className="mt-4">
-                    Загрузить ещё
-                </Button>
-            )}
+            <ProductsList search={debouncedSearch} filters={filters} sortBy={sortBy} page={page} onNextPage={onNextPage} />
         </div>
     );
 }

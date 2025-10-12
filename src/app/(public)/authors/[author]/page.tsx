@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { PayloadService } from '@/services/api/payload-service';
+import { PayloadService, payloadService } from '@/services/api/payload-service';
 
 type Params = { author: string }; // authorSlug
 
@@ -25,7 +25,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function AuthorPage({ params }: { params: Promise<Params> }) {
     const { author } = await params;
 
-    const payloadService = new PayloadService();
     const authorData = await payloadService.getAuthorBySlug(author);
 
     if (!authorData) {

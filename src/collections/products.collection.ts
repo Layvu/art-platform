@@ -1,4 +1,4 @@
-import config from '@payload-config';
+import config from '@/payload.config';
 import { nanoid } from 'nanoid';
 import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';

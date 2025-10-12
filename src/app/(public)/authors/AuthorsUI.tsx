@@ -5,19 +5,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useDebounce } from 'use-debounce';
 
-import AuthorCard from '@/components/AuthorCard';
 import SearchBar from '@/components/SearchBar';
-import { Button } from '@/components/ui/button';
 import { useUpdateQueryParams } from '@/hooks/useUpdateQueryParams';
-import type { AuthorsSortOption, IAuthorsFilters, IAuthorsUIProps } from '@/shared/types/author.interface';
+import type { AuthorsSortOption, IAuthorsFilters } from '@/shared/types/author.interface';
 
-import { filterAndSortAuthors, parseQueryToAuthorFilters } from './utils/authors';
+import { parseQueryToAuthorFilters } from './utils/authors';
 import AuthorFiltersBar from './AuthorFiltersBar';
 import { AuthorForm } from './AuthorForm';
-import { AUTHORS_PER_PAGE } from './constants';
+import AuthorsList from './AuthorsList';
 
 // TODO: loading и error
-export default function AuthorsUI({ authors }: IAuthorsUIProps) {
+export default function AuthorsUI() {
     const updateQueryParams = useUpdateQueryParams();
     const searchParams = useSearchParams();
 
@@ -40,18 +38,6 @@ export default function AuthorsUI({ authors }: IAuthorsUIProps) {
         setSortBy(sortBy);
         setPage(page);
     }, [searchParams]);
-
-    // Фильтрация, сортировка и пагинация
-    const filteredAuthors = useMemo(() => {
-        // фильтруем по debouncedSearch, что уменьшит частоту пересчётов
-        return filterAndSortAuthors(authors, debouncedSearch, filters, sortBy);
-    }, [authors, debouncedSearch, filters, sortBy]);
-
-    const paginatedAuthors = useMemo(() => {
-        return filteredAuthors.slice(0, page * AUTHORS_PER_PAGE);
-    }, [filteredAuthors, page]);
-
-    const hasMore = filteredAuthors.length > paginatedAuthors.length;
 
     // Хэндлеры
     // Синхронизируем debouncedSearch и URL (replace, чтобы не засорять историю)
@@ -102,22 +88,9 @@ export default function AuthorsUI({ authors }: IAuthorsUIProps) {
                     />
                 </div>
 
-                {/* Список продуктов */}
-                <div className="grid grid-cols-4 gap-6">
-                    {paginatedAuthors.map((author) => (
-                        <AuthorCard key={author.id} {...author} />
-                    ))}
-                </div>
-
-                <div className="grid grid-cols-4 gap-4"></div>
-
-                {/* Пагинация */}
-                {/* TODO: вынести в отдельный компонент */}
-                {hasMore && (
-                    <Button onClick={onNextPage} disabled={!hasMore} className="mt-4">
-                        Загрузить ещё
-                    </Button>
-                )}
+                {/* Список авторов */}
+                <AuthorsList {...{debouncedSearch, filters, sortBy, page, onNextPage}} />
+              
             </div>
         </>
     );

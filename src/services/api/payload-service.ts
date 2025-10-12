@@ -13,13 +13,13 @@ export class PayloadService {
         this.builder = new ApiUrlBuilder();
     }
 
-    // { next: { revalidate: 300 } } // ISR
-
     // Универсальный метод для получения данных коллекции
     private async getCollection<T extends CollectionSlug>(
         slug: T,
         params: QueryParams = {},
-        fetchOptions: RequestInit = { cache: 'no-store' }, // SSG для тестирования по умолчанию, сменить на ISR
+    //    fetchOptions: RequestInit = { cache: 'force-cache', next: { revalidate: 0 } }, // ISR
+        fetchOptions: RequestInit = { cache: 'no-store' }, // SSR
+
     ) {
         const url = this.builder.collectionWithParams(slug, params);
         const response = await fetch(url, fetchOptions);
@@ -83,6 +83,8 @@ export class PayloadService {
         return product ?? null;
     }
 }
+
+export const payloadService = new PayloadService();
 
 // SSG - статика, при сборке все данные сохраняем, пользователи быстро берут значения из кеша. Нужна пересборка для обновления
 // SSR - всегда актуальная информация на сайте, но больше нагрузка на сервер т.к данные генерируются при каждом запросе
