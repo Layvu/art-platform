@@ -4,8 +4,11 @@
 'use client';
 // Since QueryClientProvider relies on useContext under the hood, we have to put 'use client' on top
 
-import { getQueryClient } from '@/lib/utils/get-query-client';
+import React from 'react';
+
 import { QueryClientProvider } from '@tanstack/react-query';
+
+import { getQueryClient } from '@/lib/utils/get-query-client';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     // NOTE: Avoid useState when initializing the query client if you don't

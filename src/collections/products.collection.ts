@@ -1,9 +1,9 @@
-import config from '@/payload.config';
 import { nanoid } from 'nanoid';
 import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';
 
 import { PRODUCT_CATEGORIES } from '@/app/(public)/products/constants';
+import config from '@/payload.config';
 
 // TODO: enum 'admin', 'author'
 

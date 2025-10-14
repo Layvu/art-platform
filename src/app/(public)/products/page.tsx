@@ -1,8 +1,11 @@
+import { Suspense } from 'react';
+
+import { dehydrate,HydrationBoundary } from '@tanstack/react-query';
+
+import { getQueryClient } from '@/lib/utils/get-query-client';
 import { PayloadService, payloadService } from '@/services/api/payload-service';
 
 import ProductsUI from './ProductsUI';
-import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
-import { getQueryClient } from '@/lib/utils/get-query-client';
 
 export default async function ProductsPage() {
     const queryClient = getQueryClient();
@@ -15,7 +18,9 @@ export default async function ProductsPage() {
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <ProductsUI />
+            <Suspense fallback={<div>Loading...</div>}>
+                <ProductsUI />
+            </Suspense>
         </HydrationBoundary>
     );
 }

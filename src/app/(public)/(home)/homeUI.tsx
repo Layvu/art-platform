@@ -1,9 +1,11 @@
 'use client';
 
+import React from 'react';
+
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+
 import ProductCard from '@/components/ProductCard';
 import { PayloadService, payloadService } from '@/services/api/payload-service';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
-import React from 'react';
 
 
 export default function HomeUI(){

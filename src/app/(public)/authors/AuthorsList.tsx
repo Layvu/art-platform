@@ -1,14 +1,17 @@
 'use client';
 
-import AuthorCard from '@/components/AuthorCard';
-import { payloadService } from '@/services/api/payload-service';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
-import { filterAndSortAuthors } from './utils/authors';
-import { Button } from '@/components/ui/button';
+
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
-import { AUTHORS_PER_PAGE } from './constants';
+
+import AuthorCard from '@/components/AuthorCard';
+import { Button } from '@/components/ui/button';
+import { payloadService } from '@/services/api/payload-service';
 import type { AuthorsSortOption, IAuthorsFilters } from '@/shared/types/author.interface';
+
+import { filterAndSortAuthors } from './utils/authors';
+import { AUTHORS_PER_PAGE } from './constants';
 
 export default function AuthorsList({
     debouncedSearch,

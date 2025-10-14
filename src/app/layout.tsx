@@ -1,12 +1,12 @@
 import React from 'react';
 
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import Providers from './providers';
 
 import './globals.css';
-import Providers from './providers';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',

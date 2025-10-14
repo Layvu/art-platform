@@ -1,12 +1,14 @@
 'use client';
 
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+
 import ProductCard from '@/components/ProductCard';
-import { PRODUCTS_PER_PAGE } from './constants';
-import type { IProductsFilters, ProductsSortOption } from '@/shared/types/product.interface';
-import { filterAndSortProducts } from './utils/products';
-import { payloadService } from '@/services/api/payload-service';
 import { Button } from '@/components/ui/button';
+import { payloadService } from '@/services/api/payload-service';
+import type { IProductsFilters, ProductsSortOption } from '@/shared/types/product.interface';
+
+import { filterAndSortProducts } from './utils/products';
+import { PRODUCTS_PER_PAGE } from './constants';
 
 interface ProductsListProps {
     search: string;

@@ -2,15 +2,14 @@ import { postgresAdapter } from '@payloadcms/db-postgres';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { en } from '@payloadcms/translations/languages/en';
 import { ru } from '@payloadcms/translations/languages/ru';
-import { buildConfig } from 'payload';
 import path from 'path';
+import { buildConfig } from 'payload';
 import { fileURLToPath } from 'url';
 
 // import { AuthorsCollection } from '@/collections/authors.collection';
 // import { FormsCollection } from '@/collections/forms.collection';
 // import { ProductsCollection } from '@/collections/products.collection';
 // import { UsersCollection } from '@/collections/users.collection';
-
 import { AuthorsCollection } from './collections/authors.collection'
 import { FormsCollection } from './collections/forms.collection'
 import { ProductsCollection } from './collections/products.collection'
