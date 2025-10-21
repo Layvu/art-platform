@@ -1,25 +1,27 @@
-import { Suspense } from 'react';
-
-import { dehydrate,HydrationBoundary, QueryClient } from '@tanstack/react-query';
+import { dehydrate,HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient } from '@/lib/utils/get-query-client';
-import { PayloadService, payloadService } from '@/services/api/payload-service';
+import { toAuthorsQueryParams, toQueryParams } from '@/services/api/utils';
+import type { AuthorsQueryParams } from '@/shared/types/query-params.type';
+import { getAuthorsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-import AuthorsUI from './AuthorsUI';
+import AuthorsUI from '../../../components/authors/AuthorsUI';
 
-export default async function AuthorsPage() {
-    const queryClient = getQueryClient();
+export default async function AuthorsPage({ searchParams } : { searchParams: Promise<AuthorsQueryParams>}) {
+   // Получаем параметры из поисковой строки
+   const authorsQueryParams = await searchParams;
 
-    await queryClient.prefetchQuery({
-        queryKey: ['authors'],
-        queryFn: () => payloadService.getAuthors(),
-    });
+   // Преобразуем в QueryParams для запроса к серверу
+   const queryParams = toAuthorsQueryParams(authorsQueryParams)
+
+   // Prefetch текущей страницы и следующей
+   const queryClient = getQueryClient();
+   await queryClient.prefetchQuery(getAuthorsQueryOptions(queryParams));
+   await queryClient.prefetchQuery(getAuthorsQueryOptions({ ...queryParams, page: queryParams?.page ? queryParams.page + 1 : 1 }));
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <Suspense fallback={<div>Loading...</div>}>
-                <AuthorsUI />
-            </Suspense>
+            <AuthorsUI initialParams={authorsQueryParams} />
         </HydrationBoundary>
     );
 }

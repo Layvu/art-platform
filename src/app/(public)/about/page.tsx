@@ -2,7 +2,6 @@
 
 import React, { type CSSProperties } from 'react';
 
-import Image from 'next/image';
 import Slider from 'react-slick';
 
 interface ArrowProps {

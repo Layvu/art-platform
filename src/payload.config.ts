@@ -6,10 +6,6 @@ import path from 'path';
 import { buildConfig } from 'payload';
 import { fileURLToPath } from 'url';
 
-// import { AuthorsCollection } from '@/collections/authors.collection';
-// import { FormsCollection } from '@/collections/forms.collection';
-// import { ProductsCollection } from '@/collections/products.collection';
-// import { UsersCollection } from '@/collections/users.collection';
 import { AuthorsCollection } from './collections/authors.collection'
 import { FormsCollection } from './collections/forms.collection'
 import { ProductsCollection } from './collections/products.collection'
@@ -36,8 +32,7 @@ export default buildConfig({
         },
     }),
     typescript: {
-        outputFile: path.resolve(dirname, 'payload-types.ts'),
-        //outputFile: 'src/types/payload-types.ts', // TODO: не генерится(
+        outputFile: path.resolve(dirname, 'shared/types/payload-types.ts'),
     },
     cors: ['http://localhost:3000'],
 });

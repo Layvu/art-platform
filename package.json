@@ -10,7 +10,7 @@
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "payload": "payload"
+        "payload": "payload generate:types"
     },
 
     "dependencies": {

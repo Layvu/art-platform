@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 import { PAGES } from '@/config/public-pages.config';
 
-import { Menu } from './Menu/Menu';
+import { Menu } from '../Menu/Menu';
 
 export function Header() {
     return (

@@ -1,5 +1,7 @@
 import { stringify } from 'qs-esm';
 
+import type { QueryParams } from '@/shared/types/query-params.type';
+
 export const COLLECTION_SLUGS = {
     Products: 'products',
     Authors: 'authors',
@@ -8,15 +10,6 @@ export const COLLECTION_SLUGS = {
 } as const;
 
 export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_SLUGS];
-
-export type QueryParams = {
-    limit?: number;
-    page?: number;
-    where?: Record<string, unknown>;
-    sort?: string;
-    depth?: number;
-    [key: string]: unknown;
-};
 
 export class ApiUrlBuilder {
     private baseUrl: string;
@@ -32,9 +25,19 @@ export class ApiUrlBuilder {
 
     // Получить URL с параметрами запроса
     collectionWithParams(slug: string, params: QueryParams = {}): string {
-        const query = stringify(params, { addQueryPrefix: true });
+        const query = stringify(params, {
+            addQueryPrefix: true,
+            encodeValuesOnly: true, // важно для корректного where
+            skipNulls: true,
+        });
+
         return `${this.collection(slug)}${query}`;
     }
+
+    // Получить URL для item'а по slug и id
+    // collectionItem(slug: string, id: string): string {
+    //     return `${this.baseUrl}/api/${slug}/${id}`;
+    // }
 
     // Для удобства общий метод
     static forCollection(slug: string, params?: QueryParams) {

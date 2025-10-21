@@ -1,16 +1,15 @@
+import { dehydrate,HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
-import Image from 'next/image';
-import { notFound } from 'next/navigation';
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { PayloadService, payloadService } from '@/services/api/payload-service';
+import AuthorUI from '@/components/author/AuthorUI';
+import { getQueryClient } from '@/lib/utils/get-query-client';
+import { payloadService } from '@/services/api/payload-service';
+import type { AuthorQueryParams } from '@/shared/types/query-params.type';
+import { getAuthorQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-type Params = { author: string }; // authorSlug
-
-export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<AuthorQueryParams> }): Promise<Metadata> {
     const { author } = await params;
 
-    const payloadService = new PayloadService();
     const authorData = await payloadService.getAuthorBySlug(author);
 
     if (!authorData) {
@@ -22,35 +21,15 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     };
 }
 
-export default async function AuthorPage({ params }: { params: Promise<Params> }) {
-    const { author } = await params;
-
-    const authorData = await payloadService.getAuthorBySlug(author);
-
-    if (!authorData) {
-        notFound();
-    }
-
-    const { id, name, slug, bio, productsCount, productCategories, avatar } = authorData;
+export default async function AuthorPage({ params }: { params: Promise<AuthorQueryParams> }) {
+    const productQueryParams = await params;
+    
+    const queryClient = getQueryClient();
+    await queryClient.prefetchQuery(getAuthorQueryOptions({ slug: productQueryParams.author }));
 
     return (
-        <Card className="max-w-[800px] mx-auto mt-8">
-            <CardHeader>
-                <div className="flex items-center gap-4">
-                    {avatar && <Image src={avatar} alt={name} width={48} height={48} />}
-                    <div>
-                        <h2 className="text-lg font-semibold">{name}</h2>
-                        <p className="text-sm text-gray-500">Id: {id}</p>
-                        <p className="text-sm text-gray-500">Slug: {slug}</p>
-                    </div>
-                </div>
-            </CardHeader>
-
-            <CardContent className="flex flex-col gap-2">
-                {bio && <p>{bio.slice(0, 100)}</p>}
-                <span>Общее количество товаров: {productsCount}</span>
-                <span>Категории товаров: {productCategories?.join(', ') || '—'}</span>
-            </CardContent>
-        </Card>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <AuthorUI initialParams={productQueryParams} />
+        </HydrationBoundary>
     );
 }

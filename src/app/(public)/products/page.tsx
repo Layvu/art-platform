@@ -1,26 +1,28 @@
-import { Suspense } from 'react';
-
-import { dehydrate,HydrationBoundary } from '@tanstack/react-query';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient } from '@/lib/utils/get-query-client';
-import { PayloadService, payloadService } from '@/services/api/payload-service';
+import { toQueryParams } from '@/services/api/utils';
+import type { ProductsQueryParams } from '@/shared/types/query-params.type';
+import { getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-import ProductsUI from './ProductsUI';
+import ProductsUI from '../../../components/products/ProductsUI';
 
-export default async function ProductsPage() {
+
+export default async function ProductsPage({ searchParams } : { searchParams: Promise<ProductsQueryParams>} ) {
+    // Получаем параметры из поисковой строки
+    const productsQueryParams = await searchParams;
+
+    // Преобразуем в QueryParams для запроса к серверу
+    const queryParams = toQueryParams(productsQueryParams)
+
+    // Prefetch текущей страницы и следующей
     const queryClient = getQueryClient();
-
-    // можно будет заменить на prefetchInfiniteQuery
-    await queryClient.prefetchQuery({
-        queryKey: ['products'],
-        queryFn: () => payloadService.getProducts(),
-    });
+    await queryClient.prefetchQuery(getProductsQueryOptions(queryParams));
+    await queryClient.prefetchQuery(getProductsQueryOptions({ ...queryParams, page: queryParams?.page ? queryParams.page + 1 : 1 }));
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <Suspense fallback={<div>Loading...</div>}>
-                <ProductsUI />
-            </Suspense>
+            <ProductsUI initialParams={productsQueryParams} />
         </HydrationBoundary>
     );
 }

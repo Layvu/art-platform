@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 
-import { Label } from './ui/label';
+import { Label } from '../ui/label';
 
 interface ISearchBarProps {
     value: string;
