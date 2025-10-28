@@ -1,3 +1,4 @@
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import { nanoid } from 'nanoid';
 import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
@@ -5,7 +6,7 @@ import slugify from 'slugify';
 // TODO: вынести хуки в переменную / файл
 
 export const AuthorsCollection: CollectionConfig = {
-    slug: 'authors',
+    slug: COLLECTION_SLUGS.AUTHORS,
     labels: { singular: 'Author', plural: 'Authors' },
     admin: { useAsTitle: 'name' },
 
@@ -56,7 +57,7 @@ export const AuthorsCollection: CollectionConfig = {
         {
             name: 'user',
             type: 'relationship',
-            relationTo: 'users',
+            relationTo: COLLECTION_SLUGS.USERS,
             required: false,
             unique: true,
             admin: { position: 'sidebar' },
@@ -83,7 +84,7 @@ export const AuthorsCollection: CollectionConfig = {
                     while (
                         await payload
                             .count({
-                                collection: 'authors',
+                                collection: COLLECTION_SLUGS.AUTHORS,
                                 where: { slug: { equals: slug } },
                             })
                             .then((res) => res.totalDocs > 0)

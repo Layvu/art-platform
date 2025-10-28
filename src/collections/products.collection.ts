@@ -4,11 +4,12 @@ import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';
 
 import { PRODUCT_CATEGORIES } from '@/app/(public)/products/constants';
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 
 // TODO: enum 'admin', 'author'
 
 export const ProductsCollection: CollectionConfig = {
-    slug: 'products',
+    slug: COLLECTION_SLUGS.PRODUCTS,
     labels: { singular: 'Product', plural: 'Products' },
     admin: { useAsTitle: 'title' },
 
@@ -23,7 +24,7 @@ export const ProductsCollection: CollectionConfig = {
             // Авторы видят только свои товары
             const payload = await getPayload({ config });
             const authorRes = await payload.find({
-                collection: 'authors',
+                collection: COLLECTION_SLUGS.AUTHORS,
                 where: { user: { equals: user.id } },
                 limit: 1,
             });
@@ -58,7 +59,7 @@ export const ProductsCollection: CollectionConfig = {
         {
             name: 'author',
             type: 'relationship',
-            relationTo: 'authors',
+            relationTo: COLLECTION_SLUGS.AUTHORS,
             required: true,
             // Текущий автор не может добавить товар другому автору
             access: {
@@ -77,7 +78,7 @@ export const ProductsCollection: CollectionConfig = {
 
                 if (operation === 'create' && user?.role === 'author') {
                     const authorRes = await payload.find({
-                        collection: 'authors',
+                        collection: COLLECTION_SLUGS.AUTHORS,
                         where: { user: { equals: user.id } },
                         limit: 1,
                     });
@@ -110,7 +111,7 @@ export const ProductsCollection: CollectionConfig = {
                     while (
                         await payload
                             .count({
-                                collection: 'products',
+                                collection: COLLECTION_SLUGS.PRODUCTS,
                                 where: { slug: { equals: slug } },
                             })
                             .then((res) => res.totalDocs > 0)

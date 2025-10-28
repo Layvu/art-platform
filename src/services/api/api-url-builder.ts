@@ -1,10 +1,11 @@
 import { stringify } from 'qs-esm';
 
 export const COLLECTION_SLUGS = {
-    Products: 'products',
-    Authors: 'authors',
-    Users: 'users',
-    Media: 'media',
+    PRODUCTS: 'products',
+    AUTHORS: 'authors',
+    USERS: 'users',
+    CUSTOMERS: 'customers',
+    MEDIA: 'media',
 } as const;
 
 export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_SLUGS];
@@ -39,7 +40,16 @@ export class ApiUrlBuilder {
     // Для удобства общий метод
     static forCollection(slug: string, params?: QueryParams) {
         const builder = new ApiUrlBuilder();
-
         return params ? builder.collectionWithParams(slug, params) : builder.collection(slug);
+    }
+
+    static forRegister(): string {
+        const builder = new ApiUrlBuilder();
+        return `${builder.baseUrl}/api/auth/register`;
+    }
+
+    static forProfileUpdate(): string {
+        const builder = new ApiUrlBuilder();
+        return `${builder.baseUrl}/api/profile/update`;
     }
 }

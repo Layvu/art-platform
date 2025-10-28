@@ -19,9 +19,17 @@ psql -U art_user -d art_platform -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
 
 psql -U art_user -d art_platform -f src/migrations/create_author_stats_triggers.sql
 
-### 5) поднять докер + dev сервер Next + Payload
+### 5) Поднять докер + dev сервер Next + Payload
 
 pnpm dev
+
+### 6) Добавить API-ключ главного администратора
+
+Необходимо для выполнения API запросов next-auth от его имени
+
+- Создаем первого пользователя в админ-панели
+- Находим его в Users в админ-панели
+- Генерируем API-ключ и сохраняем его в .env.local как PAYLOAD_API_KEY
 
 ## Отдельно поднять и потушить БД
 

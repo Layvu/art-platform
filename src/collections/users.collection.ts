@@ -1,8 +1,14 @@
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import type { CollectionConfig } from 'payload';
 
+// Коллекция пользователей панели администратора, управляемая через PayloadCMS
 export const UsersCollection: CollectionConfig = {
-    slug: 'users',
-    auth: true,
+    slug: COLLECTION_SLUGS.USERS,
+    auth: {
+        // Поддержка API-ключей. Изменение данных о пользователе возможна только от лица главного админа (через его API key)
+        // Получаем его ключ в админке и храним в PAYLOAD_API_KEY
+        useAPIKey: true,
+    },
     labels: { singular: 'User', plural: 'Users' },
     admin: { useAsTitle: 'email' },
 
@@ -37,7 +43,7 @@ export const UsersCollection: CollectionConfig = {
                 const { payload } = req;
 
                 const existingUsers = await payload.find({
-                    collection: 'users',
+                    collection: COLLECTION_SLUGS.USERS,
                     limit: 1,
                 });
 

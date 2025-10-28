@@ -5,18 +5,30 @@ import { ru } from '@payloadcms/translations/languages/ru';
 import { buildConfig } from 'payload';
 
 import { AuthorsCollection } from '@/collections/authors.collection';
+import { CartsCollection } from '@/collections/carts.collection';
+import { CustomersCollection } from '@/collections/customers.collection';
 import { FormsCollection } from '@/collections/forms.collection';
+import { OrdersCollection } from '@/collections/orders.collection';
 import { ProductsCollection } from '@/collections/products.collection';
 import { UsersCollection } from '@/collections/users.collection';
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 
 export default buildConfig({
     serverURL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
     secret: process.env.PAYLOAD_SECRET || 'dev-secret',
     admin: {
-        user: 'users',
+        user: COLLECTION_SLUGS.USERS,
     },
     editor: lexicalEditor(),
-    collections: [ProductsCollection, AuthorsCollection, UsersCollection, FormsCollection],
+    collections: [
+        ProductsCollection,
+        AuthorsCollection,
+        UsersCollection,
+        FormsCollection,
+        CartsCollection,
+        CustomersCollection,
+        OrdersCollection,
+    ],
     i18n: {
         fallbackLanguage: 'en',
         supportedLanguages: { en, ru },
@@ -29,5 +41,6 @@ export default buildConfig({
     typescript: {
         outputFile: 'src/types/payload-types.ts', // TODO: не генерится(
     },
-    cors: ['http://localhost:3000'],
+    cors: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'],
+    csrf: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'],
 });

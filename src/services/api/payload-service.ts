@@ -32,9 +32,9 @@ export class PayloadService {
         // Не используем спред оператор, чтобы не записать на клиент лишние типы из бд (created_at, updated_at)
         return json.docs.map((doc: PayloadCollection) => {
             switch (slug) {
-                case COLLECTION_SLUGS.Authors:
+                case COLLECTION_SLUGS.AUTHORS:
                     return mapIPayloadAuthorToIAuthor(doc as IPayloadAuthor);
-                case COLLECTION_SLUGS.Products: {
+                case COLLECTION_SLUGS.PRODUCTS: {
                     const product = doc as IPayloadProduct;
                     return {
                         id: product.id,
@@ -58,7 +58,7 @@ export class PayloadService {
 
     // Методы для каждой коллекции
     async getProducts(params: QueryParams = {}): Promise<IProduct[]> {
-        return this.getCollection(COLLECTION_SLUGS.Products, { ...params, depth: 1 }); // depth=1 подтянет автора
+        return this.getCollection(COLLECTION_SLUGS.PRODUCTS, { ...params, depth: 1 }); // depth=1 подтянет автора
     }
 
     async getProductBySlug(slug: string): Promise<IProduct | null> {
@@ -71,7 +71,7 @@ export class PayloadService {
     }
 
     async getAuthors(params: QueryParams = {}): Promise<IAuthor[]> {
-        return this.getCollection(COLLECTION_SLUGS.Authors, { ...params, depth: 1 }); // depth=1 подтянет категории
+        return this.getCollection(COLLECTION_SLUGS.AUTHORS, { ...params, depth: 1 }); // depth=1 подтянет категории
     }
 
     async getAuthorBySlug(slug: string): Promise<IAuthor | null> {
