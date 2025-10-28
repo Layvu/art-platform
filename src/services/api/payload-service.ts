@@ -40,11 +40,11 @@ export class PayloadService {
     }
 
     async getProducts(params?: QueryParams): Promise<PaginatedResponse<Product>> {
-        return this.getCollection(COLLECTION_SLUGS.Products, { ...params, depth: 1 }); // depth=1 подтянет категории
+        return this.getCollection(COLLECTION_SLUGS.PRODUCTS, { ...params, depth: 1 }); // depth=1 подтянет категории
     }
 
     async getAuthors(params?: QueryParams): Promise<PaginatedResponse<Author>> {
-        return this.getCollection(COLLECTION_SLUGS.Authors, { ...params, depth: 1 }); // depth=1 подтянет категории
+        return this.getCollection(COLLECTION_SLUGS.AUTHORS, { ...params, depth: 1 }); // depth=1 подтянет категории
     }
 
     async getProductBySlug(slug: string): Promise<Product | null> {
@@ -80,11 +80,11 @@ export class PayloadService {
     // }
 
     // async getProduct(id: string): Promise<Product> {
-    //     return this.getItem(COLLECTION_SLUGS.Products, id);
+    //     return this.getItem(COLLECTION_SLUGS.PRODUCTS, id);
     // }
 
     // async getAuthor(id: string): Promise<Author> {
-    //     return this.getItem(COLLECTION_SLUGS.Authors, id);
+    //     return this.getItem(COLLECTION_SLUGS.AUTHORS, id);
     // }
 }
 

@@ -84,7 +84,7 @@ export const CustomersCollection: CollectionConfig = {
     ],
 
     access: {
-        read: ({ req: { user } }) => {
+        read: ({ req: { user }, data }) => {
             // Неавторизованные пользователи не видят список покупателей
             if (!user) return false;
 
@@ -92,7 +92,10 @@ export const CustomersCollection: CollectionConfig = {
             if (isAdmin(user)) return true;
 
             // Покупатели видят только свои данные
-            return { id: { equals: user.id } };
+            if (data?.id === user?.id) return true;
+
+            // Все остальные не видят список покупателей
+            return false;
         },
 
         // Регистрация должна идти от лица главного админа
