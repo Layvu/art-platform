@@ -2,14 +2,17 @@
     "name": "art-platform",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "scripts": {
         "dev": "docker compose up -d && next dev",
+        "turbo": "docker compose up -d && next dev --turbo",
         "stop": "docker compose down",
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "payload": "payload"
+        "payload": "payload generate:types"
     },
+
     "dependencies": {
         "@hookform/resolvers": "^5.2.2",
         "@payloadcms/db-postgres": "3.56.0",
@@ -28,6 +31,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "graphql": "^16.11.0",
+        "install": "^0.13.0",
         "lucide-react": "^0.544.0",
         "nanoid": "^5.1.6",
         "next": "15.5.3",
@@ -35,11 +39,14 @@
         "nodemailer": "^7.0.6",
         "path-to-regexp": "^8.3.0",
         "payload": "3.56.0",
+        "pg": "^8.16.3",
         "qs-esm": "^7.0.2",
         "react": "19.1.0",
         "react-dom": "19.1.0",
         "react-hook-form": "^7.63.0",
+        "react-slick": "^0.31.0",
         "sharp": "^0.34.3",
+        "slick-carousel": "^1.8.1",
         "slugify": "^1.6.6",
         "tailwind-merge": "^3.3.1",
         "tsx": "^4.20.5",
@@ -48,6 +55,7 @@
         "zustand": "^5.0.8"
     },
     "devDependencies": {
+        "@tanstack/react-query-devtools": "^5.90.2",
         "@eslint/eslintrc": "^3",
         "@eslint/js": "^9.36.0",
         "@next/eslint-plugin-next": "^15.5.3",
@@ -58,6 +66,7 @@
         "@types/nodemailer": "^7.0.1",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@types/react-slick": "^0.23.13",
         "@typescript-eslint/eslint-plugin": "^8.43.0",
         "@typescript-eslint/parser": "^8.43.0",
         "eslint": "^9",
@@ -69,6 +78,7 @@
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "prettier": "^3.6.2",
         "tailwindcss": "^4",
+        "tsconfig-paths": "^4.2.0",
         "tw-animate-css": "^1.3.8",
         "typescript": "^5"
     }

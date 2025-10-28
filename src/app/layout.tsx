@@ -1,9 +1,10 @@
 import React from 'react';
 
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 
-import { ReactQueryProvider } from '@/lib/react-query';
+import Providers from './providers';
 
 import './globals.css';
 
@@ -27,8 +28,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="ru">
-            <body className={`${geistSans.variable} antialiased`}>
-                <ReactQueryProvider>{children}</ReactQueryProvider>
+            <body className={`${geistSans.variable} antialiased`}>           
+                <Providers>
+                    {children}
+                    <ReactQueryDevtools /> 
+                    {/* TODO Only for development */}
+                </Providers>
             </body>
         </html>
     );

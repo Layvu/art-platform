@@ -1,10 +1,11 @@
-import config from '@payload-config';
 import { nanoid } from 'nanoid';
 import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';
 
-import { PRODUCT_CATEGORIES } from '@/app/(public)/products/constants';
 import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+
+import config from '@/payload.config';
+import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 
 // TODO: enum 'admin', 'author'
 

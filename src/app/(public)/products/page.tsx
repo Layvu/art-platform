@@ -1,12 +1,30 @@
-import { PayloadService } from '@/services/api/payload-service';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
-import ProductsUI from './ProductsUI';
+import { getQueryClient } from '@/lib/utils/get-query-client';
+import { toQueryParams } from '@/services/api/utils';
+import type { ProductsQueryParams } from '@/shared/types/query-params.type';
+import { getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-export default async function ProductsPage() {
-    const payloadService = new PayloadService();
-    const products = await payloadService.getProducts();
+import ProductsUI from '../../../components/products/ProductsUI';
 
-    return <ProductsUI products={products} />;
+
+export default async function ProductsPage({ searchParams } : { searchParams: Promise<ProductsQueryParams>} ) {
+    // Получаем параметры из поисковой строки
+    const productsQueryParams = await searchParams;
+
+    // Преобразуем в QueryParams для запроса к серверу
+    const queryParams = toQueryParams(productsQueryParams)
+
+    // Prefetch текущей страницы и следующей
+    const queryClient = getQueryClient();
+    await queryClient.prefetchQuery(getProductsQueryOptions(queryParams));
+    await queryClient.prefetchQuery(getProductsQueryOptions({ ...queryParams, page: queryParams?.page ? queryParams.page + 1 : 1 }));
+
+    return (
+        <HydrationBoundary state={dehydrate(queryClient)}>
+            <ProductsUI initialParams={productsQueryParams} />
+        </HydrationBoundary>
+    );
 }
 
 // TODO: Метатеги

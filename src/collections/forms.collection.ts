@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { sendEmail } from '@/lib/utils/email';
-import type { IPayloadForm } from '@/shared/types/payload-types';
+import type { Form } from '@/shared/types/payload-types';
 
 export const FormsCollection: CollectionConfig = {
     slug: 'forms',
@@ -30,7 +30,7 @@ export const FormsCollection: CollectionConfig = {
         afterChange: [
             async ({ operation, doc }) => {
                 if (operation === 'create') {
-                    const formDoc = doc as IPayloadForm;
+                    const formDoc = doc as Form;
                     await sendEmail({
                         to: process.env.EMAIL_TO || 'zemskyalexey.writer@mail.ru',
                         subject: 'Новая анкета автора',
