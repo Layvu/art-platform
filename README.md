@@ -29,7 +29,7 @@ pnpm dev
 
 - Создаем первого пользователя в админ-панели
 - Находим его в Users в админ-панели
-- Генерируем API-ключ и сохраняем его в .env.local как PAYLOAD_API_KEY
+- Генерируем API-ключ, жмём на "Сохранить" и сохраняем его в .env.local как PAYLOAD_API_KEY
 
 ## Отдельно поднять и потушить БД
 
@@ -51,6 +51,10 @@ docker compose ps
 
 - products_update_count: пересчитывает authors.products_count после операций с products
 - products_update_categories: обновляет authors_product_categories с категориями товаров, которые продают авторы
+
+## Shadcn UI:
+
+pnpm dlx shadcn@latest add componentName
 
 ## Заметки
 

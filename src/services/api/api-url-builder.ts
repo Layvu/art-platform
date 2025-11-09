@@ -51,8 +51,29 @@ export class ApiUrlBuilder {
         return `${builder.baseUrl}/api/auth/register`;
     }
 
-    static forProfileUpdate(): string {
+    static forCustomerProfileUpdate(): string {
         const builder = new ApiUrlBuilder();
         return `${builder.baseUrl}/api/profile/update`;
+    }
+
+    static forAuthorProfileUpdate(): string {
+        const builder = new ApiUrlBuilder();
+        return `${builder.baseUrl}/api/author/profile/update`;
+    }
+
+    static forAuthorProducts(productId?: number): string {
+        const builder = new ApiUrlBuilder();
+        let url = `${builder.baseUrl}/api/author/products`;
+
+        if (productId) {
+            url += `/${productId}`;
+        }
+
+        return url;
+    }
+
+    static getBaseUrl(): string {
+        const builder = new ApiUrlBuilder();
+        return builder.baseUrl;
     }
 }

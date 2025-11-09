@@ -1,5 +1,7 @@
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import type { CollectionConfig } from 'payload';
+
+import { isAdmin } from '@/lib/utils/payload';
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 
 // TODO: ниже драфт, зафиксировал идею
 export const CartsCollection: CollectionConfig = {
@@ -26,9 +28,9 @@ export const CartsCollection: CollectionConfig = {
     ],
 
     access: {
-        read: ({ req: { user } }) => !!user && user.role === 'admin',
+        read: ({ req: { user } }) => !!user && isAdmin(user),
         create: () => false,
         update: () => false,
-        delete: ({ req: { user } }) => !!user && user.role === 'admin',
+        delete: ({ req: { user } }) => !!user && isAdmin(user),
     },
 };

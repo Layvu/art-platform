@@ -10,12 +10,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGES } from '@/config/public-pages.config';
+import { type UserRole, UserType } from '@/shared/types/auth.interface';
 
 export default function LoginPage() {
     const router = useRouter();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [userType, setUserType] = useState<UserRole>(UserType.CUSTOMER);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -24,7 +27,9 @@ export default function LoginPage() {
 
         try {
             const formData = new FormData(e.currentTarget);
-            const result = await signIn('credentials', {
+
+            // Используем соответствующий провайдер в зависимости от типа пользователя
+            const result = await signIn(userType, {
                 email: formData.get('email') as string,
                 password: formData.get('password') as string,
                 redirect: false,
@@ -33,7 +38,9 @@ export default function LoginPage() {
             if (result?.error) {
                 setError('Неверный email или пароль');
             } else {
+                // После успешного входа перенаправляем в профиль
                 router.push(PAGES.PROFILE);
+                router.refresh(); // Обновляем данные сессии
             }
         } catch (error) {
             console.error(error);
@@ -48,37 +55,87 @@ export default function LoginPage() {
             <Card>
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl text-center">Вход в аккаунт</CardTitle>
-                    <CardDescription className="text-center">Введите ваш email и пароль для входа</CardDescription>
+                    <CardDescription className="text-center">
+                        Выберите тип аккаунта и введите данные для входа
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                type="email"
-                                placeholder="your@email.com"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Пароль</Label>
-                            <Input
-                                id="password"
-                                name="password"
-                                type="password"
-                                placeholder="Ваш пароль"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
+                    <Tabs
+                        defaultValue="customer"
+                        className="w-full"
+                        onValueChange={(value) => setUserType(value as UserRole)}
+                    >
+                        <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <TabsTrigger value="customer">Покупатель</TabsTrigger>
+                            <TabsTrigger value="author">Автор</TabsTrigger>
+                        </TabsList>
 
-                        <Button type="submit" disabled={loading} className="w-full cursor-pointer">
-                            {loading ? 'Вход...' : 'Войти'}
-                        </Button>
-                    </form>
+                        <TabsContent value="customer">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        placeholder="your@email.com"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Пароль</Label>
+                                    <Input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        placeholder="Ваш пароль"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <Button type="submit" disabled={loading} className="w-full cursor-pointer">
+                                    {loading ? 'Вход...' : 'Войти как покупатель'}
+                                </Button>
+                            </form>
+                        </TabsContent>
+
+                        <TabsContent value="author">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="email-author">Email</Label>
+                                    <Input
+                                        id="email-author"
+                                        name="email"
+                                        type="email"
+                                        placeholder="author@email.com"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="password-author">Пароль</Label>
+                                    <Input
+                                        id="password-author"
+                                        name="password"
+                                        type="password"
+                                        placeholder="Пароль"
+                                        required
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <div className="text-sm text-muted-foreground">
+                                    <p>Для входа используйте данные, предоставленные администратором</p>
+                                </div>
+
+                                <Button type="submit" disabled={loading} className="w-full cursor-pointer">
+                                    {loading ? 'Вход...' : 'Войти как автор'}
+                                </Button>
+                            </form>
+                        </TabsContent>
+                    </Tabs>
 
                     {error && (
                         <Alert variant="destructive" className="mt-4">
@@ -86,12 +143,20 @@ export default function LoginPage() {
                         </Alert>
                     )}
 
-                    <div className="mt-4 text-center text-sm">
-                        Нет аккаунта?{' '}
-                        <a href={PAGES.REGISTER} className="text-primary underline underline-offset-4">
-                            Зарегистрироваться
-                        </a>
-                    </div>
+                    {userType === 'customer' && (
+                        <div className="mt-4 text-center text-sm">
+                            Нет аккаунта?{' '}
+                            <a href={PAGES.REGISTER} className="text-primary underline underline-offset-4">
+                                Зарегистрироваться
+                            </a>
+                        </div>
+                    )}
+
+                    {userType === UserType.AUTHOR && (
+                        <div className="mt-4 text-center text-sm text-muted-foreground">
+                            Аккаунты авторов создаются администратором
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

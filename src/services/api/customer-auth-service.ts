@@ -1,15 +1,20 @@
-import type { ICustomer } from '@/shared/types/customer.interface';
-import { ApiUrlBuilder, COLLECTION_SLUGS } from './api-url-builder';
 import { compare, hash } from 'bcryptjs';
-import type { IAuthResult } from '@/shared/types/auth.interface';
-import { PAGES } from '@/config/public-pages.config';
 
-export class AuthService {
-    // private builder: ApiUrlBuilder;
+import { type IAuthResult, UserType } from '@/shared/types/auth.interface';
+import type {
+    ICustomerCreateInput,
+    ICustomerFormData,
+    ICustomerSession,
+    ICustomerUpdateInput,
+} from '@/shared/types/customer.interface';
+import type { Customer } from '@/shared/types/payload-types';
+
+import { ApiUrlBuilder, COLLECTION_SLUGS } from './api-url-builder';
+
+export class CustomerAuthService {
     private apiKey: string;
 
     constructor() {
-        // this.builder = new ApiUrlBuilder();
         this.apiKey = process.env.PAYLOAD_API_KEY!;
     }
 
@@ -35,12 +40,15 @@ export class AuthService {
                 return { success: false, error: 'Неверный пароль' };
             }
 
-            // Убираем пароль из ответа
-            const { password: _, ...userWithoutPassword } = customer;
+            // Возвращаем только необходимые данные для сессии
+            const customerSession: ICustomerSession = {
+                id: customer.id,
+                type: UserType.CUSTOMER,
+            };
 
             return {
                 success: true,
-                user: userWithoutPassword,
+                user: customerSession,
             };
         } catch (error) {
             console.error('Authentication error:', error);
@@ -51,7 +59,7 @@ export class AuthService {
         }
     }
 
-    async findCustomerByEmail(email: string): Promise<ICustomer | null> {
+    async findCustomerByEmail(email: string): Promise<Customer> {
         const url = ApiUrlBuilder.forCollection(COLLECTION_SLUGS.CUSTOMERS, {
             where: { email: { equals: email } },
             limit: 1,
@@ -69,7 +77,7 @@ export class AuthService {
         return data.docs[0] || null;
     }
 
-    async createCustomer(customerData: Omit<ICustomer, 'id'>): Promise<ICustomer> {
+    async createCustomer(customerData: ICustomerCreateInput): Promise<Customer> {
         // Хешируем пароль перед созданием
         const hashedPassword = await hash(customerData.password, 12);
         const customer = {
@@ -77,29 +85,25 @@ export class AuthService {
             password: hashedPassword,
         };
 
-        console.log(customer);
         const url = ApiUrlBuilder.forCollection(COLLECTION_SLUGS.CUSTOMERS);
+
         const response = await fetch(url, {
             method: 'POST',
             headers: this.getAuthHeaders(),
             body: JSON.stringify(customer),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to create customer');
-        }
+        if (!response.ok) throw new Error('Failed to create customer');
 
         const data = await response.json();
         return data.doc || data;
     }
 
-    async getCustomerById(id: string): Promise<ICustomer> {
+    async getCustomerById(id: string): Promise<Customer> {
         const url = `${ApiUrlBuilder.forCollection(COLLECTION_SLUGS.CUSTOMERS)}/${id}`;
+
         const response = await fetch(url, {
             headers: this.getAuthHeaders(),
         });
-
         if (!response.ok) throw new Error('Failed to fetch customer');
 
         const data = await response.json();
@@ -111,23 +115,20 @@ export class AuthService {
         return customerWithoutPassword;
     }
 
-    async updateCustomer(id: string, updates: Partial<ICustomer>): Promise<ICustomer> {
+    async updateCustomerProfile(id: string, updates: ICustomerUpdateInput): Promise<Customer> {
         // Если обновляется пароль, хешируем его
         if (updates.password) {
             updates.password = await hash(updates.password, 12);
         }
 
         const url = `${ApiUrlBuilder.forCollection(COLLECTION_SLUGS.CUSTOMERS)}/${id}`;
+
         const response = await fetch(url, {
             method: 'PATCH',
             headers: this.getAuthHeaders(),
             body: JSON.stringify(updates),
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to update customer');
-        }
+        if (!response.ok) throw new Error('Failed to update customer');
 
         const data = await response.json();
         const customer = data.doc || data;
@@ -145,7 +146,7 @@ export class AuthService {
     }
 
     // Клиентский метод регистрации
-    async register(userData: Omit<ICustomer, 'id'>): Promise<IAuthResult> {
+    async register(userData: ICustomerCreateInput): Promise<IAuthResult> {
         const res = await fetch(`${ApiUrlBuilder.forRegister()}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -153,30 +154,28 @@ export class AuthService {
         });
 
         const data = await res.json();
-
         if (!res.ok) {
-            return { success: false, error: data.error || 'Ошибка регистрации' };
+            return { success: false, error: data.error };
         }
 
         return { success: true };
     }
 
     // Клиентский метод обновления профиля
-    async updateProfile(updates: Partial<ICustomer>): Promise<IAuthResult> {
-        const res = await fetch(`${ApiUrlBuilder.forProfileUpdate()}`, {
+    async updateProfile(updates: ICustomerFormData): Promise<IAuthResult> {
+        const res = await fetch(`${ApiUrlBuilder.forCustomerProfileUpdate()}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updates),
         });
 
         const data = await res.json();
-
         if (!res.ok) {
-            return { success: false, error: data.message || 'Ошибка обновления профиля' };
+            return { success: false, error: data.message };
         }
 
         return { success: true, user: data.customer };
     }
 }
 
-export const authService = new AuthService();
+export const customerAuthService = new CustomerAuthService();

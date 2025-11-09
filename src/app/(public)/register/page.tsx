@@ -11,7 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PAGES } from '@/config/public-pages.config';
-import { authService } from '@/services/api/auth-service';
+import { customerAuthService } from '@/services/api/customer-auth-service';
+import { UserType } from '@/shared/types/auth.interface';
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -33,14 +34,14 @@ export default function RegisterPage() {
 
         try {
             // Вызов сервиса регистрации
-            const registerResult = await authService.register(userData);
+            const registerResult = await customerAuthService.register(userData);
             if (!registerResult.success) {
                 setError(registerResult.error || 'Ошибка при регистрации');
                 return;
             }
 
-            // Автоматический логин
-            await signIn('credentials', {
+            // Автоматический логин покупателя
+            await signIn(UserType.CUSTOMER, {
                 email: userData.email,
                 password: userData.password,
                 redirect: false,

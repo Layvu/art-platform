@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+
 import { authOptions } from '@/lib/auth';
-import { authService } from '@/services/api/auth-service';
+import { customerAuthService } from '@/services/api/customer-auth-service';
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     try {
-        const updatedCustomer = await authService.updateCustomer(session.user.id, body);
+        const updatedCustomer = await customerAuthService.updateCustomerProfile(session.user.id, body);
 
         return NextResponse.json({
             success: true,

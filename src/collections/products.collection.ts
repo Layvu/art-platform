@@ -2,12 +2,10 @@ import { nanoid } from 'nanoid';
 import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';
 
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
-
+import { isAdmin, isAuthor } from '@/lib/utils/payload';
 import config from '@/payload.config';
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
-
-// TODO: enum 'admin', 'author'
 
 export const ProductsCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.PRODUCTS,
@@ -20,7 +18,7 @@ export const ProductsCollection: CollectionConfig = {
             if (!user) return true;
 
             // Админы видят все товары
-            if (user.role === 'admin') return true;
+            if (isAdmin(user)) return true;
 
             // Авторы видят только свои товары
             const payload = await getPayload({ config });
@@ -33,6 +31,94 @@ export const ProductsCollection: CollectionConfig = {
             if (!author) return false;
 
             return { author: { equals: author.id } };
+        },
+
+        update: async ({ req: { user }, id }) => {
+            // Публичный доступ для фронтенда закрыт (анонимные запросы)
+            if (!user) return false;
+
+            // Админы могут обновлять любые товары
+            if (isAdmin(user)) return true;
+
+            // Авторы могут обновлять только свои товары
+            if (isAuthor(user)) {
+                const payload = await getPayload({ config });
+                const authorRes = await payload.find({
+                    collection: COLLECTION_SLUGS.AUTHORS,
+                    where: { user: { equals: user.id } },
+                    limit: 1,
+                });
+                const author = authorRes.docs[0];
+                if (!author) return false;
+
+                // Получаем товар
+                const product = await payload.findByID({
+                    collection: COLLECTION_SLUGS.PRODUCTS,
+                    id: id!,
+                });
+                if (!product) return false;
+
+                // Сравниваем ID автора товара с ID автора
+                // product.author может быть объектом или ID
+                // ^ TODO: странно это, пофиксить мб
+
+                const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
+                const hasAccess = productAuthorId === author.id;
+
+                return hasAccess;
+            }
+
+            return false;
+        },
+
+        // create и delete аналогичны update
+        create: async ({ req: { user } }) => {
+            if (!user) return false;
+
+            if (isAdmin(user)) return true;
+
+            if (isAuthor(user)) {
+                // Проверяем, что у автора есть профиль
+                const payload = await getPayload({ config });
+                const authorRes = await payload.find({
+                    collection: COLLECTION_SLUGS.AUTHORS,
+                    where: { user: { equals: user.id } },
+                    limit: 1,
+                });
+                return authorRes.docs.length > 0;
+            }
+
+            return false;
+        },
+
+        delete: async ({ req: { user }, id }) => {
+            if (!user) return false;
+
+            if (isAdmin(user)) return true;
+
+            if (isAuthor(user)) {
+                const payload = await getPayload({ config });
+                const authorRes = await payload.find({
+                    collection: COLLECTION_SLUGS.AUTHORS,
+                    where: { user: { equals: user.id } },
+                    limit: 1,
+                });
+                const author = authorRes.docs[0];
+                if (!author) return false;
+
+                const product = await payload.findByID({
+                    collection: COLLECTION_SLUGS.PRODUCTS,
+                    id: id!,
+                });
+                if (!product) return false;
+
+                const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
+                const hasAccess = productAuthorId === author.id;
+
+                return hasAccess;
+            }
+
+            return false;
         },
     },
 
@@ -64,8 +150,8 @@ export const ProductsCollection: CollectionConfig = {
             required: true,
             // Текущий автор не может добавить товар другому автору
             access: {
-                create: ({ req }) => req.user?.role === 'admin',
-                update: ({ req }) => req.user?.role === 'admin',
+                create: ({ req }) => isAdmin(req.user),
+                update: ({ req }) => isAdmin(req.user),
             },
             admin: {
                 position: 'sidebar',
@@ -76,11 +162,10 @@ export const ProductsCollection: CollectionConfig = {
         beforeChange: [
             async ({ data, req, operation }) => {
                 const { user, payload } = req;
-
-                if (operation === 'create' && user?.role === 'author') {
+                if (operation === 'create' && isAuthor(user)) {
                     const authorRes = await payload.find({
                         collection: COLLECTION_SLUGS.AUTHORS,
-                        where: { user: { equals: user.id } },
+                        where: { user: { equals: user!.id } },
                         limit: 1,
                     });
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { authService } from '@/services/api/auth-service';
+import { customerAuthService } from '@/services/api/customer-auth-service';
 
 // Нам нужен этот эндпоинт, потому что в Payload имеет доступ к пользовательской сессии только на сервере
 // => в эндпоинте Payload работает с правильными правами доступа. Аналогично с profile/update
@@ -14,13 +14,13 @@ export async function POST(req: Request) {
 
     try {
         // Проверяем, существует ли пользователь
-        const userExists = await authService.checkUserExists(email);
+        const userExists = await customerAuthService.checkUserExists(email);
         if (userExists) {
             return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 });
         }
 
         // Создаём нового покупателя
-        const newCustomer = await authService.createCustomer({
+        const newCustomer = await customerAuthService.createCustomer({
             email,
             password,
             fullName,

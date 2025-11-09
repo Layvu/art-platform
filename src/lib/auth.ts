@@ -2,12 +2,17 @@ import { type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 import { PAGES } from '@/config/public-pages.config';
-import { authService } from '@/services/api/auth-service';
+import { authorAuthService } from '@/services/api/author-auth-service';
+import { customerAuthService } from '@/services/api/customer-auth-service';
+import { type UserRole, UserType } from '@/shared/types/auth.interface';
+import type { IAuthorSession } from '@/shared/types/author.interface';
+import type { ICustomerSession } from '@/shared/types/customer.interface';
 
 export const authOptions: NextAuthOptions = {
     providers: [
         CredentialsProvider({
-            name: 'Credentials',
+            id: 'customer',
+            name: 'Customer',
             credentials: {
                 email: { label: 'Email', type: 'email' },
                 password: { label: 'Password', type: 'password' },
@@ -17,30 +22,54 @@ export const authOptions: NextAuthOptions = {
                 if (!credentials?.email || !credentials?.password) {
                     return null;
                 }
-                try {
-                    const result = await authService.authenticate(credentials.email, credentials.password);
 
-                    if (!result.success || !result.user) {
-                        return null;
-                    }
-
-                    // Для работы с сессией нам достаточно хранить только Id
-                    return {
-                        id: result.user.id,
-                    };
-                } catch (err) {
-                    console.error('Error authorizing:', err);
+                const result = await customerAuthService.authenticate(credentials.email, credentials.password);
+                if (!result.success || !result.user) {
                     return null;
                 }
+
+                // Для работы с сессией нам достаточно хранить только Id и тип пользователя
+                return result.user as ICustomerSession;
+            },
+        }),
+        CredentialsProvider({
+            id: 'author',
+            name: 'Author',
+            credentials: {
+                email: { label: 'Email', type: 'email' },
+                password: { label: 'Password', type: 'password' },
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) {
+                    return null;
+                }
+
+                const result = await authorAuthService.authenticate(credentials.email, credentials.password);
+                if (!result.success || !result.user) {
+                    return null;
+                }
+
+                // Минимум данных для сохранения в сессии
+                return result.user as IAuthorSession;
             },
         }),
     ],
 
     callbacks: {
         // Вызывается при создании/обновлении JWT токена
-        async jwt({ token, user, account, profile }) {
+        async jwt({ token, user, trigger }) {
+            // Принудительно обновляем токен при signIn
+            if (trigger === 'signIn' || trigger === 'signUp') {
+                return { ...token, ...user };
+            }
+
             if (user) {
                 token.id = user.id;
+
+                token.type = user.type;
+                if (user.type === UserType.AUTHOR) {
+                    token.authorId = user.authorId;
+                }
             }
             return token; // Этот token будет сохранен в cookie
         },
@@ -52,6 +81,11 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 // Расширяем сессию данными из JWT
                 session.user.id = token.id as string;
+
+                session.user.type = token.type as UserRole;
+                if (token.type === UserType.AUTHOR) {
+                    session.user.authorId = token.authorId as number;
+                }
             }
             return session;
         },

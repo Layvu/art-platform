@@ -1,9 +1,12 @@
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import { nanoid } from 'nanoid';
-import { type CollectionConfig } from 'payload';
+import { type CollectionConfig, getPayload } from 'payload';
 import slugify from 'slugify';
 
-// TODO: вынести хуки в переменную / файл
+import { isAdmin, isAuthor } from '@/lib/utils/payload';
+import config from '@/payload.config';
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+
+// TODO: вынести хуки коллекций в переменную / файл
 
 export const AuthorsCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.AUTHORS,
@@ -16,11 +19,37 @@ export const AuthorsCollection: CollectionConfig = {
             if (!user) return true;
 
             // Админы видят всех авторов
-            if (user.role === 'admin') return true;
+            if (isAdmin(user)) return true;
 
             // Авторы не видят других авторов
             return false;
         },
+
+        update: async ({ req: { user }, id }) => {
+            // Публичный доступ для фронтенда закрыт (анонимные запросы)
+            if (!user) return false;
+
+            // Админы могут обновлять любых авторов
+            if (isAdmin(user)) return true;
+
+            if (isAuthor(user)) {
+                const payload = await getPayload({ config });
+                const authorRes = await payload.find({
+                    collection: COLLECTION_SLUGS.AUTHORS,
+                    where: { user: { equals: user.id } },
+                    limit: 1,
+                });
+                const author = authorRes.docs[0];
+                if (!author) return false;
+
+                return author.id === id;
+            }
+
+            return false;
+        },
+
+        create: ({ req: { user } }) => isAdmin(user),
+        delete: ({ req: { user } }) => isAdmin(user),
     },
 
     fields: [

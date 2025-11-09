@@ -10,20 +10,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { authService } from '@/services/api/auth-service';
-import type { ICustomer, ICustomerAddress, ICustomerWithoutPassword } from '@/shared/types/customer.interface';
+import { customerAuthService } from '@/services/api/customer-auth-service';
+import type { ICustomerAddress, ICustomerFormData, ICustomerWithoutPassword } from '@/shared/types/customer.interface';
 
 interface ProfileUIProps {
     customerData: ICustomerWithoutPassword;
 }
 
-export default function ProfileUI({ customerData }: ProfileUIProps) {
+export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
     const { data: session, status } = useSession();
 
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // TODO: общий стейт для формы
     const [email, setEmail] = useState(customerData.email || '');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState(customerData.fullName || '');
@@ -36,9 +37,9 @@ export default function ProfileUI({ customerData }: ProfileUIProps) {
         setError('');
         setSuccess('');
 
-        // TODO: по хорошему формировать updated исходя из того, что изменилось,
-        // но в целом данных мало, так что пока просто обновляем всё
-        const updated: Partial<ICustomer> = {
+        // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
+        // Но в целом данных мало, так что пока просто обновляем всё
+        const updated: ICustomerFormData = {
             email,
             fullName,
             phone,
@@ -49,24 +50,22 @@ export default function ProfileUI({ customerData }: ProfileUIProps) {
         }
 
         try {
-            const result = await authService.updateProfile(updated);
+            const result = await customerAuthService.updateProfile(updated);
 
             if (result.success) {
                 setSuccess('Профиль обновлен');
                 setPassword('');
                 setLoading(false);
             } else {
-                setError(result.error || 'Ошибка обновления профиля');
+                setError('Произошла ошибка при обновлении профиля');
+                console.error(result.error);
             }
-        } catch (error) {
-            console.error(error);
-            setError('Произошла ошибка при обновлении профиля');
         } finally {
             setLoading(false);
         }
     };
 
-    // TODO: loading и error
+    // TODO: loading и error компоненты
     if (status === 'loading') return <div>Загрузка...</div>;
     if (!session?.user) return <div>Пожалуйста, войдите в систему</div>;
 

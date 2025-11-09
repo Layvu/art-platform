@@ -1,5 +1,8 @@
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import type { CollectionConfig } from 'payload';
+
+import { isAdmin } from '@/lib/utils/payload';
+import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+import { UserType } from '@/shared/types/auth.interface';
 
 // Коллекция пользователей панели администратора, управляемая через PayloadCMS
 export const UsersCollection: CollectionConfig = {
@@ -27,13 +30,13 @@ export const UsersCollection: CollectionConfig = {
         // Блокируем авторам доступ к юзерам, разрешаем только смотреть свой профиль
         read: ({ req: { user }, id }) => {
             if (!user) return false;
-            if (user.role === 'admin') return true;
+            if (isAdmin(user)) return true;
             return user.id === id;
         },
 
-        create: ({ req: { user } }) => user?.role === 'admin',
-        update: ({ req: { user } }) => user?.role === 'admin',
-        delete: ({ req: { user } }) => user?.role === 'admin',
+        create: ({ req: { user } }) => isAdmin(user),
+        update: ({ req: { user } }) => isAdmin(user),
+        delete: ({ req: { user } }) => isAdmin(user),
     },
 
     hooks: {
@@ -48,7 +51,7 @@ export const UsersCollection: CollectionConfig = {
                 });
 
                 if (existingUsers.totalDocs === 0) {
-                    data.role = 'admin';
+                    data.role = UserType.ADMIN;
                 }
 
                 return data;
