@@ -76,6 +76,12 @@ export const CustomersCollection: CollectionConfig = {
             admin: { readOnly: true },
         },
         {
+            name: 'cart',
+            type: 'relationship',
+            relationTo: COLLECTION_SLUGS.CARTS,
+            admin: { readOnly: true },
+        },
+        {
             name: 'createdAt',
             type: 'date',
             label: 'Дата регистрации',

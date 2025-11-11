@@ -8,6 +8,7 @@ export const COLLECTION_SLUGS = {
     USERS: 'users',
     CUSTOMERS: 'customers',
     MEDIA: 'media',
+    CARTS: 'carts',
 } as const;
 
 export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_SLUGS];

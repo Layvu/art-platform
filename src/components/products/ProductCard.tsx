@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef } from 'react';
 
 import Image from 'next/image';
@@ -11,10 +13,17 @@ import { isAuthorData } from '@/shared/guards/author.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
+import { useCartStore } from '@/services/store/cart/store';
+import { isProductData } from '../../shared/guards/product.guard';
 
 export default function ProductCard({ id, title, slug, description, price, author, image }: Product) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
+
+    const { cart, addItem } = useCartStore();
+    const inCart = cart?.items?.find((item) =>
+        isProductData(item.product) ? item?.product.id == id : item.product == id,
+    );
 
     return (
         <Card>
@@ -58,6 +67,13 @@ export default function ProductCard({ id, title, slug, description, price, autho
             <CardFooter>
                 <Button variant="outline" asChild>
                     <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
+                </Button>
+                <Button
+                    variant="outline"
+                    asChild
+                    onClick={() => addItem({ id, title, slug, description, price, author, image })}
+                >
+                    <div>{inCart ? 'уже в корзине' : 'Добавить в корзину'}</div>
                 </Button>
             </CardFooter>
         </Card>

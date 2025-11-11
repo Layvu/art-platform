@@ -235,6 +235,7 @@ export interface Customer {
         id?: string | null;
       }[]
     | null;
+  cart?: (number | null) | Cart;
   createdAt: string;
   updatedAt: string;
 }
@@ -450,6 +451,7 @@ export interface CustomersSelect<T extends boolean = true> {
         postalCode?: T;
         id?: T;
       };
+  cart?: T;
   createdAt?: T;
   updatedAt?: T;
 }

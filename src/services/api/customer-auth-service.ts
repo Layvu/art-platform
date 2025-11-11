@@ -139,7 +139,7 @@ export class CustomerAuthService {
         return customerWithoutPassword;
     }
 
-    // Проверка существования пользователя по emai
+    // Проверка существования пользователя по email
     async checkUserExists(email: string): Promise<boolean> {
         const customer = await this.findCustomerByEmail(email);
         return !!customer;

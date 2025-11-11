@@ -137,6 +137,7 @@ export const ProductsCollection: CollectionConfig = {
         { name: 'price', type: 'number', required: true },
         { name: 'description', type: 'textarea' },
         { name: 'image', type: 'text' }, // TODO: relationTo: 'media'
+        //{ name: 'quantity', type: 'number' },
         {
             name: 'category',
             type: 'select',
