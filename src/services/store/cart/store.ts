@@ -1,91 +1,86 @@
 import type { Cart, Product } from '@/shared/types/payload-types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { EMPTY_CART } from './utils';
+import { isProductData } from '@/shared/guards/product.guard';
 
-type CartItem = {
-    product: number | Product;
-    quantity: number;
-    checked?: boolean | null;
-    id?: string | null;    
-}
 interface CartState {
     cart: Cart | null;
     setCart: (cart: Cart) => void;
-    addItem: (product: Partial<Product>) => void;
-    // increase: (productId: number) => void;
-    // decrease: (productId: number) => void;
-    // toggleChecked: (productId: number) => void;
-    // removeItem: (productId: number) => void;
-    // clear: () => void;
+    addItem: (product: Omit<Product, 'author' | 'updatedAt' | 'createdAt'>) => void;
+    increase: (productId: number) => void;
+    decrease: (productId: number) => void;
+    toggleChecked: (productId: number) => void;
+    removeItem: (productId: number) => void;
+    clear: () => void;
 }
 
 export const useCartStore = create<CartState>()(
     persist(
         (set, get) => ({
-            cart: { id: 'local', items: [] } as unknown as Cart, 
-            // items: [],
+            cart: EMPTY_CART as unknown as Cart,
 
             setCart: (cart) => set({ cart }),
 
             addItem: (product) =>
-            set((state) => {
-              const cart = state.cart ?? { id: 'local', items: [] }; // защита
-              const items = cart.items ?? [];
-    
-              const exists = items.some((i) =>
-                typeof i.product === 'number'
-                  ? i.product === product.id
-                  : i.product.id === product.id,
-              );
-    
-              if (exists) return state;
-    
-              const newItems = [
-                ...items,
-                { product, quantity: 1, checked: true } as CartItem,
-              ];
-    
-              return { cart: { ...cart, items: newItems } as Cart };
-            }),
+                set((state) => {
+                    const cart = state.cart ?? EMPTY_CART; 
+                    const items = cart.items ?? [];
 
-            // increase: (productId) =>
-            //   set((state) => ({
-            //     items: state.items.map((i) =>
-            //       (typeof i.product === 'number' ? i.product : i.product.id) === productId
-            //         ? { ...i, quantity: i.quantity + 1 }
-            //         : i
-            //     ),
-            //   })),
+                    const exists = items.some((i) =>
+                         i.product === product.id
+                    );
 
-            // decrease: (productId) =>
-            //   set((state) => ({
-            //     items: state.items
-            //       .map((i) =>
-            //         (typeof i.product === 'number' ? i.product : i.product.id) === productId
-            //           ? { ...i, quantity: i.quantity - 1 }
-            //           : i
-            //       )
-            //       .filter((i) => i.quantity > 0),
-            //   })),
+                    if (exists) return state;
 
-            // toggleChecked: (productId) =>
-            //   set((state) => ({
-            //     items: state.items.map((i) =>
-            //       (typeof i.product === 'number' ? i.product : i.product.id) === productId
-            //         ? { ...i, checked: !i.checked }
-            //         : i
-            //     ),
-            //   })),
+                    const newItems = [...items, { product, quantity: 1, checked: true }];
 
-            // removeItem: (productId) =>
-            //   set((state) => ({
-            //     items: state.items.filter(
-            //       (i) =>
-            //         (typeof i.product === 'number' ? i.product : i.product.id) !== productId
-            //     ),
-            //   })),
+                    return { cart: { ...cart, items: newItems } as Cart };
+                }),
 
-            // clear: () => set({ items: [], cart: null }),
+            increase: (productId) =>
+                set((state) => {
+                    if (!state.cart) return state;
+                    const newItems = state.cart.items?.map((i) => {
+                        const id = isProductData(i.product) ? i.product.id : i.product;
+                        return id === productId ? { ...i, quantity: i.quantity + 1 } : i;
+                    });
+                    return { cart: { ...state.cart, items: newItems } };
+                }),
+
+            decrease: (productId) =>
+                set((state) => {
+                    if (!state.cart) return state;
+                    const newItems = state.cart.items
+                        ?.map((i) => {
+                            const id = isProductData(i.product) ? i.product.id : i.product;
+                            return id === productId ? { ...i, quantity: i.quantity - 1 } : i;
+                        })
+                        .filter((i) => i.quantity > 0);
+                    return { cart: { ...state.cart, items: newItems } };
+                }),
+
+            toggleChecked: (productId) =>
+                set((state) => {
+                    if (!state.cart) return state;
+                    const newItems = state.cart.items?.map((i) => {
+                        const id = isProductData(i.product) ? i.product.id : i.product;
+                        return id === productId ? { ...i, checked: !i.checked } : i;
+                    });
+                    return { cart: { ...state.cart, items: newItems } };
+                }),
+
+            removeItem: (productId) =>
+                set((state) => {
+                    if (!state.cart) return state;
+                    const newItems = state.cart.items?.filter((i) => {
+                        const id = isProductData(i.product) ? i.product.id : i.product;
+                        return id !== productId;
+                    });
+                    return { cart: { ...state.cart, items: newItems } };
+                }),
+
+            clear: () => set({ cart: EMPTY_CART as Cart }),
         }),
         { name: 'cart-storage' },
     ),

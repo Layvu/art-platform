@@ -16,12 +16,12 @@ import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 import { useCartStore } from '@/services/store/cart/store';
 import { isProductData } from '../../shared/guards/product.guard';
 
-export default function ProductCard({ id, title, slug, description, price, author, image }: Product) {
+export default function ProductCard({ id, title, slug, description, price, author, image, category, }: Product) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 
-    const { cart, addItem } = useCartStore();
-    const inCart = cart?.items?.find((item) =>
+    const { cart, addItem, increase, decrease, removeItem, toggleChecked, clear } = useCartStore();
+    const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
 
@@ -64,17 +64,25 @@ export default function ProductCard({ id, title, slug, description, price, autho
                 {image && <Image alt="Картинка" src={image} width={100} height={52} />}
             </CardContent>
 
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
                 <Button variant="outline" asChild>
                     <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
                 </Button>
-                <Button
-                    variant="outline"
-                    asChild
-                    onClick={() => addItem({ id, title, slug, description, price, author, image })}
-                >
-                    <div>{inCart ? 'уже в корзине' : 'Добавить в корзину'}</div>
-                </Button>
+                {productInCart ? (
+                    <div className='flex gap-1.5 items-center'>
+                        <Button onClick={() => decrease(id)} variant="outline">
+                            -
+                        </Button>
+                        { productInCart.quantity }
+                        <Button onClick={() => increase(id)} variant="outline">
+                            +
+                        </Button>
+                    </div>
+                ) : (
+                    <Button variant="outline" onClick={() => addItem({ id, title, slug, description, price, image, category })}>
+                        Добавить в корзину
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     );

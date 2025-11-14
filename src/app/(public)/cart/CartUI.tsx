@@ -3,39 +3,70 @@
 import { useCartStore } from '@/services/store/cart/store';
 import React from 'react';
 import { isProductData } from '@/shared/guards/product.guard';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemGroup,
+    ItemTitle,
+} from '@/components/ui/item';
+import { Minus, PlusIcon, Trash } from 'lucide-react';
 
 export default function CartUI() {
-    const { cart } = useCartStore();
+    const { cart, toggleChecked, increase, decrease, removeItem } = useCartStore();
+    const totalAmountInCart = cart?.items?.reduce((acc, item) => acc + item.quantity, 0);
+    const totalChosenAmount = cart?.items?.filter((i) => i.checked).reduce((acc, item) => acc + item.quantity, 0);
+    const finalPrice = cart?.items
+        ?.filter((i) => i.checked)
+        .reduce((acc, item) => {
+            if (isProductData(item.product)) {
+                return acc + item.quantity * item.product?.price;
+            } else {
+                return 0;
+            }
+        }, 0);
 
     return (
         <div className="p-4">
-            <h1>Cart</h1>
+            <h1 className='mb-4'>Cart</h1>
             {cart?.items?.length === 0 && <p>Cart is empty</p>}
-            <ul>
-                {cart?.items?.map((item) => (
-                    <li key={item.id} className="border p-2 mb-2 flex items-center justify-between">
-                        <div>
-                            <input
-                                type="checkbox"
-                                checked={item?.checked || false}
-                                // onChange={() => toggleCheck(item.id)}
-                                className="mr-2"
-                            />
-                            {isProductData(item.product) && (
-                                <>
-                                    <span>{item.product?.title ? item.product?.title : 'Unknown'}</span> -{' '}
-                                    {item.quantity}
-                                </>
-                            )}
-                        </div>
-                        {/* <div>
-              <button onClick={() => decrement(item.id)} className="px-2">-</button>
-              <button onClick={() => increment(item.id)} className="px-2">+</button>
-              <button onClick={() => removeItem(item.id)} className="px-2 text-red-500">x</button>
-            </div> */}
-                    </li>
-                ))}
-            </ul>
+            <ItemGroup className="flex w-full max-w-md flex-col gap-6">
+                {cart?.items?.map((item) => {
+                    const productId = typeof item.product === 'number' ? item.product : item.product.id;
+                    console.log(item.product);
+                    if (isProductData(item.product)) {
+                        const product = item.product;
+                        return (
+                            <Item variant="outline">
+                                <ItemContent className="flex gap-2 flex-row items-center">
+                                    <Checkbox
+                                        checked={item.checked || false}
+                                        onCheckedChange={() => toggleChecked(productId)}
+                                        className="mr-2"
+                                    />
+                                    <div className='flex flex-col'>
+                                        <ItemTitle>{product.title}</ItemTitle>
+                                        <ItemDescription>{product.description}</ItemDescription>
+                                        <ItemDescription>Цена: {product.price}</ItemDescription>
+                                        <ItemDescription>{item.quantity} штук в корзине</ItemDescription>
+                                    </div>
+                                </ItemContent>
+                                <ItemActions>
+                                    <PlusIcon onClick={() => increase(productId)} cursor={'pointer'} />
+                                    <Minus onClick={() => decrease(productId)} cursor={'pointer'} />
+                                    <Trash onClick={() => removeItem(productId)} color="red" cursor={'pointer'} />
+                                </ItemActions>
+                                {/* <ItemSeparator /> */}
+                            </Item>
+                        );
+                    } else return <div>4ilee</div>;
+                })}
+            </ItemGroup>
+            <div className='mt-4'>TOTAL AMOUNT: {totalAmountInCart}</div>
+            <div>TOTAL CHOSEN AMOUNT: {totalChosenAmount}</div>
+            <div>FINAL PRICE: {finalPrice}</div>
         </div>
     );
 }
