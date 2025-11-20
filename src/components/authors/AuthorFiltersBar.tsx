@@ -7,6 +7,8 @@ import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 import type { AuthorsFilters, AuthorsSortOptions } from '@/shared/types/query-params.type';
 
 import SearchBar from '../shared/SearchBar';
+import { useCallback, useState } from 'react';
+import { debounce } from 'lodash';
 
 interface IAuthorFiltersBarProps {
     filters: AuthorsFilters;
@@ -17,6 +19,22 @@ interface IAuthorFiltersBarProps {
 
 // TODO: переиспользовать, передавая категории и опции сортировки
 export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSortChange }: IAuthorFiltersBarProps) {
+    const [searchValue, setSearchValue] = useState<string>(filters.search || '');
+
+    const debouncedSearch = useCallback(
+        debounce((value: string) => {
+            onFilterChange({
+                ...filters,
+                search: value
+            });
+        }, 500), 
+        [filters]
+    );
+    const handleSearchChange = (value: string) => {
+        setSearchValue(value);
+        debouncedSearch(value);
+    }
+
     return (
         <div className="flex items-start gap-6 mb-6">
             {/* Сортировка */}
@@ -76,8 +94,8 @@ export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSor
 
             {/* Поиск */}
             <SearchBar
-                value={filters.search ? filters.search : ''}
-                onChange={(value) => onFilterChange({ search: value })}
+               value={searchValue}
+               onChange={(value) => handleSearchChange(value)}
             />
         </div>
     );
