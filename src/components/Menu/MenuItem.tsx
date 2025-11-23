@@ -11,7 +11,7 @@ export function MenuItem({ menuItem, isActive }: IProps) {
     return (
         <Link
             href={menuItem.href}
-            className={`${isActive ? 'text-red' : 'text-white/80'} hover:underline`}
+            className={`${isActive ? 'text-red' : 'text-black'} hover:underline`}
             onClick={menuItem.onClick}
         >
             {menuItem.name}

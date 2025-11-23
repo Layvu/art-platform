@@ -11,6 +11,8 @@ import type { ProductsQueryParams } from '@/shared/types/query-params.type';
 
 import ProductFiltersBar from './ProductFiltersBar';
 
+import './products.scss'
+
 export default function ProductsUI({ initialParams }: { initialParams: ProductsQueryParams }) {
     const page = Number(initialParams.page) || 1;
     const params = toQueryParams(initialParams);
@@ -62,7 +64,9 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
                     <div>totalPages: {totalPages}</div>
                 </div>
             )}
-            <div className={`grid grid-cols-4 gap-6 m-2.5 ${isPlaceholderData && 'opacity-50'}`}>
+            {/* <div className={`grid grid-cols-4 gap-6 m-2.5 ${isPlaceholderData && 'opacity-50'}`}> */}
+            <div className={`card-list ${isPlaceholderData && 'opacity-50'}`}>
+
                 {products?.map((product) => (
                     <ProductCard key={product.id} {...product} />
                 ))}

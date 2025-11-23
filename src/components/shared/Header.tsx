@@ -9,12 +9,10 @@ import { Menu } from '../Menu/Menu';
 
 export function Header() {
     return (
-        <header className="flex items-center justify-between p-4 bg-black text-white">
+        <header className="flex items-center justify-between p-4 bg-white text-black wrap">
             <Link href={PAGES.HOME} className="flex items-center gap-2">
-                <Image src="/globe.svg" alt="Art Logo" width={28} height={28} priority />
-                <span className="text-lg font-semibold">Art Platform</span>
+                <Image src="/logo.svg" alt="Art Logo" width={86} height={40} priority />
             </Link>
-
             <Menu />
         </header>
     );
