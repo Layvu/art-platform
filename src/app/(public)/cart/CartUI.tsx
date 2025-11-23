@@ -3,70 +3,60 @@
 import { useCartStore } from '@/services/store/cart/store';
 import React from 'react';
 import { isProductData } from '@/shared/guards/product.guard';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-    Item,
-    ItemActions,
-    ItemContent,
-    ItemDescription,
-    ItemGroup,
-    ItemTitle,
-} from '@/components/ui/item';
-import { Minus, PlusIcon, Trash } from 'lucide-react';
+import { ItemGroup } from '@/components/ui/item';
+import { useProductsByIds } from '@/shared/hooks/useFetchData';
+import CartItem from '@/components/cart/CartItem';
+import type { Product } from '@/shared/types/payload-types';
+import type { ICartItem } from '@/shared/types/cart.interface';
+
 
 export default function CartUI() {
-    const { cart, toggleChecked, increase, decrease, removeItem } = useCartStore();
-    const totalAmountInCart = cart?.items?.reduce((acc, item) => acc + item.quantity, 0);
-    const totalChosenAmount = cart?.items?.filter((i) => i.checked).reduce((acc, item) => acc + item.quantity, 0);
-    const finalPrice = cart?.items
-        ?.filter((i) => i.checked)
-        .reduce((acc, item) => {
-            if (isProductData(item.product)) {
-                return acc + item.quantity * item.product?.price;
-            } else {
-                return 0;
-            }
-        }, 0);
+    const { cart } = useCartStore();
+
+    // берем текущие товары из корзины
+    const items = cart?.items ?? [];
+
+    // берем id товаров, парсим их в массив чисел
+    const productsIds = items.map((item) => {
+        if (isProductData(item.product)) return item.product.id;
+        return item.product;
+    })
+
+    // фетчим товары по массиву чисел
+    const {data: products, isLoading, isError} = useProductsByIds(productsIds);
+
+    // лоадинг
+    if (isLoading) return <>Loading from ui...</>;
+    if (isError) return <>Error</>;
+    if(!products) return <>No products found</>;
+
+    // сливаем товары с корзиной
+    // было product: number, cтало product: Product
+    const itemsWithProducts = items.map((item) => {
+        const product = products.find((p) => p.id === item.product);
+        if (!product) return null;
+        return { ...item, product };
+      }).filter(Boolean) as (ICartItem & { product: Product })[];
+
+    // итоговая цена
+    const total = itemsWithProducts.filter((i) => i.checked).reduce(
+        (sum, item) => sum + item.quantity * item.product.price,
+        0
+    );
 
     return (
         <div className="p-4">
-            <h1 className='mb-4'>Cart</h1>
-            {cart?.items?.length === 0 && <p>Cart is empty</p>}
+            <h1 className="mb-4">Cart</h1>
+
+            {itemsWithProducts.length === 0 && <p>Cart is empty</p>}
+
             <ItemGroup className="flex w-full max-w-md flex-col gap-6">
-                {cart?.items?.map((item) => {
-                    const productId = typeof item.product === 'number' ? item.product : item.product.id;
-                    console.log(item.product);
-                    if (isProductData(item.product)) {
-                        const product = item.product;
-                        return (
-                            <Item variant="outline">
-                                <ItemContent className="flex gap-2 flex-row items-center">
-                                    <Checkbox
-                                        checked={item.checked || false}
-                                        onCheckedChange={() => toggleChecked(productId)}
-                                        className="mr-2"
-                                    />
-                                    <div className='flex flex-col'>
-                                        <ItemTitle>{product.title}</ItemTitle>
-                                        <ItemDescription>{product.description}</ItemDescription>
-                                        <ItemDescription>Цена: {product.price}</ItemDescription>
-                                        <ItemDescription>{item.quantity} штук в корзине</ItemDescription>
-                                    </div>
-                                </ItemContent>
-                                <ItemActions>
-                                    <PlusIcon onClick={() => increase(productId)} cursor={'pointer'} />
-                                    <Minus onClick={() => decrease(productId)} cursor={'pointer'} />
-                                    <Trash onClick={() => removeItem(productId)} color="red" cursor={'pointer'} />
-                                </ItemActions>
-                                {/* <ItemSeparator /> */}
-                            </Item>
-                        );
-                    } else return <div>4ilee</div>;
-                })}
+                {itemsWithProducts.map((item) => (
+                    <CartItem key={item.id ?? item.product.id} item={item} />
+                ))}
             </ItemGroup>
-            <div className='mt-4'>TOTAL AMOUNT: {totalAmountInCart}</div>
-            <div>TOTAL CHOSEN AMOUNT: {totalChosenAmount}</div>
-            <div>FINAL PRICE: {finalPrice}</div>
+
+            <div className="mt-4">TOTAL AMOUNT: {total}</div>
         </div>
     );
 }

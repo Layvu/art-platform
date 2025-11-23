@@ -16,11 +16,11 @@ import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 import { useCartStore } from '@/services/store/cart/store';
 import { isProductData } from '../../shared/guards/product.guard';
 
-export default function ProductCard({ id, title, slug, description, price, author, image, category, }: Product) {
+export default function ProductCard({ id, title, slug, description, price, author, image, category }: Product) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 
-    const { cart, addItem, increase, decrease, removeItem, toggleChecked, clear } = useCartStore();
+    const { cart, addItem, increase, decrease } = useCartStore();
     const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
@@ -69,17 +69,17 @@ export default function ProductCard({ id, title, slug, description, price, autho
                     <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
                 </Button>
                 {productInCart ? (
-                    <div className='flex gap-1.5 items-center'>
+                    <div className="flex gap-1.5 items-center">
                         <Button onClick={() => decrease(id)} variant="outline">
                             -
                         </Button>
-                        { productInCart.quantity }
+                        {productInCart.quantity}
                         <Button onClick={() => increase(id)} variant="outline">
                             +
                         </Button>
                     </div>
                 ) : (
-                    <Button variant="outline" onClick={() => addItem({ id, title, slug, description, price, image, category })}>
+                    <Button variant="outline" onClick={() => addItem(id)}>
                         Добавить в корзину
                     </Button>
                 )}

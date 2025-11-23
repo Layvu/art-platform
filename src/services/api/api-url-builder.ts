@@ -37,9 +37,9 @@ export class ApiUrlBuilder {
     }
 
     // Получить URL для item'а по slug и id
-    // collectionItem(slug: string, id: string): string {
-    //     return `${this.baseUrl}/api/${slug}/${id}`;
-    // }
+    collectionItem(slug: string, id: string): string {
+        return `${this.baseUrl}/api/${slug}/${id}`;
+    }
 
     // Для удобства общий метод
     static forCollection(slug: string, params?: QueryParams) {

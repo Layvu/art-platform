@@ -1,4 +1,4 @@
-import type { Cart, Product } from '@/shared/types/payload-types';
+import type { Cart } from '@/shared/types/payload-types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { EMPTY_CART } from './utils';
@@ -7,7 +7,7 @@ import { isProductData } from '@/shared/guards/product.guard';
 interface CartState {
     cart: Cart | null;
     setCart: (cart: Cart) => void;
-    addItem: (product: Omit<Product, 'author' | 'updatedAt' | 'createdAt'>) => void;
+    addItem: (productId: number) => void;
     increase: (productId: number) => void;
     decrease: (productId: number) => void;
     toggleChecked: (productId: number) => void;
@@ -22,18 +22,18 @@ export const useCartStore = create<CartState>()(
 
             setCart: (cart) => set({ cart }),
 
-            addItem: (product) =>
+            addItem: (productId) =>
                 set((state) => {
                     const cart = state.cart ?? EMPTY_CART; 
                     const items = cart.items ?? [];
 
                     const exists = items.some((i) =>
-                         i.product === product.id
+                         i.product === productId
                     );
 
                     if (exists) return state;
 
-                    const newItems = [...items, { product, quantity: 1, checked: true }];
+                    const newItems = [...items, { product: productId, quantity: 1, checked: true }];
 
                     return { cart: { ...cart, items: newItems } as Cart };
                 }),
