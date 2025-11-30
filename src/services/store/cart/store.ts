@@ -1,8 +1,10 @@
-import type { Cart } from '@/shared/types/payload-types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { EMPTY_CART } from './utils';
+
 import { isProductData } from '@/shared/guards/product.guard';
+import type { Cart } from '@/shared/types/payload-types';
+
+import { EMPTY_CART } from './utils';
 
 interface CartState {
     cart: Cart | null;
@@ -24,12 +26,10 @@ export const useCartStore = create<CartState>()(
 
             addItem: (productId) =>
                 set((state) => {
-                    const cart = state.cart ?? EMPTY_CART; 
+                    const cart = state.cart ?? EMPTY_CART;
                     const items = cart.items ?? [];
 
-                    const exists = items.some((i) =>
-                         i.product === productId
-                    );
+                    const exists = items.some((i) => i.product === productId);
 
                     if (exists) return state;
 

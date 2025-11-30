@@ -9,7 +9,10 @@
         "stop": "docker compose down",
         "build": "next build",
         "start": "next start",
-        "lint": "eslint",
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+        "format": "prettier --write .",
+        "lint-and-format": "npm run lint:fix && npm run format",
         "payload": "payload generate:types"
     },
     "dependencies": {

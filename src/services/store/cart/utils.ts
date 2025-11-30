@@ -12,4 +12,4 @@ export const getCart = () => {
     }
 };
 
-export const EMPTY_CART: Partial<Cart> = { id: -1 , items: [] };
+export const EMPTY_CART: Partial<Cart> = { id: -1, items: [] };

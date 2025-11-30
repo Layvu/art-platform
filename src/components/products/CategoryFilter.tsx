@@ -1,13 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '../ui/scroll-area';
-import { Checkbox } from '../ui/checkbox';
-import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { URL_SEPARATOR } from '@/shared/constants/constants';
+import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
+
+import { Checkbox } from '../ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { ScrollArea } from '../ui/scroll-area';
 
 type CategoryFilterProps = {
     category?: string;
@@ -22,7 +24,6 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     const currentCategories = category ? category.split(URL_SEPARATOR).filter(Boolean) : [];
 
     const onSaveClick = () => {
-  
         onCategoryChange(
             newCategories?.length ? newCategories.join(URL_SEPARATOR) : undefined, // чтобы убрать параметр из URL
         );
@@ -32,7 +33,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline">Категория: {Boolean(currentCategories.length) ? 'есть' : 'нет'}</Button>
+                <Button variant="outline">Категория: {currentCategories.length ? 'есть' : 'нет'}</Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
                 <Command>
@@ -67,9 +68,8 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                                                 onCheckedChange={toggle}
                                                 // Блокируем всплытие, чтобы CommandItem не срабатывал дважды
                                                 onClick={(e) => e.stopPropagation()}
-
                                             />
-                                          {category.label}
+                                            {category.label}
                                         </CommandItem>
                                     );
                                 })}

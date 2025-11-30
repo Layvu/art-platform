@@ -5,11 +5,9 @@ import React from 'react';
 import ProductCard from '@/components/products/ProductCard';
 import { useFetchProducts } from '@/shared/hooks/useFetchData';
 
+export default function HomeUI() {
+    const { data } = useFetchProducts({ limit: 10 });
 
-export default function HomeUI(){
-
-    const { data } = useFetchProducts({ limit: 10 })
-    
     return (
         <div className="max-w-6xl mx-auto p-4">
             <h1 className="text-2xl font-bold mb-6">Home</h1>
@@ -21,4 +19,4 @@ export default function HomeUI(){
             </div>
         </div>
     );
-};
+}

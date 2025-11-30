@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { signOut } from 'next-auth/react';
 
 import { PAGES } from '@/config/public-pages.config';

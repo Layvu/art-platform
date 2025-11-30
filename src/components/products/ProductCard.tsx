@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { getQueryClient } from '@/lib/utils/get-query-client';
+import { useCartStore } from '@/services/store/cart/store';
 import { isAuthorData } from '@/shared/guards/author.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
-import { useCartStore } from '@/services/store/cart/store';
+
 import { isProductData } from '../../shared/guards/product.guard';
 
 export default function ProductCard({ id, title, slug, description, price, author, image, category }: Product) {

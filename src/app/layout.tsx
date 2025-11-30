@@ -7,7 +7,7 @@ import { Geist } from 'next/font/google';
 import Providers from './providers';
 
 import './globals.css';
-import "@/styles/global.scss";
+import '@/styles/global.scss';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -29,10 +29,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="ru">
-            <body className={`${geistSans.variable} antialiased`}>           
+            <body className={`${geistSans.variable} antialiased`}>
                 <Providers>
                     {children}
-                    <ReactQueryDevtools /> 
+                    <ReactQueryDevtools />
                     {/* TODO Only for development */}
                 </Providers>
             </body>

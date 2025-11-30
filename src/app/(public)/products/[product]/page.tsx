@@ -1,4 +1,4 @@
-import { dehydrate,HydrationBoundary } from '@tanstack/react-query';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 
 import ProductUI from '@/components/product/ProductUI';
@@ -6,7 +6,6 @@ import { getQueryClient } from '@/lib/utils/get-query-client';
 import { payloadService } from '@/services/api/payload-service';
 import type { ProductQueryParams } from '@/shared/types/query-params.type';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
-
 
 export async function generateMetadata({ params }: { params: Promise<ProductQueryParams> }): Promise<Metadata> {
     const { product } = await params;
@@ -24,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<ProductQuer
 
 export default async function ProductPage({ params }: { params: Promise<ProductQueryParams> }) {
     const productQueryParams = await params;
-    
+
     const queryClient = getQueryClient();
     await queryClient.prefetchQuery(getProductQueryOptions({ slug: productQueryParams.product }));
 

@@ -8,29 +8,19 @@ interface ArrowProps {
     className?: string;
     style?: CSSProperties;
     onClick?: () => void;
-  }
+}
 
 function SampleNextArrow(props: ArrowProps) {
     const { className, style, onClick } = props;
-    return (
-      <div
-        className={className}
-        style={{ ...style, display: "block", background: "red" }}
-        onClick={onClick}
-      />
-    );
-  }
-  
-  function SamplePrevArrow(props: ArrowProps) {
+    return <div className={className} style={{ ...style, display: 'block', background: 'red' }} onClick={onClick} />;
+}
+
+function SamplePrevArrow(props: ArrowProps) {
     const { className, style, onClick } = props;
     return (
-      <div
-        className={className}
-        style={{ ...style, display: "block", backgroundColor: "green" }}
-        onClick={onClick}
-      />
+        <div className={className} style={{ ...style, display: 'block', backgroundColor: 'green' }} onClick={onClick} />
     );
-  }
+}
 
 export default function AboutPage() {
     const settings = {

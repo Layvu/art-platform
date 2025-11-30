@@ -1,6 +1,6 @@
-.card-list{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(200px, 1fr));
-  gap: 1rem;
-  margin: 10px;
+.card-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 10px;
 }

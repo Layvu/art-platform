@@ -1,7 +1,6 @@
 import { URL_SEPARATOR } from '@/shared/constants/constants';
 import type { AuthorsQueryParams, ProductsQueryParams, QueryParams } from '@/shared/types/query-params.type';
 
-
 // TODO: объединить мб в одну функцию
 
 // ProductsQueryParams -> QueryParams
@@ -46,14 +45,13 @@ export function toAuthorsQueryParams(params: AuthorsQueryParams): QueryParams {
     }
     if (category) {
         const categories = category.split(URL_SEPARATOR).filter(Boolean);
-      
+
         if (categories.length > 1) {
-          where['product_categories.category'] = { in: categories };
+            where['product_categories.category'] = { in: categories };
         } else {
-          where['product_categories.category'] = { equals: categories[0] };
+            where['product_categories.category'] = { equals: categories[0] };
         }
-      }
-      
+    }
 
     return {
         ...(page ? { page: Number(page) } : { page: 1 }),

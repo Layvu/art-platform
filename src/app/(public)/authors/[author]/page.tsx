@@ -1,4 +1,4 @@
-import { dehydrate,HydrationBoundary } from '@tanstack/react-query';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 
 import AuthorUI from '@/components/author/AuthorUI';
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<AuthorQuery
 
 export default async function AuthorPage({ params }: { params: Promise<AuthorQueryParams> }) {
     const productQueryParams = await params;
-    
+
     const queryClient = getQueryClient();
     await queryClient.prefetchQuery(getAuthorQueryOptions({ slug: productQueryParams.author }));
 

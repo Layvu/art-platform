@@ -39,7 +39,10 @@ export default function AuthorCard({ id, name, slug, bio, products_count, produc
                 {bio && <p>Описание: {bio.slice(0, 100)}</p>}
 
                 <span>Общее количество товаров: {products_count}</span>
-                <span>Категории товаров: {product_categories?.map((category) => category.category).join(', ') || 'НЕТ КАТЕГОРИЙ'}</span>
+                <span>
+                    Категории товаров:{' '}
+                    {product_categories?.map((category) => category.category).join(', ') || 'НЕТ КАТЕГОРИЙ'}
+                </span>
 
                 {avatar && <Image alt="Картинка" src={avatar} width={100} height={52} />}
             </CardContent>

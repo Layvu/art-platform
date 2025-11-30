@@ -1,3 +1,7 @@
+import { useCallback, useState } from 'react';
+
+import { debounce } from 'lodash';
+
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,8 +11,6 @@ import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 import type { AuthorsFilters, AuthorsSortOptions } from '@/shared/types/query-params.type';
 
 import SearchBar from '../shared/SearchBar';
-import { useCallback, useState } from 'react';
-import { debounce } from 'lodash';
 
 interface IAuthorFiltersBarProps {
     filters: AuthorsFilters;
@@ -25,15 +27,15 @@ export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSor
         debounce((value: string) => {
             onFilterChange({
                 ...filters,
-                search: value
+                search: value,
             });
-        }, 500), 
-        [filters]
+        }, 500),
+        [filters],
     );
     const handleSearchChange = (value: string) => {
         setSearchValue(value);
         debouncedSearch(value);
-    }
+    };
 
     return (
         <div className="flex items-start gap-6 mb-6">
@@ -93,10 +95,7 @@ export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSor
             </div>
 
             {/* Поиск */}
-            <SearchBar
-               value={searchValue}
-               onChange={(value) => handleSearchChange(value)}
-            />
+            <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
         </div>
     );
 }

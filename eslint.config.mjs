@@ -9,15 +9,7 @@ import globals from 'globals';
 
 const eslintConfig = [
     {
-        ignores: [
-            'dist',
-            'node_modules/**',
-            '.next/**',
-            'out/**',
-            'build/**',
-            'next-env.d.ts',
-            'src/app/(payload)/admin/**',
-        ],
+        ignores: ['dist', 'node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'src/app/(payload)/**'],
     },
     {
         files: ['**/*.{ts,tsx}'],

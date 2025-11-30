@@ -14,16 +14,16 @@ import type { ProductQueryParams } from '@/shared/types/query-params.type';
 
 export default function ProductUI({ initialParams }: { initialParams: ProductQueryParams }) {
     const slug = initialParams.product;
-    const { data, isError, error, isFetching } = useFetchProduct({slug});
+    const { data, isError, error, isFetching } = useFetchProduct({ slug });
 
     if (isError) {
-        return <div>Error: {error.message}</div>
+        return <div>Error: {error.message}</div>;
     }
     if (isFetching) {
-        return <div>Loading...</div>
+        return <div>Loading...</div>;
     }
     if (!data) {
-      notFound();
+        notFound();
     }
 
     const { id, title, description, image, price, author } = data;

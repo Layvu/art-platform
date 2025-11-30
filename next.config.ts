@@ -7,12 +7,11 @@ const nextConfig: NextConfig = {
         domains: ['cdn.lentochka.lenta.com', 'images.unsplash.com'],
         remotePatterns: [
             {
-              protocol: 'https',
-              hostname: 'images.unsplash.com',
-              pathname: '/**',
+                protocol: 'https',
+                hostname: 'images.unsplash.com',
+                pathname: '/**',
             },
-          ],
-
+        ],
     },
 };
 

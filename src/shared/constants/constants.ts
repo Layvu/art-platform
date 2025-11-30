@@ -1,1 +1,1 @@
-export const URL_SEPARATOR = '-or-'
+export const URL_SEPARATOR = '-or-';
