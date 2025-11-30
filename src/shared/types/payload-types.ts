@@ -134,7 +134,7 @@ export interface Product {
   price: number;
   description?: string | null;
   image?: string | null;
-  category?: ('shopper' | 'clothes') | null;
+  category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
   author: number | Author;
   updatedAt: string;
   createdAt: string;
@@ -235,6 +235,7 @@ export interface Customer {
         id?: string | null;
       }[]
     | null;
+  cart?: (number | null) | Cart;
   createdAt: string;
   updatedAt: string;
 }
@@ -450,6 +451,7 @@ export interface CustomersSelect<T extends boolean = true> {
         postalCode?: T;
         id?: T;
       };
+  cart?: T;
   createdAt?: T;
   updatedAt?: T;
 }

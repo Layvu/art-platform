@@ -65,27 +65,27 @@ export class PayloadService {
         return author.docs[0] ?? null;
     }
 
-    // private async getItem<T extends CollectionSlug>(
-    //     slug: T,
-    //     id: string,
-    //     //    fetchOptions: RequestInit = { cache: 'force-cache', next: { revalidate: 0 } }, // ISR
-    //     fetchOptions: RequestInit = { cache: 'no-store' }, // SSR
-    // ) {
-    //     const url = this.builder.collectionItem(slug, id);
-    //     const response = await fetch(url, fetchOptions);
+    private async getItem<T extends CollectionSlug>(
+        slug: T,
+        id: string,
+        //    fetchOptions: RequestInit = { cache: 'force-cache', next: { revalidate: 0 } }, // ISR
+        fetchOptions: RequestInit = { cache: 'no-store' }, // SSR
+    ) {
+        const url = this.builder.collectionItem(slug, id);
+        const response = await fetch(url, fetchOptions);
 
-    //     if (!response.ok) throw new Error(`Failed to fetch ${slug}/${id}`);
-    //     const json = await response.json();
-    //     return json;
-    // }
+        if (!response.ok) throw new Error(`Failed to fetch ${slug}/${id}`);
+        const json = await response.json();
+        return json;
+    }
 
-    // async getProduct(id: string): Promise<Product> {
-    //     return this.getItem(COLLECTION_SLUGS.PRODUCTS, id);
-    // }
+    async getProductById(id: number): Promise<Product> {
+        return this.getItem(COLLECTION_SLUGS.PRODUCTS, id.toString());
+    }
 
-    // async getAuthor(id: string): Promise<Author> {
-    //     return this.getItem(COLLECTION_SLUGS.AUTHORS, id);
-    // }
+    async getAuthorById(id: number): Promise<Author> {
+        return this.getItem(COLLECTION_SLUGS.AUTHORS, id.toString());
+    }
 }
 
 export const payloadService = new PayloadService();

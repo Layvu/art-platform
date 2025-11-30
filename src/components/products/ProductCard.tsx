@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef } from 'react';
 
 import Image from 'next/image';
@@ -11,10 +13,17 @@ import { isAuthorData } from '@/shared/guards/author.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
+import { useCartStore } from '@/services/store/cart/store';
+import { isProductData } from '../../shared/guards/product.guard';
 
-export default function ProductCard({ id, title, slug, description, price, author, image }: Product) {
+export default function ProductCard({ id, title, slug, description, price, author, image, category }: Product) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
+
+    const { cart, addItem, increase, decrease } = useCartStore();
+    const productInCart = cart?.items?.find((item) =>
+        isProductData(item.product) ? item?.product.id == id : item.product == id,
+    );
 
     return (
         <Card>
@@ -55,10 +64,25 @@ export default function ProductCard({ id, title, slug, description, price, autho
                 {image && <Image alt="Картинка" src={image} width={100} height={52} />}
             </CardContent>
 
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
                 <Button variant="outline" asChild>
                     <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
                 </Button>
+                {productInCart ? (
+                    <div className="flex gap-1.5 items-center">
+                        <Button onClick={() => decrease(id)} variant="outline">
+                            -
+                        </Button>
+                        {productInCart.quantity}
+                        <Button onClick={() => increase(id)} variant="outline">
+                            +
+                        </Button>
+                    </div>
+                ) : (
+                    <Button variant="outline" onClick={() => addItem(id)}>
+                        Добавить в корзину
+                    </Button>
+                )}
             </CardFooter>
         </Card>
     );

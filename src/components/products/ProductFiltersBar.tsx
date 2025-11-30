@@ -1,10 +1,13 @@
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { URL_SEPARATOR } from '@/shared/constants/constants';
 import { PRODUCT_CATEGORIES,PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
 import type { ProductsFilters, ProductsSortOptions } from '@/shared/types/query-params.type';
+import { useCallback, useState } from 'react';
+import { debounce } from 'lodash';
+import SearchBar from '../shared/SearchBar';
+import CategoryFilter from './CategoryFilter';
 
 interface IProductFiltersBarProps {
     filters: ProductsFilters;
@@ -15,6 +18,22 @@ interface IProductFiltersBarProps {
 
 // TODO: переиспользовать, передавая категории и опции сортировки
 export default function ProductFiltersBar({ filters, sort, onFilterChange, onSortChange }: IProductFiltersBarProps) {
+    const [searchValue, setSearchValue] = useState<string>(filters.search || '');
+
+    const debouncedSearch = useCallback(
+        debounce((value: string) => {
+            onFilterChange({
+                ...filters,
+                search: value
+            });
+        }, 500), 
+        [filters]
+    );
+    const handleSearchChange = (value: string) => {
+        setSearchValue(value);
+        debouncedSearch(value);
+    }
+
     return (
         <div className="flex items-start gap-6">
             {/* Категории */}
@@ -51,35 +70,15 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                         </div>
                     );
                 })}
-
-                {/* 
-                <Select
-                    value={filters?.category || 'all'}
-                    onValueChange={(value) =>
-                        onFilterChange({
-                            category: value === 'all' ? undefined : (value as ProductCategory),
-                        })
-                    }
-                >
-                    <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Все категории" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Все категории</SelectItem>
-                        {PRODUCT_CATEGORIES.map((c) => (
-                            <SelectItem key={c.value} value={c.value}>
-                                {c.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select> */}
             </div>
+
+            <CategoryFilter category={filters?.category} onCategoryChange={(category) => onFilterChange({ ...filters, category })} />
 
             {/* Сортировка */}
             <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-gray-700">Сортировка</Label>
                 <Select
-                    value={sort || 'default'}
+                    value={sort}
                     onValueChange={(value) =>
                         onSortChange(value === 'default' ? undefined : (value as ProductsSortOptions))
                     }
@@ -88,7 +87,6 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                         <SelectValue placeholder="Сортировка по умолчанию" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="default">Сортировка по умолчанию</SelectItem>
                         {PRODUCTS_SORT_OPTIONS.map((s) => (
                             <SelectItem key={s.value} value={s.value}>
                                 {s.label}
@@ -97,17 +95,15 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                     </SelectContent>
                 </Select>
             </div>
-            {/* TODO кнопочку приделать чтобы не отправлять кучу запросов на сервер */}
+
             {/* Поиск */}
-            <div className="flex flex-col gap-2">
-                <Label className="text-sm font-medium text-gray-700">Поиск</Label>
-                <Input
-                    className="max-w-[320px]"
-                    placeholder="Поиск..."
-                    value={filters?.search ?? ''}
-                    onChange={(e) => onFilterChange({search:e.target.value})}
-                />
-            </div>
+            <SearchBar
+               value={searchValue}
+               onChange={(value) => handleSearchChange(value)}
+            />
+            
+            {/* <Filters /> */}
+
         </div>
     );
 }

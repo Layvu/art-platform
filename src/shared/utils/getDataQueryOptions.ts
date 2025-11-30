@@ -35,6 +35,14 @@ export const getProductQueryOptions = ({ slug }: { slug: string }) => {
     };
 };
 
+export const getProductByIdQueryOptions = ({ id }: { id: number }) => {
+    return {
+        queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
+        queryFn: () => payloadService.getProductById(id),
+        staleTime: 1000 * 60, // минута,
+    };
+};
+
 export const getAuthorQueryOptions = ({ slug }: { slug: string }) => {
     return {
         queryKey: [COLLECTION_SLUGS.AUTHORS, slug],

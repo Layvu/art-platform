@@ -8,6 +8,7 @@ export const COLLECTION_SLUGS = {
     USERS: 'users',
     CUSTOMERS: 'customers',
     MEDIA: 'media',
+    CARTS: 'carts',
 } as const;
 
 export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_SLUGS];
@@ -36,9 +37,9 @@ export class ApiUrlBuilder {
     }
 
     // Получить URL для item'а по slug и id
-    // collectionItem(slug: string, id: string): string {
-    //     return `${this.baseUrl}/api/${slug}/${id}`;
-    // }
+    collectionItem(slug: string, id: string): string {
+        return `${this.baseUrl}/api/${slug}/${id}`;
+    }
 
     // Для удобства общий метод
     static forCollection(slug: string, params?: QueryParams) {
