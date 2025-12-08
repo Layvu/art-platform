@@ -1,61 +1,12 @@
-'use client';
+import React from 'react';
 
-import React, { type CSSProperties } from 'react';
+import { Clock, Instagram, MapPin, Phone, Plane } from 'lucide-react';
 
-import { CheckIcon, Clock, Instagram, MapPin, Phone, Plane } from 'lucide-react';
-import Slider from 'react-slick';
+import YandexMap from '@/components/about/YandexMap';
+import AboutSlider from '@/components/about/Slider';
 
-interface ArrowProps {
-    className?: string;
-    style?: CSSProperties;
-    onClick?: () => void;
-}
-
-function SampleNextArrow(props: ArrowProps) {
-    const { className, style, onClick } = props;
-    return <div className={className} style={{ ...style, display: 'block', background: 'red' }} onClick={onClick} />;
-}
-
-function SamplePrevArrow(props: ArrowProps) {
-    const { className, style, onClick } = props;
-    return (
-        <div className={className} style={{ ...style, display: 'block', backgroundColor: 'green' }} onClick={onClick} />
-    );
-}
 
 export default function AboutPage() {
-    const settings = {
-        dots: false,
-        infinite: true,
-        speed: 600,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        focusOnSelect: true,
-        autoplay: true,
-        centerMode: true,
-        centerPadding: '0px',
-        autoplaySpeed: 2500,
-        draggable: true,
-        arrows: true,
-        // nextArrow: <SampleNextArrow />,
-        // prevArrow: <SamplePrevArrow />,
-        responsive: [
-            { breakpoint: 1024, settings: { slidesToShow: 1, centerPadding: '0px' } },
-            { breakpoint: 640, settings: { slidesToShow: 1, centerPadding: '0px' } },
-        ],
-    };
-
-    const images = [
-        'https://images.unsplash.com/photo-1507149833265-60c372daea22?w=800',
-        'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800',
-        'https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0?w=800',
-        'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800',
-        'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?w=800',
-        'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800',
-        'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=800',
-        'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=800',
-    ];
-
     return (
         <section className="">
             <header className="wrap">
@@ -69,17 +20,7 @@ export default function AboutPage() {
                 </div>
             </header>
 
-            <Slider {...settings} className="mx-auto mt-10 h-[501px] flex text-center">
-                {images.map((url, i) => (
-                    <div key={i} className="px-2 wrap">
-                        <img
-                            src={url}
-                            alt={`Slide ${i + 1}`}
-                            className="rounded-2xl w-full object-cover shadow-md h-[501px] "
-                        />
-                    </div>
-                ))}
-            </Slider>
+            <AboutSlider />
 
             <section className="wrap grid grid-cols-[405px_1fr] gap-10 mt-10 mb-10">
                 <div className="flex flex-col gap-10 max-w-[405px]">
@@ -118,44 +59,11 @@ export default function AboutPage() {
                         </li>
                     </ul>
                 </div>
-                <div className="w-full h-full bg-gray-200 rounded-2xl"></div>
+                <div className="w-full h-[500px] rounded-2xl overflow-hidden shadow-md">
+                    <YandexMap />
+                </div>
             </section>
         </section>
-    );
-}
-
-function CenterMode() {
-    const settings = {
-        className: 'center',
-        centerMode: true,
-        infinite: true,
-        centerPadding: '60px',
-        slidesToShow: 3,
-        speed: 500,
-    };
-    return (
-        <div className="slider-container">
-            <Slider {...settings}>
-                <div>
-                    <h3>1</h3>
-                </div>
-                <div>
-                    <h3>2</h3>
-                </div>
-                <div>
-                    <h3>3</h3>
-                </div>
-                <div>
-                    <h3>4</h3>
-                </div>
-                <div>
-                    <h3>5</h3>
-                </div>
-                <div>
-                    <h3>6</h3>
-                </div>
-            </Slider>
-        </div>
     );
 }
 
