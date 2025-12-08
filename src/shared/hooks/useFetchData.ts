@@ -4,7 +4,7 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 
 import type { PaginatedResponse } from '@/services/api/payload-service';
 
-import type { Author, Product } from '../types/payload-types';
+import type { Author, Media, Product } from '../types/payload-types';
 import type { QueryParams } from '../types/query-params.type';
 import {
     getAuthorQueryOptions,
@@ -60,3 +60,7 @@ export const useProductsByIds = (ids: number[]) => {
 export const useFetchAuthor = ({ slug }: { slug: string }) => {
     return useQuery<Author | null>(getAuthorQueryOptions({ slug }));
 };
+
+// export const useFetchMedia = ({ id }: { id: number }) => {
+//     return useQuery<Media | null>(getMediaQueryOptions({ id }));
+// };

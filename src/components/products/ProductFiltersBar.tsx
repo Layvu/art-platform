@@ -12,6 +12,7 @@ import type { ProductsFilters, ProductsSortOptions } from '@/shared/types/query-
 import SearchBar from '../shared/SearchBar';
 
 import CategoryFilter from './CategoryFilter';
+import Filters from './Filters';
 
 interface IProductFiltersBarProps {
     filters: ProductsFilters;
@@ -106,7 +107,7 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
             {/* Поиск */}
             <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
 
-            {/* <Filters /> */}
+            <Filters />
         </div>
     );
 }

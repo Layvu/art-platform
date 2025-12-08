@@ -50,3 +50,11 @@ export const getAuthorQueryOptions = ({ slug }: { slug: string }) => {
         staleTime: 1000 * 60, // минута,
     };
 };
+
+// export const getMediaQueryOptions = ({ id }: { id: number }) => {
+//     return {
+//         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
+//         queryFn: () => payloadService.getMediaById(id),
+//         staleTime: 1000 * 60, // минута,
+//     };
+// };

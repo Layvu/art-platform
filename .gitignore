@@ -40,3 +40,7 @@ next-env.d.ts
 
 # database
 docker-compose.yml
+
+#media
+
+media

@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { type CollectionConfig, getPayload } from 'payload';
+import { type CollectionConfig, type CollectionSlug,getPayload } from 'payload';
 import slugify from 'slugify';
 
 import { isAdmin, isAuthor } from '@/lib/utils/payload';
@@ -136,7 +136,25 @@ export const ProductsCollection: CollectionConfig = {
         },
         { name: 'price', type: 'number', required: true },
         { name: 'description', type: 'textarea' },
-        { name: 'image', type: 'text' }, // TODO: relationTo: 'media'
+        // { name: 'image', type: 'text' }, // TODO: relationTo: 'media'
+        // {
+        //     name: 'image',
+        //     type: 'upload',
+        //     relationTo: COLLECTION_SLUGS.MEDIA as CollectionSlug,
+        // },
+
+        {
+            name: 'gallery',
+            type: 'array',
+            fields: [
+                {
+                    name: 'image',
+                    type: 'upload',
+                    relationTo: COLLECTION_SLUGS.MEDIA,
+                },
+            ],
+        },
+
         //{ name: 'quantity', type: 'number' },
         {
             name: 'category',
