@@ -55,13 +55,13 @@ export default function AboutSlider() {
     ];
 
     return (
-        <Slider {...settings} className="mx-auto mt-10 h-[501px] flex text-center">
+        <Slider {...settings} className="mx-auto mt-10 h-[501px] flex text-center relative">
             {images.map((url, i) => (
                 <div key={i} className="wrap">
                     <img
                         src={url}
                         alt={`Slide ${i + 1}`}
-                        className="rounded-2xl w-full object-cover shadow-md h-[501px] "
+                        className="rounded-2xl w-full object-cover shadow-md h-[501px]"
                     />
                 </div>
             ))}

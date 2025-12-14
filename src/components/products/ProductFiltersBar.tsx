@@ -13,6 +13,8 @@ import SearchBar from '../shared/SearchBar';
 
 import CategoryFilter from './CategoryFilter';
 import Filters from './Filters';
+import PriceFilter from './PriceFilter';
+import AuthorFilter from './AuthorFilter';
 
 interface IProductFiltersBarProps {
     filters: ProductsFilters;
@@ -41,7 +43,7 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
 
     return (
         <div className="flex items-start gap-6">
-            {/* Категории */}
+            {/* Категории
             <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-gray-700">Категории</Label>
                 {PRODUCT_CATEGORIES.map((c) => {
@@ -77,12 +79,8 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                 })}
             </div>
 
-            <CategoryFilter
-                category={filters?.category}
-                onCategoryChange={(category) => onFilterChange({ ...filters, category })}
-            />
+            
 
-            {/* Сортировка */}
             <div className="flex flex-col gap-2">
                 <Label className="text-sm font-medium text-gray-700">Сортировка</Label>
                 <Select
@@ -102,12 +100,40 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                         ))}
                     </SelectContent>
                 </Select>
-            </div>
+            </div> */}
 
             {/* Поиск */}
-            <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
+                <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
+            <div className="flex gap-2">
 
-            <Filters />
+                <PriceFilter />
+                <CategoryFilter
+                    category={filters?.category}
+                    onCategoryChange={(category) => onFilterChange({ ...filters, category })}
+                />
+                <AuthorFilter />
+                <div className="flex flex-col gap-2">
+                    <Select
+                        value={sort}
+                        onValueChange={(value) =>
+                            onSortChange(value === 'default' ? undefined : (value as ProductsSortOptions))
+                        }
+                    >
+                        <SelectTrigger className="w-[220px]">
+                            <SelectValue placeholder="Сортировка по умолчанию" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {PRODUCTS_SORT_OPTIONS.map((s) => (
+                                <SelectItem key={s.value} value={s.value}>
+                                    {s.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            {/* <Filters /> */}
         </div>
     );
 }

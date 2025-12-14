@@ -35,7 +35,7 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
     const { hasNextPage = false, hasPrevPage = false, totalPages = 0, prevPage, nextPage, totalDocs } = data;
 
     return (
-        <>
+        <div className='wrap'>
             <ProductFiltersBar
                 filters={{
                     authors: initialParams.authors,
@@ -89,6 +89,6 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
                     </Button>
                 </div>
             )}
-        </>
+        </div>
     );
 }
