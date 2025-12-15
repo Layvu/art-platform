@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -12,10 +11,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGES } from '@/config/public-pages.config';
+// import { useAuth } from '@/providers/auth-provider';
+import { authorAuthService } from '@/services/api/author-auth-service';
+import { customerAuthService } from '@/services/api/customer-auth-service';
+import { useAuthStore } from '@/services/store/auth/store';
 import { type UserRole, UserType } from '@/shared/types/auth.interface';
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const checkAuth = useAuthStore((state) => state.checkAuth);
+    // const { refreshUser } = useAuth();
+    const redirectUrl = searchParams.get('redirect') || PAGES.PROFILE;
+
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [userType, setUserType] = useState<UserRole>(UserType.CUSTOMER);
@@ -27,21 +35,30 @@ export default function LoginPage() {
 
         try {
             const formData = new FormData(e.currentTarget);
+            const email = formData.get('email') as string;
+            const password = formData.get('password') as string;
 
-            // Используем соответствующий провайдер в зависимости от типа пользователя
-            const result = await signIn(userType, {
-                email: formData.get('email') as string,
-                password: formData.get('password') as string,
-                redirect: false,
-            });
-
-            if (result?.error) {
-                setError('Неверный email или пароль');
+            let authResult;
+            if (userType === UserType.CUSTOMER) {
+                // Аутентификация покупателя через Payload
+                authResult = await customerAuthService.authenticate(email, password);
+            } else if (userType === UserType.AUTHOR) {
+                // Аутентификация автора через Payload
+                authResult = await authorAuthService.authenticate(email, password);
             } else {
-                // После успешного входа перенаправляем в профиль
-                router.push(PAGES.PROFILE);
-                router.refresh(); // Обновляем данные сессии
+                setError('Неверный тип пользователя');
+                return;
             }
+
+            if (!authResult.success) {
+                setError(authResult.error || 'Неверный email или пароль');
+                return;
+            }
+
+            await checkAuth(); // Обновляем user в store
+
+            // После успешного входа перенаправляем в профиль или по пути редиректа
+            router.replace(redirectUrl);
         } catch (error) {
             console.error(error);
             setError('Произошла ошибка при входе');

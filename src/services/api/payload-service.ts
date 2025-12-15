@@ -1,7 +1,8 @@
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import type { Author, Product } from '@/shared/types/payload-types';
 import type { QueryParams } from '@/shared/types/query-params.type';
 
-import { ApiUrlBuilder, COLLECTION_SLUGS, type CollectionSlug } from './api-url-builder';
+import { ApiUrlBuilder } from './api-url-builder';
 
 export type PaginatedResponse<T> = {
     docs: T[];
@@ -15,6 +16,8 @@ export type PaginatedResponse<T> = {
     totalDocs: number;
     totalPages: number;
 };
+
+export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_SLUGS];
 
 // Сервис для работы с Payload CMS API
 export class PayloadService {
@@ -81,10 +84,6 @@ export class PayloadService {
 
     async getProductById(id: number): Promise<Product> {
         return this.getItem(COLLECTION_SLUGS.PRODUCTS, id.toString());
-    }
-
-    async getAuthorById(id: number): Promise<Author> {
-        return this.getItem(COLLECTION_SLUGS.AUTHORS, id.toString());
     }
 }
 

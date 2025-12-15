@@ -15,12 +15,13 @@ interface CartState {
     toggleChecked: (productId: number) => void;
     removeItem: (productId: number) => void;
     clear: () => void;
+    clearCheckedItems: () => void;
 }
 
 export const useCartStore = create<CartState>()(
     persist(
         (set, get) => ({
-            cart: EMPTY_CART as unknown as Cart,
+            cart: EMPTY_CART as Cart,
 
             setCart: (cart) => set({ cart }),
 
@@ -81,6 +82,20 @@ export const useCartStore = create<CartState>()(
                 }),
 
             clear: () => set({ cart: EMPTY_CART as Cart }),
+
+            clearCheckedItems: () => {
+                set((state) => {
+                    if (!state.cart) return state;
+
+                    return {
+                        ...state,
+                        cart: {
+                            ...state.cart,
+                            items: state.cart.items?.filter((item) => !item.checked),
+                        },
+                    };
+                });
+            },
         }),
         { name: 'cart-storage' },
     ),

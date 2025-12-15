@@ -9,6 +9,7 @@ export const PAGES = {
     REGISTER: '/register',
     PROFILE: '/profile',
     CART: '/cart',
+    ORDER: '/order',
 };
 
 // api.config.ts

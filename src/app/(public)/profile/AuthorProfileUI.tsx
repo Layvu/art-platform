@@ -18,12 +18,12 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { authorAuthService } from '@/services/api/author-auth-service';
-import type { IAuthorFormData, IAuthorWithoutPassword } from '@/shared/types/author.interface';
-import type { Product } from '@/shared/types/payload-types';
+import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
+import type { Author, Product } from '@/shared/types/payload-types';
 import type { IProductFormData } from '@/shared/types/product.type';
 
 interface AuthorProfileUIProps {
-    authorData: IAuthorWithoutPassword;
+    authorData: Author;
     products: Product[];
 }
 
@@ -61,7 +61,8 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         setError('');
         setSuccess('');
 
-        const updated: IAuthorFormData = {
+        const updated: IAuthorUpdateInput = {
+            id: authorData.id,
             name,
             bio,
         };
@@ -301,6 +302,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                         onOpenChange={(open) => {
                             if (!open) {
                                 setIsCreateModalOpen(false);
+                                // TODO: timeout тут - это не адекватно
                                 setTimeout(() => setCreateProductForm(initialProductForm), 150);
                             }
                         }}

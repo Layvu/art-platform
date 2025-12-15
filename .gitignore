@@ -15,6 +15,9 @@
 /.next/
 /out/
 
+# payloadCMS
+src/app/\(payload\)/
+
 # production
 /build
 

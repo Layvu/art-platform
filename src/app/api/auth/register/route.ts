@@ -20,19 +20,16 @@ export async function POST(req: Request) {
         }
 
         // Создаём нового покупателя
-        const newCustomer = await customerAuthService.createCustomer({
+        await customerAuthService.createCustomer({
             email,
             password,
             fullName,
             phone,
         });
 
-        return NextResponse.json({
-            success: true,
-            customer: newCustomer,
-        });
+        return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Registration error:', error);
-        return NextResponse.json({ error: 'Внутренняя ошибка сервера' }, { status: 500 });
+        return NextResponse.json({ error: 'Ощибка при создании пользователя' }, { status: 500 });
     }
 }

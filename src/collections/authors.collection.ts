@@ -1,10 +1,9 @@
 import { nanoid } from 'nanoid';
-import { type CollectionConfig, getPayload } from 'payload';
+import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
 import { isAdmin, isAuthor } from '@/lib/utils/payload';
-import config from '@/payload.config';
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
 // TODO: вынести хуки коллекций в переменную / файл
 
@@ -15,17 +14,24 @@ export const AuthorsCollection: CollectionConfig = {
 
     access: {
         read: async ({ req: { user } }) => {
-            // Публичный доступ для фронтенда (анонимные запросы)
+            // Публичный доступ для фронтенда
             if (!user) return true;
 
             // Админы видят всех авторов
             if (isAdmin(user)) return true;
 
-            // Авторы не видят других авторов
+            // Авторы видят только свою запись
+            if (isAuthor(user)) {
+                return {
+                    user: { equals: user.id },
+                };
+            }
+
+            // Все остальные не видят авторов
             return false;
         },
 
-        update: async ({ req: { user }, id }) => {
+        update: async ({ req: { user } }) => {
             // Публичный доступ для фронтенда закрыт (анонимные запросы)
             if (!user) return false;
 
@@ -33,16 +39,10 @@ export const AuthorsCollection: CollectionConfig = {
             if (isAdmin(user)) return true;
 
             if (isAuthor(user)) {
-                const payload = await getPayload({ config });
-                const authorRes = await payload.find({
-                    collection: COLLECTION_SLUGS.AUTHORS,
-                    where: { user: { equals: user.id } },
-                    limit: 1,
-                });
-                const author = authorRes.docs[0];
-                if (!author) return false;
-
-                return author.id === id;
+                // Автор может обновлять только свою запись
+                return {
+                    user: { equals: user.id },
+                };
             }
 
             return false;
@@ -53,7 +53,11 @@ export const AuthorsCollection: CollectionConfig = {
     },
 
     fields: [
-        { name: 'name', type: 'text', required: true },
+        {
+            name: 'name',
+            type: 'text',
+            // required: true,
+        },
         {
             name: 'slug',
             type: 'text',
@@ -99,8 +103,8 @@ export const AuthorsCollection: CollectionConfig = {
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;
 
-                // Генерируем slug только если slug отсутствует или name изменился
-                if (!data.slug || (data.name && data.name !== originalDoc?.name)) {
+                // Генерируем slug только если передан name И если slug отсутствует или name изменился
+                if (data.name && (!data.slug || data.name !== originalDoc?.name)) {
                     const baseSlug = slugify(data.name, {
                         lower: true,
                         strict: true,
@@ -122,7 +126,11 @@ export const AuthorsCollection: CollectionConfig = {
                     }
 
                     data.slug = slug;
+                } else {
+                    // Если name нет, генерируем slug на основе Id пользователя
+                    data.slug = `author-${nanoid(6)}`;
                 }
+
                 return data;
             },
         ],

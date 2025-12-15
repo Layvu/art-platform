@@ -1,13 +1,14 @@
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import type { IOperationResult, IProductResult } from '@/shared/types/api.interface';
-import { type IAuthResult, UserType } from '@/shared/types/auth.interface';
-import type { IAuthorFormData, IAuthorSession, IAuthorUpdateInput } from '@/shared/types/author.interface';
-import type { Author, Product } from '@/shared/types/payload-types';
+import { UserType } from '@/shared/types/auth.interface';
+import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
+import type { Product } from '@/shared/types/payload-types';
 import type { IProductCreateInput, IProductFormData, IProductUpdateInput } from '@/shared/types/product.type';
 
-import { ApiUrlBuilder, COLLECTION_SLUGS } from './api-url-builder';
+import { ApiUrlBuilder } from './api-url-builder';
 
-// TODO: использовать api url builder
-
+// TODO: использовать api url builder во всех сервисах
+// TODO: разделить на серверные (с getAuthHeaders) и клиентские сервисы
 export class AuthorAuthService {
     private apiKey: string;
 
@@ -22,7 +23,7 @@ export class AuthorAuthService {
         };
     }
 
-    async authenticate(email: string, password: string): Promise<IAuthResult> {
+    async authenticate(email: string, password: string): Promise<IOperationResult> {
         try {
             // Используем ApiUrlBuilder для создания URL логина
             const loginUrl = `${ApiUrlBuilder.getBaseUrl()}/api/users/login`;
@@ -31,6 +32,7 @@ export class AuthorAuthService {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
+                credentials: 'include', // Важно для сохранения сессии // TODO ?
             });
 
             if (!loginResponse.ok) {
@@ -44,88 +46,22 @@ export class AuthorAuthService {
                 return { success: false, error: 'Доступ только для авторов' };
             }
 
-            // Находим профиль автора
-            const author = await this.getAuthorByUserId(userData.user.id);
-            if (!author) {
-                return { success: false, error: 'Профиль автора не найден' };
-            }
-
-            // Возвращаем только необходимые данные для сессии
-            const authorSession: IAuthorSession = {
-                id: userData.user.id,
-                type: UserType.AUTHOR,
-                authorId: author.id,
-            };
-            console.log('author', authorSession);
-
-            return {
-                success: true,
-                user: authorSession,
-            };
+            return { success: true };
         } catch (error) {
             console.error('Author authentication error:', error);
             return { success: false, error: 'Ошибка аутентификации' };
         }
     }
 
-    async getAuthorByUserId(userId: string): Promise<Author> {
-        const url = ApiUrlBuilder.forCollection(COLLECTION_SLUGS.AUTHORS, {
-            where: { user: { equals: userId } },
-            limit: 1,
-        });
+    async updateAuthorProfile(authorId: number, updates: IAuthorUpdateInput): Promise<void> {
+        const authorUrl = `${ApiUrlBuilder.forCollection(COLLECTION_SLUGS.AUTHORS)}/${authorId}`;
 
-        const response = await fetch(url, {
-            headers: this.getAuthHeaders(),
-        });
-        if (!response.ok) throw new Error('Failed to fetch author by user ID');
-
-        const data = await response.json();
-        return data.docs[0];
-    }
-
-    async getAuthorById(authorId: number): Promise<Author> {
-        const url = `${ApiUrlBuilder.forCollection(COLLECTION_SLUGS.AUTHORS)}/${authorId}`;
-
-        const response = await fetch(url, {
-            headers: this.getAuthHeaders(),
-        });
-        if (!response.ok) throw new Error('Failed to fetch author by ID');
-
-        const data = await response.json();
-        const author = data.doc || data;
-
-        // Убираем пароль из ответа
-        const { password: _, ...authorWithoutPassword } = author;
-
-        return authorWithoutPassword;
-    }
-
-    async updateAuthorProfile(authorId: number, updates: IAuthorUpdateInput): Promise<Author> {
-        const url = `${ApiUrlBuilder.forCollection(COLLECTION_SLUGS.AUTHORS)}/${authorId}`;
-
-        const response = await fetch(url, {
+        const response = await fetch(authorUrl, {
             method: 'PATCH',
             headers: this.getAuthHeaders(),
             body: JSON.stringify(updates),
         });
-        if (!response.ok) throw new Error('Failed to update author');
-
-        const data = await response.json();
-        return data.doc || data;
-    }
-
-    async getAuthorProducts(authorId: number): Promise<Product[]> {
-        const url = ApiUrlBuilder.forCollection(COLLECTION_SLUGS.PRODUCTS, {
-            where: { author: { equals: authorId } },
-        });
-
-        const response = await fetch(url, {
-            headers: this.getAuthHeaders(),
-        });
-        if (!response.ok) throw new Error('Failed to fetch products');
-
-        const data = await response.json();
-        return data.docs || data;
+        if (!response.ok) throw new Error('Server: Failed to update author profile');
     }
 
     async createAuthorProduct(productData: IProductCreateInput): Promise<Product> {
@@ -137,7 +73,7 @@ export class AuthorAuthService {
             headers: this.getAuthHeaders(),
             body: JSON.stringify(productData),
         });
-        if (!response.ok) throw new Error('Failed to create product');
+        if (!response.ok) throw new Error('Failed to create author product');
 
         const data = await response.json();
         return data.doc || data;
@@ -151,7 +87,7 @@ export class AuthorAuthService {
             headers: this.getAuthHeaders(),
             body: JSON.stringify(updates),
         });
-        if (!response.ok) throw new Error('Failed to update product');
+        if (!response.ok) throw new Error('Failed to update author product');
 
         const data = await response.json();
         return data.doc || data;
@@ -168,19 +104,19 @@ export class AuthorAuthService {
     }
 
     // Клиентский метод обновления профиля
-    async updateProfile(updates: IAuthorFormData): Promise<IAuthResult> {
-        const res = await fetch(`${ApiUrlBuilder.forAuthorProfileUpdate()}`, {
+    async updateProfile(updates: IAuthorUpdateInput): Promise<IOperationResult> {
+        const response = await fetch(`${ApiUrlBuilder.forAuthorProfileUpdate()}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updates),
         });
 
-        const data = await res.json();
-        if (!res.ok) {
-            return { success: false, error: data.message };
+        const data = await response.json();
+        if (!response.ok) {
+            return { success: false, error: data.error || 'Ошибка обновления профиля' };
         }
 
-        return { success: true, user: data.author };
+        return { success: true };
     }
 
     // Клиентские методы работы с товарами
@@ -221,7 +157,7 @@ export class AuthorAuthService {
 
         const data = await res.json();
         if (!res.ok) {
-            return { success: false, error: data.message };
+            return { success: false, error: data.message || 'Ошибка удаления товара' };
         }
 
         return { success: true };
