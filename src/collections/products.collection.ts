@@ -1,10 +1,10 @@
 import { nanoid } from 'nanoid';
-import { type CollectionConfig, type CollectionSlug,getPayload } from 'payload';
+
+import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
-import { isAdmin, isAuthor } from '@/lib/utils/payload';
-import config from '@/payload.config';
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+import { isAdmin, isAuthor, isCustomer } from '@/lib/utils/payload';
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 
 export const ProductsCollection: CollectionConfig = {
@@ -13,27 +13,33 @@ export const ProductsCollection: CollectionConfig = {
     admin: { useAsTitle: 'title' },
 
     access: {
-        read: async ({ req: { user } }) => {
+        read: async ({ req: { user, payload } }) => {
             // Публичный доступ для фронтенда (анонимные запросы)
             if (!user) return true;
 
             // Админы видят все товары
             if (isAdmin(user)) return true;
 
-            // Авторы видят только свои товары
-            const payload = await getPayload({ config });
-            const authorRes = await payload.find({
-                collection: COLLECTION_SLUGS.AUTHORS,
-                where: { user: { equals: user.id } },
-                limit: 1,
-            });
-            const author = authorRes.docs[0];
-            if (!author) return false;
+            // Покупатели видят все товары
+            if (isCustomer(user)) return true;
 
-            return { author: { equals: author.id } };
+            // Авторы видят только свои товары
+            if (isAuthor(user)) {
+                const authorRes = await payload.find({
+                    collection: COLLECTION_SLUGS.AUTHORS,
+                    where: { user: { equals: user.id } },
+                    limit: 1,
+                });
+                const author = authorRes.docs[0];
+                if (!author) return false;
+
+                return { author: { equals: author.id } };
+            }
+
+            return false;
         },
 
-        update: async ({ req: { user }, id }) => {
+        update: async ({ req: { user, payload }, id }) => {
             // Публичный доступ для фронтенда закрыт (анонимные запросы)
             if (!user) return false;
 
@@ -42,7 +48,6 @@ export const ProductsCollection: CollectionConfig = {
 
             // Авторы могут обновлять только свои товары
             if (isAuthor(user)) {
-                const payload = await getPayload({ config });
                 const authorRes = await payload.find({
                     collection: COLLECTION_SLUGS.AUTHORS,
                     where: { user: { equals: user.id } },
@@ -72,14 +77,14 @@ export const ProductsCollection: CollectionConfig = {
         },
 
         // create и delete аналогичны update
-        create: async ({ req: { user } }) => {
+        create: async ({ req: { user, payload } }) => {
             if (!user) return false;
 
             if (isAdmin(user)) return true;
 
             if (isAuthor(user)) {
                 // Проверяем, что у автора есть профиль
-                const payload = await getPayload({ config });
+                // const payload = await getPayload({ config });
                 const authorRes = await payload.find({
                     collection: COLLECTION_SLUGS.AUTHORS,
                     where: { user: { equals: user.id } },
@@ -91,13 +96,13 @@ export const ProductsCollection: CollectionConfig = {
             return false;
         },
 
-        delete: async ({ req: { user }, id }) => {
+        delete: async ({ req: { user, payload }, id }) => {
             if (!user) return false;
 
             if (isAdmin(user)) return true;
 
             if (isAuthor(user)) {
-                const payload = await getPayload({ config });
+                // const payload = await getPayload({ config });
                 const authorRes = await payload.find({
                     collection: COLLECTION_SLUGS.AUTHORS,
                     where: { user: { equals: user.id } },

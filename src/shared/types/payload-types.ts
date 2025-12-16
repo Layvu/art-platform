@@ -74,7 +74,6 @@ export interface Config {
     carts: Cart;
     customers: Customer;
     orders: Order;
-    media: Media;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -88,7 +87,6 @@ export interface Config {
     carts: CartsSelect<false> | CartsSelect<true>;
     customers: CustomersSelect<false> | CustomersSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -135,12 +133,7 @@ export interface Product {
   slug: string;
   price: number;
   description?: string | null;
-  gallery?:
-    | {
-        image?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
+  image?: string | null;
   category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
   author: number | Author;
   updatedAt: string;
@@ -188,7 +181,7 @@ export interface Media {
  */
 export interface Author {
   id: number;
-  name: string;
+  name?: string | null;
   slug: string;
   bio?: string | null;
   avatar?: string | null;
@@ -209,7 +202,7 @@ export interface Author {
  */
 export interface User {
   id: number;
-  role: string;
+  role?: ('admin' | 'author' | 'customer') | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -266,7 +259,7 @@ export interface Cart {
 export interface Customer {
   id: number;
   email: string;
-  password: string;
+  user: number | User;
   fullName?: string | null;
   phone?: string | null;
   addresses?:
@@ -290,27 +283,21 @@ export interface Order {
   id: number;
   orderNumber?: string | null;
   customer: number | Customer;
-  items?:
-    | {
-        productSnapshot:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        quantity: number;
-        id?: string | null;
-      }[]
-    | null;
-  deliveryType?: ('pickup' | 'delivery') | null;
+  items: {
+    productSnapshot: {
+      productId: number;
+      title: string;
+      price: number;
+    };
+    quantity: number;
+    id?: string | null;
+  }[];
+  deliveryType: 'pickup' | 'delivery';
   address?: string | null;
   status?: ('processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled') | null;
   total: number;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -346,10 +333,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'orders';
         value: number | Order;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -402,12 +385,7 @@ export interface ProductsSelect<T extends boolean = true> {
   slug?: T;
   price?: T;
   description?: T;
-  gallery?:
-    | T
-    | {
-        image?: T;
-        id?: T;
-      };
+  image?: T;
   category?: T;
   author?: T;
   updatedAt?: T;
@@ -491,7 +469,7 @@ export interface CartsSelect<T extends boolean = true> {
  */
 export interface CustomersSelect<T extends boolean = true> {
   email?: T;
-  password?: T;
+  user?: T;
   fullName?: T;
   phone?: T;
   addresses?:
@@ -517,7 +495,13 @@ export interface OrdersSelect<T extends boolean = true> {
   items?:
     | T
     | {
-        productSnapshot?: T;
+        productSnapshot?:
+          | T
+          | {
+              productId?: T;
+              title?: T;
+              price?: T;
+            };
         quantity?: T;
         id?: T;
       };
@@ -525,8 +509,8 @@ export interface OrdersSelect<T extends boolean = true> {
   address?: T;
   status?: T;
   total?: T;
-  updatedAt?: T;
   createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

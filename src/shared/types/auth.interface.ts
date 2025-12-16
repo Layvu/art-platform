@@ -1,10 +1,10 @@
-import type { IOperationResult } from './api.interface';
-import type { IAuthorSession } from './author.interface';
-import type { ICustomerSession } from './customer.interface';
-
 // TODO: добавить префикс "I" к генерируемым интерфейсам (Author -> IAuthor)
-export interface IAuthResult extends IOperationResult {
-    user?: IAuthorSession | ICustomerSession;
+
+import type { User } from './payload-types';
+
+export interface ICredentials {
+    email?: string;
+    password?: string;
 }
 
 export enum UserType {
@@ -14,3 +14,5 @@ export enum UserType {
 }
 
 export type UserRole = UserType.CUSTOMER | UserType.AUTHOR;
+
+export type ISessionUser = Pick<User, 'id'>;

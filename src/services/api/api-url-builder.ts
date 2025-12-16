@@ -2,17 +2,6 @@ import { stringify } from 'qs-esm';
 
 import type { QueryParams } from '@/shared/types/query-params.type';
 
-export const COLLECTION_SLUGS = {
-    PRODUCTS: 'products',
-    AUTHORS: 'authors',
-    USERS: 'users',
-    CUSTOMERS: 'customers',
-    MEDIA: 'media',
-    CARTS: 'carts',
-} as const;
-
-export type CollectionSlug = (typeof COLLECTION_SLUGS)[keyof typeof COLLECTION_SLUGS];
-
 export class ApiUrlBuilder {
     private baseUrl: string;
 
@@ -54,7 +43,7 @@ export class ApiUrlBuilder {
 
     static forCustomerProfileUpdate(): string {
         const builder = new ApiUrlBuilder();
-        return `${builder.baseUrl}/api/profile/update`;
+        return `${builder.baseUrl}/api/customer/profile/update`;
     }
 
     static forAuthorProfileUpdate(): string {

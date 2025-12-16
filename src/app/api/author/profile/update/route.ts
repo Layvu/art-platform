@@ -1,37 +1,33 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 
-import { authOptions } from '@/lib/auth';
 import { authorAuthService } from '@/services/api/author-auth-service';
+import { payloadServerAuthService } from '@/services/api/payload-server-auth.service';
 import { UserType } from '@/shared/types/auth.interface';
 
 export async function PATCH(req: Request) {
-    const session = await getServerSession(authOptions);
+    // Получаем текущего пользователя
+    const user = await payloadServerAuthService.getCurrentUser();
 
-    if (!session?.user?.id || session.user.type !== UserType.AUTHOR) {
-        return NextResponse.json({ error: 'Доступ только для авторов' }, { status: 401 });
+    if (!user?.id) {
+        return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
     }
-    if (!session.user.authorId) {
-        return NextResponse.json({ error: 'ID автора не найден' }, { status: 400 });
+
+    if (user.role !== UserType.AUTHOR) {
+        return NextResponse.json({ error: 'Доступ только для авторов' }, { status: 401 });
     }
 
     const body = await req.json();
     try {
-        const updatedAuthor = await authorAuthService.updateAuthorProfile(session.user.authorId, body);
+        // Обновляем профиль
+        const { id, ...updates } = body;
+        await authorAuthService.updateAuthorProfile(id, updates);
 
         return NextResponse.json({
             success: true,
             message: 'Профиль успешно обновлен',
-            author: updatedAuthor,
         });
     } catch (error) {
-        console.error('Author profile update error:', error);
-        return NextResponse.json(
-            {
-                success: false,
-                message: 'Ошибка при обновлении профиля автора',
-            },
-            { status: 500 },
-        );
+        console.error('Profile update error:', error);
+        return NextResponse.json({ success: false, message: 'Ошибка при обновлении профиля' }, { status: 500 });
     }
 }

@@ -1,9 +1,8 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAdmin } from '@/lib/utils/payload';
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+import { isAdmin, isCustomer } from '@/lib/utils/payload';
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
-// TODO: ниже драфт, зафиксировал идею
 export const CartsCollection: CollectionConfig = {
     slug: 'carts',
     labels: { singular: 'Cart', plural: 'Carts' },
@@ -28,9 +27,37 @@ export const CartsCollection: CollectionConfig = {
     ],
 
     access: {
-        read: ({ req: { user } }) => !!user && isAdmin(user),
-        create: () => false,
-        update: () => false,
-        delete: ({ req: { user } }) => !!user && isAdmin(user),
+        read: ({ req: { user } }) => {
+            if (!user) return false;
+            if (isAdmin(user)) return true;
+
+            // Покупатели видят только свою корзину
+            if (isCustomer(user)) {
+                return {
+                    owner: { equals: user.id },
+                };
+            }
+
+            return false;
+        },
+
+        // Только админы могут создавать корзины
+        create: ({ req: { user } }) => isAdmin(user),
+
+        update: ({ req: { user } }) => {
+            if (!user) return false;
+            if (isAdmin(user)) return true;
+
+            // Покупатели могут обновлять только свою корзину
+            if (isCustomer(user)) {
+                return {
+                    owner: { equals: user.id },
+                };
+            }
+
+            return false;
+        },
+
+        delete: ({ req: { user } }) => isAdmin(user),
     },
 };

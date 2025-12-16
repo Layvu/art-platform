@@ -1,13 +1,8 @@
-import React from 'react';
-
-import { signOut } from 'next-auth/react';
-
 import { PAGES } from '@/config/public-pages.config';
 
 export interface IMenuItem {
     href: string;
     name: string;
-    onClick?: (e: React.MouseEvent) => void;
     requiresAuth?: boolean;
     guestOnly?: boolean;
 }
@@ -52,11 +47,5 @@ export const MENU: IMenuItem[] = [
         href: '#',
         name: 'Выход',
         requiresAuth: true,
-        onClick: (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            signOut({ callbackUrl: PAGES.HOME });
-        },
     },
 ];

@@ -1,17 +1,22 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 
-import { authOptions } from '@/lib/auth';
 import { authorAuthService } from '@/services/api/author-auth-service';
+import { payloadServerAuthService } from '@/services/api/payload-server-auth.service';
 import { UserType } from '@/shared/types/auth.interface';
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions);
-    const { id } = await params;
+    // Получаем текущего пользователя
+    const user = await payloadServerAuthService.getCurrentUser();
 
-    if (!session?.user?.id || session.user.type !== UserType.AUTHOR) {
+    if (!user?.id) {
+        return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
+    }
+
+    if (user.role !== UserType.AUTHOR) {
         return NextResponse.json({ error: 'Доступ только для авторов' }, { status: 401 });
     }
+
+    const { id } = await params;
 
     const productId = id;
     const body = await req.json();
@@ -26,12 +31,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions);
-    const { id } = await params;
+    // Получаем текущего пользователя
+    const user = await payloadServerAuthService.getCurrentUser();
 
-    if (!session?.user?.id || session.user.type !== UserType.AUTHOR) {
+    if (!user?.id) {
+        return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
+    }
+
+    if (user.role !== UserType.AUTHOR) {
         return NextResponse.json({ error: 'Доступ только для авторов' }, { status: 401 });
     }
+
+    const { id } = await params;
 
     const productId = id;
 

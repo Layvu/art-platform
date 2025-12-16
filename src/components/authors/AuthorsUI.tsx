@@ -1,7 +1,6 @@
 'use client';
 
 import AuthorCard from '@/components/authors/AuthorCard';
-import SearchBar from '@/components/shared/SearchBar';
 import { Button } from '@/components/ui/button';
 import { toAuthorsQueryParams } from '@/services/api/utils';
 import { useFetchAuthors } from '@/shared/hooks/useFetchData';
@@ -9,7 +8,6 @@ import { useUpdateQueryParams } from '@/shared/hooks/useUpdateQueryParams';
 import type { AuthorsQueryParams } from '@/shared/types/query-params.type';
 
 import AuthorsFiltersBar from './AuthorFiltersBar';
-//import AuthorFiltersBar from './AuthorFiltersBar';
 import { AuthorForm } from './AuthorForm';
 
 // TODO: loading и error

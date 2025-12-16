@@ -14,7 +14,7 @@ import { MediaCollection } from '@/collections/media.collection';
 import { OrdersCollection } from '@/collections/orders.collection';
 import { ProductsCollection } from '@/collections/products.collection';
 import { UsersCollection } from '@/collections/users.collection';
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);

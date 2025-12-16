@@ -1,14 +1,14 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAdmin } from '@/lib/utils/payload';
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
+import { isAdmin, isCustomer } from '@/lib/utils/payload';
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
-// Коллекция покупателей, управляемая через next-auth
+// Коллекция покупателей без данных для авторизации
 export const CustomersCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.CUSTOMERS,
     labels: { singular: 'Customer', plural: 'Customers' },
     admin: {
-        useAsTitle: 'fullName',
+        useAsTitle: 'email',
         defaultColumns: ['email', 'fullName', 'phone'],
     },
 
@@ -22,11 +22,12 @@ export const CustomersCollection: CollectionConfig = {
             admin: { readOnly: true },
         },
         {
-            // Хешированный пароль
-            name: 'password',
-            type: 'text',
+            name: 'user',
+            type: 'relationship',
+            relationTo: COLLECTION_SLUGS.USERS,
             required: true,
-            admin: { hidden: true },
+            unique: true,
+            admin: { readOnly: true },
         },
         {
             name: 'fullName',
@@ -90,31 +91,49 @@ export const CustomersCollection: CollectionConfig = {
     ],
 
     access: {
-        read: ({ req: { user }, data }) => {
-            // Неавторизованные пользователи не видят список покупателей
+        read: async ({ req: { user } }) => {
+            // Публичный доступ для фронтенда закрыт
             if (!user) return false;
 
             // Админы видят всех покупателей
             if (isAdmin(user)) return true;
 
-            // Покупатели видят только свои данные
-            if (data?.id === user?.id) return true;
+            // Покупатели видят только свою запись
+            if (isCustomer(user)) {
+                return {
+                    user: { equals: user.id },
+                };
+            }
 
-            // Все остальные не видят список покупателей
+            // Все остальные не видят покупателей
             return false;
         },
 
-        // Регистрация должна идти от лица главного админа
-        create: ({ req: { user } }) => isAdmin(user),
-
-        // Покупатели могут обновлять только свои данные, админы могут обновлять любого
-        // (это нужно для того, чтобы обновлять токена админа, по факту же для админа все поля пользователя readonly)
-        update: ({ req: { user }, data }) => {
+        update: async ({ req: { user } }) => {
+            // Публичный доступ для фронтенда закрыт (анонимные запросы)
             if (!user) return false;
-            return isAdmin(user) || data?.id === user?.id;
+
+            // Админы могут обновлять любых покупателей
+            if (isAdmin(user)) return true;
+
+            if (isCustomer(user)) {
+                // Покупатель может обновлять только свою запись
+                return {
+                    user: { equals: user.id },
+                };
+            }
+
+            return false;
         },
 
-        // Удалить профиль может только админ
+        // Создается автоматически через хук users
+        create: ({ req: { user } }) => isAdmin(user),
         delete: ({ req: { user } }) => isAdmin(user),
     },
 };
+
+// Users - только для авторизации
+// Customers - дополнительные данные покупателей
+// Authors - дополнительные данные авторов
+
+// TODO: конвертировать все комментарии в коде в JSDoc

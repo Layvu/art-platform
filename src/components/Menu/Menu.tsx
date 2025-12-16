@@ -1,20 +1,22 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { match } from 'path-to-regexp';
+
+import { useAuthStore } from '@/services/store/auth/store';
 
 import { MENU } from './menu.data';
 import { MenuItem } from './MenuItem';
 
 export function Menu() {
     const pathName = usePathname();
-    const { data: session } = useSession();
+    // Получаем частичные данные текущего пользователя из localStorage
+    const user = useAuthStore((state) => state.user);
 
-    // Если пользователь авторизован (session существует), то отрисовываем Profile и Logout
+    // Если пользователь авторизован (user существует), то отрисовываем Profile и Logout
     // Иначе отрисовываем Login и Register
     const menuItems = MENU.filter((menuItem) => {
-        if (session) {
+        if (user) {
             return !menuItem.guestOnly;
         } else {
             return !menuItem.requiresAuth;

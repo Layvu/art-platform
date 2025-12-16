@@ -1,5 +1,5 @@
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 import { payloadService } from '@/services/api/payload-service';
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
 import { AUTHORS_PER_PAGE } from '../constants/authors.constants';
 import { PRODUCTS_PER_PAGE } from '../constants/products.constants';
@@ -51,10 +51,11 @@ export const getAuthorQueryOptions = ({ slug }: { slug: string }) => {
     };
 };
 
-// export const getMediaQueryOptions = ({ id }: { id: number }) => {
-//     return {
-//         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
-//         queryFn: () => payloadService.getMediaById(id),
-//         staleTime: 1000 * 60, // минута,
-//     };
-// };
+// TODO: возвращает весь Product, а не только slug. Причём много запросов, не оптимально - нужен фикс
+export const getProductSlugQueryOptions = ({ id }: { id: number }) => {
+    return {
+        queryKey: [COLLECTION_SLUGS.PRODUCTS, id, 'slug'],
+        queryFn: () => payloadService.getProductById(id),
+        staleTime: 1000 * 60, // минута,
+    };
+};

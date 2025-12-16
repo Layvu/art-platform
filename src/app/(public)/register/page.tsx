@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -12,10 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PAGES } from '@/config/public-pages.config';
 import { customerAuthService } from '@/services/api/customer-auth-service';
-import { UserType } from '@/shared/types/auth.interface';
+import { useAuthStore } from '@/services/store/auth/store';
+import type { ICustomerCreateInput } from '@/shared/types/customer.interface';
 
 export default function RegisterPage() {
     const router = useRouter();
+    const checkAuth = useAuthStore((state) => state.checkAuth);
+
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -25,7 +27,7 @@ export default function RegisterPage() {
         setError('');
 
         const formData = new FormData(e.currentTarget);
-        const userData = {
+        const userData: ICustomerCreateInput = {
             email: formData.get('email') as string,
             password: formData.get('password') as string,
             fullName: formData.get('fullName') as string,
@@ -41,13 +43,16 @@ export default function RegisterPage() {
             }
 
             // Автоматический логин покупателя
-            await signIn(UserType.CUSTOMER, {
-                email: userData.email,
-                password: userData.password,
-                redirect: false,
-            });
+            const authResult = await customerAuthService.authenticate(userData.email, userData.password!);
 
-            router.push(PAGES.PROFILE);
+            if (!authResult.success) {
+                setError('Регистрация прошла успешно, но не удалось войти. Попробуйте войти снова');
+                return;
+            }
+
+            await checkAuth(); // Обновляем user в store
+
+            router.replace(PAGES.PROFILE);
         } catch (error) {
             console.error(error);
             setError('Произошла ошибка при регистрации');

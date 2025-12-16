@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 
-import { useSession } from 'next-auth/react';
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,15 +9,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { customerAuthService } from '@/services/api/customer-auth-service';
-import type { ICustomerAddress, ICustomerFormData, ICustomerWithoutPassword } from '@/shared/types/customer.interface';
+import type { ICustomerAddress, ICustomerUpdateInput } from '@/shared/types/customer.interface';
+import type { Customer } from '@/shared/types/payload-types';
+
+import OrderHistory from './OrderHistory';
 
 interface ProfileUIProps {
-    customerData: ICustomerWithoutPassword;
+    customerData: Customer;
 }
 
 export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
-    const { data: session, status } = useSession();
-
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
@@ -39,12 +38,15 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
 
         // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
         // Но в целом данных мало, так что пока просто обновляем всё
-        const updated: ICustomerFormData = {
+        const updated: ICustomerUpdateInput = {
+            id: customerData.id,
             email,
             fullName,
             phone,
             addresses,
+            password,
         };
+        // Пароль сразу нельзя передавать, так как может занулиться, если не изменился - по умолчанию пустая строка
         if (password) {
             updated.password = password;
         }
@@ -66,8 +68,6 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
     };
 
     // TODO: loading и error компоненты
-    if (status === 'loading') return <div>Загрузка...</div>;
-    if (!session?.user) return <div>Пожалуйста, войдите в систему</div>;
 
     return (
         <div className="container max-w-2xl mx-auto p-6">
@@ -77,11 +77,17 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                     <CardDescription>Управление вашими персональными данными и настройками аккаунта</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Tabs defaultValue="profile" className="space-y-4">
-                        <TabsList className="grid w-full grid-cols-2">
+                    <Tabs defaultValue="orders" className="space-y-4">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="orders">Мои заказы</TabsTrigger>
                             <TabsTrigger value="profile">Основные данные</TabsTrigger>
                             <TabsTrigger value="security">Параметры входа</TabsTrigger>
                         </TabsList>
+
+                        {/* Вкладка заказов */}
+                        <TabsContent value="orders" className="space-y-4">
+                            <OrderHistory customerId={customerData.id} />
+                        </TabsContent>
 
                         <TabsContent value="profile" className="space-y-4">
                             <form onSubmit={handleSubmit} className="space-y-4">

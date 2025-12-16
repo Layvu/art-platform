@@ -9,3 +9,7 @@ export const isAdmin = (user: TypedUser | null) => {
 export const isAuthor = (user: TypedUser | null) => {
     return user?.role === UserType.AUTHOR;
 };
+
+export const isCustomer = (user: TypedUser | null) => {
+    return user?.role === UserType.CUSTOMER;
+};

@@ -11,6 +11,7 @@ import {
     getAuthorsQueryOptions,
     getProductByIdQueryOptions,
     getProductQueryOptions,
+    getProductSlugQueryOptions,
     getProductsQueryOptions,
 } from '../utils/getDataQueryOptions';
 
@@ -61,6 +62,28 @@ export const useFetchAuthor = ({ slug }: { slug: string }) => {
     return useQuery<Author | null>(getAuthorQueryOptions({ slug }));
 };
 
-// export const useFetchMedia = ({ id }: { id: number }) => {
-//     return useQuery<Media | null>(getMediaQueryOptions({ id }));
-// };
+export const useProductSlugs = (productIds: number[]) => {
+    const queries = useQueries({
+        queries: productIds.map((id) => getProductSlugQueryOptions({ id })),
+    });
+
+    const isLoading = queries.some((q) => q.isLoading);
+    const isError = queries.some((q) => q.isError);
+
+    const slugMap = queries.reduce(
+        (acc, query, index) => {
+            const productId = productIds[index];
+            if (productId && query.data?.slug) {
+                acc[productId] = query.data.slug;
+            }
+            return acc;
+        },
+        {} as Record<number, string>,
+    );
+
+    return {
+        slugMap,
+        isLoading,
+        isError,
+    };
+};
