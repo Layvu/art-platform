@@ -1,7 +1,7 @@
 // collections/Media.ts
+import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import type { CollectionConfig } from 'payload';
 
-import { COLLECTION_SLUGS } from '@/services/api/api-url-builder';
 
 export const MediaCollection: CollectionConfig = {
   slug: COLLECTION_SLUGS.MEDIA,

@@ -13,53 +13,53 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-  | 'Pacific/Midway'
-  | 'Pacific/Niue'
-  | 'Pacific/Honolulu'
-  | 'Pacific/Rarotonga'
-  | 'America/Anchorage'
-  | 'Pacific/Gambier'
-  | 'America/Los_Angeles'
-  | 'America/Tijuana'
-  | 'America/Denver'
-  | 'America/Phoenix'
-  | 'America/Chicago'
-  | 'America/Guatemala'
-  | 'America/New_York'
-  | 'America/Bogota'
-  | 'America/Caracas'
-  | 'America/Santiago'
-  | 'America/Buenos_Aires'
-  | 'America/Sao_Paulo'
-  | 'Atlantic/South_Georgia'
-  | 'Atlantic/Azores'
-  | 'Atlantic/Cape_Verde'
-  | 'Europe/London'
-  | 'Europe/Berlin'
-  | 'Africa/Lagos'
-  | 'Europe/Athens'
-  | 'Africa/Cairo'
-  | 'Europe/Moscow'
-  | 'Asia/Riyadh'
-  | 'Asia/Dubai'
-  | 'Asia/Baku'
-  | 'Asia/Karachi'
-  | 'Asia/Tashkent'
-  | 'Asia/Calcutta'
-  | 'Asia/Dhaka'
-  | 'Asia/Almaty'
-  | 'Asia/Jakarta'
-  | 'Asia/Bangkok'
-  | 'Asia/Shanghai'
-  | 'Asia/Singapore'
-  | 'Asia/Tokyo'
-  | 'Asia/Seoul'
-  | 'Australia/Brisbane'
-  | 'Australia/Sydney'
-  | 'Pacific/Guam'
-  | 'Pacific/Noumea'
-  | 'Pacific/Auckland'
-  | 'Pacific/Fiji';
+    | 'Pacific/Midway'
+    | 'Pacific/Niue'
+    | 'Pacific/Honolulu'
+    | 'Pacific/Rarotonga'
+    | 'America/Anchorage'
+    | 'Pacific/Gambier'
+    | 'America/Los_Angeles'
+    | 'America/Tijuana'
+    | 'America/Denver'
+    | 'America/Phoenix'
+    | 'America/Chicago'
+    | 'America/Guatemala'
+    | 'America/New_York'
+    | 'America/Bogota'
+    | 'America/Caracas'
+    | 'America/Santiago'
+    | 'America/Buenos_Aires'
+    | 'America/Sao_Paulo'
+    | 'Atlantic/South_Georgia'
+    | 'Atlantic/Azores'
+    | 'Atlantic/Cape_Verde'
+    | 'Europe/London'
+    | 'Europe/Berlin'
+    | 'Africa/Lagos'
+    | 'Europe/Athens'
+    | 'Africa/Cairo'
+    | 'Europe/Moscow'
+    | 'Asia/Riyadh'
+    | 'Asia/Dubai'
+    | 'Asia/Baku'
+    | 'Asia/Karachi'
+    | 'Asia/Tashkent'
+    | 'Asia/Calcutta'
+    | 'Asia/Dhaka'
+    | 'Asia/Almaty'
+    | 'Asia/Jakarta'
+    | 'Asia/Bangkok'
+    | 'Asia/Shanghai'
+    | 'Asia/Singapore'
+    | 'Asia/Tokyo'
+    | 'Asia/Seoul'
+    | 'Australia/Brisbane'
+    | 'Australia/Sydney'
+    | 'Pacific/Guam'
+    | 'Pacific/Noumea'
+    | 'Pacific/Auckland'
+    | 'Pacific/Fiji';
 
 export interface Config {
     auth: {
@@ -108,22 +108,22 @@ export interface Config {
     };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
+    forgotPassword: {
+        email: string;
+        password: string;
+    };
+    login: {
+        email: string;
+        password: string;
+    };
+    registerFirstUser: {
+        email: string;
+        password: string;
+    };
+    unlock: {
+        email: string;
+        password: string;
+    };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -136,11 +136,12 @@ export interface Product {
     price: number;
     description?: string | null;
     gallery?:
-    | {
-        image?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;    category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
+        | {
+              image?: (number | null) | Media;
+              id?: string | null;
+          }[]
+        | null;
+    category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
     author: number | Author;
     updatedAt: string;
     createdAt: string;
@@ -150,36 +151,36 @@ export interface Product {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
+    id: number;
+    updatedAt: string;
+    createdAt: string;
+    url?: string | null;
+    thumbnailURL?: string | null;
+    filename?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    focalX?: number | null;
+    focalY?: number | null;
+    sizes?: {
+        thumbnail?: {
+            url?: string | null;
+            width?: number | null;
+            height?: number | null;
+            mimeType?: string | null;
+            filesize?: number | null;
+            filename?: string | null;
+        };
+        medium?: {
+            url?: string | null;
+            width?: number | null;
+            height?: number | null;
+            mimeType?: string | null;
+            filesize?: number | null;
+            filename?: string | null;
+        };
     };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -208,7 +209,7 @@ export interface Author {
  */
 export interface User {
     id: number;
-    role: string;
+    role?: ('admin' | 'author' | 'customer') | null;
     updatedAt: string;
     createdAt: string;
     enableAPIKey?: boolean | null;
@@ -235,28 +236,28 @@ export interface User {
  * via the `definition` "forms".
  */
 export interface Form {
-  id: number;
-  content: string;
-  updatedAt: string;
-  createdAt: string;
+    id: number;
+    content: string;
+    updatedAt: string;
+    createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts".
  */
 export interface Cart {
-  id: number;
-  owner: number | Customer;
-  items?:
-    | {
-        product: number | Product;
-        quantity: number;
-        checked?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    id: number;
+    owner: number | Customer;
+    items?:
+        | {
+              product: number | Product;
+              quantity: number;
+              checked?: boolean | null;
+              id?: string | null;
+          }[]
+        | null;
+    updatedAt: string;
+    createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -265,7 +266,6 @@ export interface Cart {
 export interface Customer {
     id: number;
     email: string;
-    password: string;
     user: number | User;
     fullName?: string | null;
     phone?: string | null;
@@ -287,24 +287,24 @@ export interface Customer {
  * via the `definition` "orders".
  */
 export interface Order {
-  id: number;
-  orderNumber?: string | null;
-  customer: number | Customer;
-  items: {
-    productSnapshot: {
-      productId: number;
-      title: string;
-      price: number;
-    };
-    quantity: number;
-    id?: string | null;
-  }[];
-  deliveryType: 'pickup' | 'delivery';
-  address?: string | null;
-  status?: ('processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled') | null;
-  total: number;
-  createdAt: string;
-  updatedAt: string;
+    id: number;
+    orderNumber?: string | null;
+    customer: number | Customer;
+    items: {
+        productSnapshot: {
+            productId: number;
+            title: string;
+            price: number;
+        };
+        quantity: number;
+        id?: string | null;
+    }[];
+    deliveryType: 'pickup' | 'delivery';
+    address?: string | null;
+    status?: ('processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled') | null;
+    total: number;
+    createdAt: string;
+    updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -340,10 +340,10 @@ export interface PayloadLockedDocument {
         | ({
               relationTo: 'orders';
               value: number | Order;
-            } | null)
-            | ({
-                relationTo: 'media';
-                value: number | Media;
+          } | null)
+        | ({
+              relationTo: 'media';
+              value: number | Media;
           } | null);
     globalSlug?: string | null;
     user: {
@@ -358,34 +358,34 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
+    id: number;
+    user: {
+        relationTo: 'users';
+        value: number | User;
+    };
+    key?: string | null;
+    value?:
+        | {
+              [k: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | number
+        | boolean
+        | null;
+    updatedAt: string;
+    createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
-  name?: string | null;
-  batch?: number | null;
-  updatedAt: string;
-  createdAt: string;
+    id: number;
+    name?: string | null;
+    batch?: number | null;
+    updatedAt: string;
+    createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -397,11 +397,12 @@ export interface ProductsSelect<T extends boolean = true> {
     price?: T;
     description?: T;
     gallery?:
-    | T
-    | {
-        image?: T;
-        id?: T;
-      };    category?: T;
+        | T
+        | {
+              image?: T;
+              id?: T;
+          };
+    category?: T;
     author?: T;
     updatedAt?: T;
     createdAt?: T;
@@ -411,72 +412,72 @@ export interface ProductsSelect<T extends boolean = true> {
  * via the `definition` "authors_select".
  */
 export interface AuthorsSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  bio?: T;
-  avatar?: T;
-  products_count?: T;
-  product_categories?:
-    | T
-    | {
-        category?: T;
-        id?: T;
-      };
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
+    name?: T;
+    slug?: T;
+    bio?: T;
+    avatar?: T;
+    products_count?: T;
+    product_categories?:
+        | T
+        | {
+              category?: T;
+              id?: T;
+          };
+    user?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  role?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
+    role?: T;
+    updatedAt?: T;
+    createdAt?: T;
+    enableAPIKey?: T;
+    apiKey?: T;
+    apiKeyIndex?: T;
+    email?: T;
+    resetPasswordToken?: T;
+    resetPasswordExpiration?: T;
+    salt?: T;
+    hash?: T;
+    loginAttempts?: T;
+    lockUntil?: T;
+    sessions?:
+        | T
+        | {
+              id?: T;
+              createdAt?: T;
+              expiresAt?: T;
+          };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
-  content?: T;
-  updatedAt?: T;
-  createdAt?: T;
+    content?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts_select".
  */
 export interface CartsSelect<T extends boolean = true> {
-  owner?: T;
-  items?:
-    | T
-    | {
-        product?: T;
-        quantity?: T;
-        checked?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
+    owner?: T;
+    items?:
+        | T
+        | {
+              product?: T;
+              quantity?: T;
+              checked?: T;
+              id?: T;
+          };
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -485,7 +486,6 @@ export interface CartsSelect<T extends boolean = true> {
 export interface CustomersSelect<T extends boolean = true> {
     email?: T;
     user?: T;
-    password?: T;
     fullName?: T;
     phone?: T;
     addresses?:
@@ -511,7 +511,13 @@ export interface OrdersSelect<T extends boolean = true> {
     items?:
         | T
         | {
-              productSnapshot?: T;
+              productSnapshot?:
+                  | T
+                  | {
+                        productId?: T;
+                        title?: T;
+                        price?: T;
+                    };
               quantity?: T;
               id?: T;
           };
@@ -519,91 +525,90 @@ export interface OrdersSelect<T extends boolean = true> {
     address?: T;
     status?: T;
     total?: T;
-    updatedAt?: T;
     createdAt?: T;
+    updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        medium?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
+    updatedAt?: T;
+    createdAt?: T;
+    url?: T;
+    thumbnailURL?: T;
+    filename?: T;
+    mimeType?: T;
+    filesize?: T;
+    width?: T;
+    height?: T;
+    focalX?: T;
+    focalY?: T;
+    sizes?:
+        | T
+        | {
+              thumbnail?:
+                  | T
+                  | {
+                        url?: T;
+                        width?: T;
+                        height?: T;
+                        mimeType?: T;
+                        filesize?: T;
+                        filename?: T;
+                    };
+              medium?:
+                  | T
+                  | {
+                        url?: T;
+                        width?: T;
+                        height?: T;
+                        mimeType?: T;
+                        filesize?: T;
+                        filename?: T;
+                    };
+          };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-  document?: T;
-  globalSlug?: T;
-  user?: T;
-  updatedAt?: T;
-  createdAt?: T;
+    document?: T;
+    globalSlug?: T;
+    user?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-  user?: T;
-  key?: T;
-  value?: T;
-  updatedAt?: T;
-  createdAt?: T;
+    user?: T;
+    key?: T;
+    value?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-  name?: T;
-  batch?: T;
-  updatedAt?: T;
-  createdAt?: T;
+    name?: T;
+    batch?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-  [k: string]: unknown;
+    [k: string]: unknown;
 }
 
-
 declare module 'payload' {
-  export interface GeneratedTypes extends Config {}
+    export interface GeneratedTypes extends Config {}
 }
