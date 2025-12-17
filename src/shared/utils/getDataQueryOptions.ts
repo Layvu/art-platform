@@ -59,3 +59,10 @@ export const getProductSlugQueryOptions = ({ id }: { id: number }) => {
         staleTime: 1000 * 60, // минута,
     };
 };
+// export const getMediaQueryOptions = ({ id }: { id: number }) => {
+//     return {
+//         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
+//         queryFn: () => payloadService.getMediaById(id),
+//         staleTime: 1000 * 60, // минута,
+//     };
+// };

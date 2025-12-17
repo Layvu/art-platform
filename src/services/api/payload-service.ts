@@ -85,6 +85,14 @@ export class PayloadService {
     async getProductById(id: number): Promise<Product> {
         return this.getItem(COLLECTION_SLUGS.PRODUCTS, id.toString());
     }
+
+    async getAuthorById(id: number): Promise<Author> {
+        return this.getItem(COLLECTION_SLUGS.AUTHORS, id.toString());
+    }
+
+    // async getMediaById(id: number): Promise<Media> {
+    //     return this.getItem(COLLECTION_SLUGS.MEDIA, id.toString());
+    // }
 }
 
 export const payloadService = new PayloadService();

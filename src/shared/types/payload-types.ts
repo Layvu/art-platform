@@ -62,48 +62,50 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 
 export interface Config {
-  auth: {
-    users: UserAuthOperations;
-  };
-  blocks: {};
-  collections: {
-    products: Product;
-    authors: Author;
-    users: User;
-    forms: Form;
-    carts: Cart;
-    customers: Customer;
-    orders: Order;
-    'payload-locked-documents': PayloadLockedDocument;
-    'payload-preferences': PayloadPreference;
-    'payload-migrations': PayloadMigration;
-  };
-  collectionsJoins: {};
-  collectionsSelect: {
-    products: ProductsSelect<false> | ProductsSelect<true>;
-    authors: AuthorsSelect<false> | AuthorsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
-    forms: FormsSelect<false> | FormsSelect<true>;
-    carts: CartsSelect<false> | CartsSelect<true>;
-    customers: CustomersSelect<false> | CustomersSelect<true>;
-    orders: OrdersSelect<false> | OrdersSelect<true>;
-    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
-  };
-  db: {
-    defaultIDType: number;
-  };
-  globals: {};
-  globalsSelect: {};
-  locale: null;
-  user: User & {
-    collection: 'users';
-  };
-  jobs: {
-    tasks: unknown;
-    workflows: unknown;
-  };
+    auth: {
+        users: UserAuthOperations;
+    };
+    blocks: {};
+    collections: {
+        products: Product;
+        authors: Author;
+        users: User;
+        forms: Form;
+        carts: Cart;
+        customers: Customer;
+        orders: Order;
+        media: Media;
+        'payload-locked-documents': PayloadLockedDocument;
+        'payload-preferences': PayloadPreference;
+        'payload-migrations': PayloadMigration;
+    };
+    collectionsJoins: {};
+    collectionsSelect: {
+        products: ProductsSelect<false> | ProductsSelect<true>;
+        authors: AuthorsSelect<false> | AuthorsSelect<true>;
+        users: UsersSelect<false> | UsersSelect<true>;
+        forms: FormsSelect<false> | FormsSelect<true>;
+        carts: CartsSelect<false> | CartsSelect<true>;
+        customers: CustomersSelect<false> | CustomersSelect<true>;
+        orders: OrdersSelect<false> | OrdersSelect<true>;
+        media: MediaSelect<false> | MediaSelect<true>;
+        'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+        'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+        'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+    };
+    db: {
+        defaultIDType: number;
+    };
+    globals: {};
+    globalsSelect: {};
+    locale: null;
+    user: User & {
+        collection: 'users';
+    };
+    jobs: {
+        tasks: unknown;
+        workflows: unknown;
+    };
 }
 export interface UserAuthOperations {
   forgotPassword: {
@@ -128,65 +130,105 @@ export interface UserAuthOperations {
  * via the `definition` "products".
  */
 export interface Product {
+    id: number;
+    title: string;
+    slug: string;
+    price: number;
+    description?: string | null;
+    gallery?:
+    | {
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;    category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
+    author: number | Author;
+    updatedAt: string;
+    createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
   id: number;
-  title: string;
-  slug: string;
-  price: number;
-  description?: string | null;
-  image?: string | null;
-  category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
-  author: number | Author;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors".
  */
 export interface Author {
-  id: number;
-  name?: string | null;
-  slug: string;
-  bio?: string | null;
-  avatar?: string | null;
-  products_count?: number | null;
-  product_categories?:
-    | {
-        category?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  user?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
+    id: number;
+    name?: string | null;
+    slug: string;
+    bio?: string | null;
+    avatar?: string | null;
+    products_count?: number | null;
+    product_categories?:
+        | {
+              category?: string | null;
+              id?: string | null;
+          }[]
+        | null;
+    user?: (number | null) | User;
+    updatedAt: string;
+    createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
-  role?: ('admin' | 'author' | 'customer') | null;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
+    id: number;
+    role: string;
+    updatedAt: string;
+    createdAt: string;
+    enableAPIKey?: boolean | null;
+    apiKey?: string | null;
+    apiKeyIndex?: string | null;
+    email: string;
+    resetPasswordToken?: string | null;
+    resetPasswordExpiration?: string | null;
+    salt?: string | null;
+    hash?: string | null;
+    loginAttempts?: number | null;
+    lockUntil?: string | null;
+    sessions?:
+        | {
+              id: string;
+              createdAt?: string | null;
+              expiresAt: string;
+          }[]
+        | null;
+    password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -221,23 +263,24 @@ export interface Cart {
  * via the `definition` "customers".
  */
 export interface Customer {
-  id: number;
-  email: string;
-  user: number | User;
-  fullName?: string | null;
-  phone?: string | null;
-  addresses?:
-    | {
-        label?: string | null;
-        addressLine: string;
-        city: string;
-        postalCode: string;
-        id?: string | null;
-      }[]
-    | null;
-  cart?: (number | null) | Cart;
-  createdAt: string;
-  updatedAt: string;
+    id: number;
+    email: string;
+    password: string;
+    user: number | User;
+    fullName?: string | null;
+    phone?: string | null;
+    addresses?:
+        | {
+              label?: string | null;
+              addressLine: string;
+              city: string;
+              postalCode: string;
+              id?: string | null;
+          }[]
+        | null;
+    cart?: (number | null) | Cart;
+    createdAt: string;
+    updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -268,43 +311,47 @@ export interface Order {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
-  document?:
-    | ({
-        relationTo: 'products';
-        value: number | Product;
-      } | null)
-    | ({
-        relationTo: 'authors';
-        value: number | Author;
-      } | null)
-    | ({
+    id: number;
+    document?:
+        | ({
+              relationTo: 'products';
+              value: number | Product;
+          } | null)
+        | ({
+              relationTo: 'authors';
+              value: number | Author;
+          } | null)
+        | ({
+              relationTo: 'users';
+              value: number | User;
+          } | null)
+        | ({
+              relationTo: 'forms';
+              value: number | Form;
+          } | null)
+        | ({
+              relationTo: 'carts';
+              value: number | Cart;
+          } | null)
+        | ({
+              relationTo: 'customers';
+              value: number | Customer;
+          } | null)
+        | ({
+              relationTo: 'orders';
+              value: number | Order;
+            } | null)
+            | ({
+                relationTo: 'media';
+                value: number | Media;
+          } | null);
+    globalSlug?: string | null;
+    user: {
         relationTo: 'users';
         value: number | User;
-      } | null)
-    | ({
-        relationTo: 'forms';
-        value: number | Form;
-      } | null)
-    | ({
-        relationTo: 'carts';
-        value: number | Cart;
-      } | null)
-    | ({
-        relationTo: 'customers';
-        value: number | Customer;
-      } | null)
-    | ({
-        relationTo: 'orders';
-        value: number | Order;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
-  updatedAt: string;
-  createdAt: string;
+    };
+    updatedAt: string;
+    createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -345,15 +392,19 @@ export interface PayloadMigration {
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  price?: T;
-  description?: T;
-  image?: T;
-  category?: T;
-  author?: T;
-  updatedAt?: T;
-  createdAt?: T;
+    title?: T;
+    slug?: T;
+    price?: T;
+    description?: T;
+    gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };    category?: T;
+    author?: T;
+    updatedAt?: T;
+    createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -432,49 +483,85 @@ export interface CartsSelect<T extends boolean = true> {
  * via the `definition` "customers_select".
  */
 export interface CustomersSelect<T extends boolean = true> {
-  email?: T;
-  user?: T;
-  fullName?: T;
-  phone?: T;
-  addresses?:
-    | T
-    | {
-        label?: T;
-        addressLine?: T;
-        city?: T;
-        postalCode?: T;
-        id?: T;
-      };
-  cart?: T;
-  createdAt?: T;
-  updatedAt?: T;
+    email?: T;
+    user?: T;
+    password?: T;
+    fullName?: T;
+    phone?: T;
+    addresses?:
+        | T
+        | {
+              label?: T;
+              addressLine?: T;
+              city?: T;
+              postalCode?: T;
+              id?: T;
+          };
+    cart?: T;
+    createdAt?: T;
+    updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
-  orderNumber?: T;
-  customer?: T;
-  items?:
+    orderNumber?: T;
+    customer?: T;
+    items?:
+        | T
+        | {
+              productSnapshot?: T;
+              quantity?: T;
+              id?: T;
+          };
+    deliveryType?: T;
+    address?: T;
+    status?: T;
+    total?: T;
+    updatedAt?: T;
+    createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
     | T
     | {
-        productSnapshot?:
+        thumbnail?:
           | T
           | {
-              productId?: T;
-              title?: T;
-              price?: T;
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
             };
-        quantity?: T;
-        id?: T;
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
       };
-  deliveryType?: T;
-  address?: T;
-  status?: T;
-  total?: T;
-  createdAt?: T;
-  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

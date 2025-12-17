@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { URL_SEPARATOR } from '@/shared/constants/constants';
 import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 
 import { Checkbox } from '../ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { ScrollArea } from '../ui/scroll-area';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 type CategoryFilterProps = {
     category?: string;
@@ -33,7 +34,10 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline">Категория: {currentCategories.length ? 'есть' : 'нет'}</Button>
+                <Button variant="secondary">Категория:
+                 {/* {currentCategories.length ? 'есть' : 'нет'}  */}
+                    {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
                 <Command>

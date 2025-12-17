@@ -62,6 +62,7 @@ export const useFetchAuthor = ({ slug }: { slug: string }) => {
     return useQuery<Author | null>(getAuthorQueryOptions({ slug }));
 };
 
+
 export const useProductSlugs = (productIds: number[]) => {
     const queries = useQueries({
         queries: productIds.map((id) => getProductSlugQueryOptions({ id })),
@@ -87,3 +88,7 @@ export const useProductSlugs = (productIds: number[]) => {
         isError,
     };
 };
+
+// export const useFetchMedia = ({ id }: { id: number }) => {
+//     return useQuery<Media | null>(getMediaQueryOptions({ id }));
+// };

@@ -1,23 +1,20 @@
-import { Input } from '@/components/ui/input';
 
-import { Label } from '../ui/label';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group';
+import { SearchIcon } from 'lucide-react';
 
 interface ISearchBarProps {
     value: string;
     onChange: (value: string) => void;
+    placeholder?: string;
 }
 
-// TODO: после внедрения shadcn компонент стал бессмысленным, можно удалить
-export default function SearchBar({ value, onChange }: ISearchBarProps) {
+export default function SearchBar({ value, onChange, placeholder = 'Найти товар' }: ISearchBarProps) {
     return (
-        <div className="flex flex-col gap-2">
-            <Label className="text-sm font-medium text-gray-700">Поиск</Label>
-            <Input
-                className="max-w-[320px]"
-                placeholder="Поиск..."
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-            />
-        </div>
+        <InputGroup>
+            <InputGroupInput value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+            <InputGroupAddon>
+                <SearchIcon />
+            </InputGroupAddon>
+        </InputGroup>
     );
 }

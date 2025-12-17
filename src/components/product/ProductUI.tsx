@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { isAuthorData } from '@/shared/guards/author.guard';
+import { isImageData } from '@/shared/guards/image.guard';
 import { useFetchProduct } from '@/shared/hooks/useFetchData';
 import type { ProductQueryParams } from '@/shared/types/query-params.type';
 
@@ -26,13 +27,42 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
         notFound();
     }
 
-    const { id, title, description, image, price, author } = data;
+    const { id, title, description, gallery, price, author } = data;
+    console.log('image:', gallery);
 
     return (
         <Card className="max-w-[800px] mx-auto mt-8">
             <CardHeader>
                 <div className="flex items-center gap-4">
-                    {image && <Image src={image} alt={title} width={48} height={48} />}
+                    {/* {isImageData(image) && (
+                        <Image
+                            src={image.url || ''}
+                            alt={title}
+                            width={500}
+                            height={500}
+                            style={{ objectFit: 'cover' }}
+                        />
+                    )} */}
+
+                    {/* На случай если контейнер будет прямоугольным */}
+                    {/* {isImageData(image) && (
+                        <div className="w-[500px] aspect-video relative">
+                            <Image src={image.url || ''} alt={title} fill className="object-cover" />
+                        </div>
+                    )} */}
+
+                    {/* квадратным */}
+                    {gallery?.map(galleryItem => {
+                        if (isImageData(galleryItem.image)) {
+                            const image = galleryItem.image;
+                            return (
+                                <div key={galleryItem.id} className="w-[500px] aspect-square relative">
+                                    <Image src={image.url || ''} alt={title} fill className="object-cover" />
+                                </div>
+                            );
+                        } else return null;
+                    })}
+          
                     <div>
                         <h2 className="text-lg font-semibold">{title}</h2>
                         <p className="text-sm text-gray-500">Id: {id}</p>
