@@ -84,14 +84,14 @@ export default function ProductCard({ id, title, slug, description, price, autho
                         <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
                     </Button> */}
                     {productInCart ? (
-                        <div className="flex w-full gap-1 items-center justify-center bg-primary text-white rounded">
-                            <Button className='p-0' onClick={() => decrease(id)} variant="ghost">
+                        <div className="flex w-full gap-1 items-center justify-center bg-orange-600 text-white rounded">
+                            <Button className='p-0' onClick={() => decrease(id)} variant="empty">
                                 <Minus />
                             </Button>
                             <div className="px-2">
                                 {productInCart.quantity}
                             </div>
-                            <Button className='p-0' onClick={() => increase(id)} variant="ghost">
+                            <Button className='p-0' onClick={() => increase(id)} variant="empty">
                                 <Plus />
                             </Button>
                         </div>

@@ -19,12 +19,13 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
 
     const { data, isError, error, isPlaceholderData, isFetching } = useFetchProducts(params);
     const products = data?.docs;
-
+    
     const updateQueryParams = useUpdateQueryParams<ProductsQueryParams>();
 
     if (isError) {
         return <div>Error: {error.message}</div>;
     }
+    // TODO перенести в компонент списка товаров
     if (isFetching) {
         return <div>Loading...</div>;
     }
@@ -35,7 +36,7 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
     const { hasNextPage = false, hasPrevPage = false, totalPages = 0, prevPage, nextPage, totalDocs } = data;
 
     return (
-        <div className='wrap'>
+        <div className="wrap">
             <ProductFiltersBar
                 filters={{
                     authors: initialParams.authors,
@@ -58,12 +59,12 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
                 }
                 onSortChange={(value) => updateQueryParams({ sort: value })}
             />
-            {totalDocs > 0 && (
+            {/* {totalDocs > 0 && (
                 <div className="flex gap-2 mt-3">
                     <div>totalDocs: {totalDocs}</div>
                     <div>totalPages: {totalPages}</div>
                 </div>
-            )}
+            )} */}
             {/* <div className={`grid grid-cols-4 gap-6 m-2.5 ${isPlaceholderData && 'opacity-50'}`}> */}
             <div className={`card-list ${isPlaceholderData && 'opacity-50'}`}>
                 {products?.map((product) => (
@@ -76,16 +77,25 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
                 <div className="flex gap-2 mt-3">
                     {/* TODO: случай множества кликов отработать */}
                     <Button
+                        variant="ghost"
                         onClick={() => updateQueryParams({ page: prevPage || 0 }, { resetPage: false })}
                         disabled={!hasPrevPage}
                     >
-                        prev page: {page - 1}
+                        {page - 1}
                     </Button>
                     <Button
+                        variant="secondary"
+                        onClick={() => updateQueryParams({ page: nextPage || 2 }, { resetPage: false })}
+                        disabled={true}
+                    >
+                        {page}
+                    </Button>
+                    <Button
+                        variant="ghost"
                         onClick={() => updateQueryParams({ page: nextPage || 2 }, { resetPage: false })}
                         disabled={!hasNextPage}
                     >
-                        next page: {page + 1}
+                        {page + 1}
                     </Button>
                 </div>
             )}
