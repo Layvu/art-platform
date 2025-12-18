@@ -76,27 +76,29 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
             ) : (
                 <div className="flex gap-2 mt-3">
                     {/* TODO: случай множества кликов отработать */}
+                    {prevPage &&
                     <Button
                         variant="ghost"
-                        onClick={() => updateQueryParams({ page: prevPage || 0 }, { resetPage: false })}
+                        onClick={() => updateQueryParams({ page: prevPage }, { resetPage: false })}
                         disabled={!hasPrevPage}
                     >
                         {page - 1}
-                    </Button>
+                    </Button>}
                     <Button
                         variant="secondary"
-                        onClick={() => updateQueryParams({ page: nextPage || 2 }, { resetPage: false })}
                         disabled={true}
                     >
                         {page}
                     </Button>
+                    {nextPage && 
                     <Button
-                        variant="ghost"
-                        onClick={() => updateQueryParams({ page: nextPage || 2 }, { resetPage: false })}
-                        disabled={!hasNextPage}
+                    variant="ghost"
+                    onClick={() => updateQueryParams({ page: nextPage}, { resetPage: false })}
+                    disabled={!hasNextPage}
                     >
                         {page + 1}
                     </Button>
+                    }
                 </div>
             )}
         </div>

@@ -192,7 +192,7 @@ export const OrdersCollection: CollectionConfig = {
         update: async ({ req: { user, payload }, id }) => {
             if (!user) return false;
             if (isAdmin(user)) return true;
-
+            if (!id) return false;
             if (user.role === 'customer') {
                 // 1. Находим customer запись пользователя
                 const customerRes = await payload.find({
@@ -206,7 +206,7 @@ export const OrdersCollection: CollectionConfig = {
                 // 2. Получаем заказ
                 const order = await payload.findByID({
                     collection: COLLECTION_SLUGS.ORDERS,
-                    id: id!,
+                    id: id,
                 });
                 if (!order) return false;
 

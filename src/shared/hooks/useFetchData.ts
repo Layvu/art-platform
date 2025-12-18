@@ -48,13 +48,14 @@ export const useProductsByIds = (ids: number[]) => {
 
     const isLoading = queries.some((q) => q.isLoading);
     const isError = queries.some((q) => q.isError);
-
+   // const error = queries.some(q => q.isError) ? queries.find(q => q.isError)?.error : null;
     const products = queries.map((q) => q.data).filter(Boolean) as Product[];
 
     return {
         data: products,
         isLoading,
         isError,
+        // error
     };
 };
 

@@ -40,7 +40,7 @@ export default function ProductCard({ id, title, slug, description, price, autho
 
     return (
         <Card className='max-w-[294px]'>
-            <CardHeader className=" flex-1 aspect-square relative">
+            <CardHeader className="flex flex-1 aspect-square relative items-center">
                 {mainImage ? (
                     <Image
                         alt="Картинка"
