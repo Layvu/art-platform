@@ -40,9 +40,9 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
                 <Command>
-                    <CommandInput placeholder="Search..." className="h-9" />
-                    <CommandList>
-                        <CommandEmpty>No category found.</CommandEmpty>
+                    <CommandInput placeholder="Найти категорию" className="h-9" />
+                    <CommandList className='mt-4'>
+                        <CommandEmpty>Такой категории нет.</CommandEmpty>
                         <CommandGroup>
                             <ScrollArea className="h-46 w-full">
                                 {PRODUCT_CATEGORIES.map((category) => {
@@ -71,6 +71,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                                                 onCheckedChange={toggle}
                                                 // Блокируем всплытие, чтобы CommandItem не срабатывал дважды
                                                 onClick={(e) => e.stopPropagation()}
+                                                className='cursor-pointer'
                                             />
                                             {category.label}
                                         </CommandItem>
@@ -80,39 +81,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                         </CommandGroup>
                     </CommandList>
                 </Command>
-                {/*фильтр как-то реализован https://ui.shadcn.com/docs/components/combobox */}
-                {/* <InputGroup>
-                        <InputGroupInput placeholder="Search..." />
-                        <InputGroupAddon>
-                            <Search />
-                        </InputGroupAddon>
-                    </InputGroup>
-                    <ScrollArea className="h-46 w-full">
-                        {PRODUCT_CATEGORIES.map((c) => {
-                            // читаем состояние текущего чекбокса на основе фильтров
-                            const isChecked = currentCategories.includes(c.value);
-                            return (
-                                <div key={c.value} className="flex items-center gap-3 mb-2">
-                                    <Checkbox
-                                        id={c.value}
-                                        checked={isChecked}
-                                        onCheckedChange={(checked) => {
-                                            const newCategories = checked
-                                                ? [...new Set([...currentCategories, c.value])] // добавляем
-                                                : currentCategories.filter((v) => v !== c.value); // удаляем
-
-                                            onCategoryChange(
-                                                newCategories.length ? newCategories.join(URL_SEPARATOR) : undefined, // чтобы убрать параметр из URL
-                                            );
-                                        }}
-                                    />
-                                    <Label htmlFor={c.value}>{c.label}</Label>
-                                </div>
-                            );
-                        })}
-                    </ScrollArea> */}
-
-                <Button type="submit" onClick={onSaveClick} className="w-full">
+                <Button onClick={onSaveClick} className="w-full mt-4" disabled={!newCategories.length}>
                     Применить
                 </Button>
             </PopoverContent>

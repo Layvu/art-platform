@@ -49,21 +49,39 @@ function CommandDialog({
     );
 }
 
-function CommandInput({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Input>) {
+function CommandInput({
+    className,
+    ...props
+}: React.ComponentProps<typeof CommandPrimitive.Input>) {
     return (
-        <div data-slot="command-input-wrapper" className="flex h-9 items-center gap-2 border-b px-3">
-            <SearchIcon className="size-4 shrink-0 opacity-50" />
+        <div
+            data-slot="input-group"
+            role="group"
+            className={cn(
+                'group/input-group border-input dark:bg-input/30 relative flex w-full items-center rounded-md border shadow-xs',
+                'h-9 min-w-0',
+            )}
+        >
             <CommandPrimitive.Input
-                data-slot="command-input"
+                data-slot="input-group-control"
                 className={cn(
-                    'placeholder:text-muted-foreground flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
+                    'flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0',
+                    'placeholder:text-muted-foreground h-9 px-3 text-sm outline-none',
                     className,
                 )}
                 {...props}
             />
+
+            <div
+                data-slot="input-group-addon"
+                data-align="inline-end"
+                className="text-muted-foreground flex items-center pr-3"
+            >
+                <SearchIcon className="size-4 opacity-50" />
+            </div>
         </div>
-    );
-}
+    )
+}   
 
 function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
     return (
@@ -76,7 +94,7 @@ function CommandList({ className, ...props }: React.ComponentProps<typeof Comman
 }
 
 function CommandEmpty({ ...props }: React.ComponentProps<typeof CommandPrimitive.Empty>) {
-    return <CommandPrimitive.Empty data-slot="command-empty" className="py-6 text-center text-sm" {...props} />;
+    return <CommandPrimitive.Empty data-slot="command-empty" className="py-1 text-left text-sm" {...props} />;
 }
 
 function CommandGroup({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Group>) {

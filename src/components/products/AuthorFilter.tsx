@@ -12,6 +12,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 import { useFetchAuthors } from '@/shared/hooks/useFetchData';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Spinner } from '../ui/spinner';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 
 type AuthorFilterProps = {
     initialAuthor?: string;
@@ -46,7 +47,7 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
-                <form className="flex flex-col gap-5">
+                {/* <form className="flex flex-col gap-5">
                     <InputGroup>
                         <InputGroupInput
                             placeholder="Найти автора"
@@ -91,7 +92,68 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
                             </Button>
                         </>
                     )}
-                </form>
+                </form> */}
+                <Command>
+                    <CommandInput placeholder="Найти автора" className="h-9" />
+                    <CommandList className="mt-4">
+                        <CommandEmpty>Такого автора нет.</CommandEmpty>
+                        <CommandGroup>
+                            {isFetching ? (
+                                <Spinner />
+                            ) : isError ? (
+                                <div>Error: {error.message}</div>
+                            ) : (
+                                <ScrollArea className="max-h-46 h-fit w-full">
+                                    <RadioGroup
+                                        className="gap-0"
+                                        value={selectedAuthor}
+                                        onValueChange={setSelectedAuthor}
+                                    >
+                                        {filteredAuthors?.map((author) => {
+                                            const value = author.name ?? author.id.toString();
+                                            const isChecked = selectedAuthor === value;
+
+                                            const select = () => {
+                                                setSelectedAuthor(value);
+                                            };
+
+                                            return (
+                                                <CommandItem
+                                                    key={author.id}
+                                                    value={value}
+                                                    onSelect={select}
+                                                    className="flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <RadioGroupItem
+                                                        checked={isChecked}
+                                                        value={value}
+                                                        id={author.id.toString()}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            select();
+                                                        }}
+                                                        className="cursor-pointer"
+                                                    />
+                                                    <Label className="cursor-pointer" htmlFor={author.id.toString()}>
+                                                        {author.name}
+                                                    </Label>
+                                                </CommandItem>
+                                            );
+                                        })}
+                                    </RadioGroup>
+                                </ScrollArea>
+                            )}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+                <Button
+                    disabled={!selectedAuthor}
+                    type="submit"
+                    className="w-full mt-4"
+                    onClick={(e) => onSaveClick(e)}
+                >
+                    Применить
+                </Button>
             </PopoverContent>
         </Popover>
     );

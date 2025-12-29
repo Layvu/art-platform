@@ -106,7 +106,7 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                 <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
             <div className="flex gap-2">
 
-                <PriceFilter />
+                <PriceFilter priceFrom={filters.priceFrom} priceTo={filters.priceTo} onPriceChange={(priceFrom, priceTo) => onFilterChange({ ...filters, priceFrom: priceFrom, priceTo: priceTo })}/>
                 <CategoryFilter
                     category={filters?.category}
                     onCategoryChange={(category) => onFilterChange({ ...filters, category })}
