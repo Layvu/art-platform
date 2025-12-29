@@ -22,7 +22,6 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         category ? category.split(URL_SEPARATOR).filter(Boolean) : [],
     );
 
-    const currentCategories = category ? category.split(URL_SEPARATOR).filter(Boolean) : [];
 
     const onSaveClick = () => {
         onCategoryChange(

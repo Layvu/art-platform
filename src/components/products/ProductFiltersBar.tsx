@@ -111,7 +111,7 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                     category={filters?.category}
                     onCategoryChange={(category) => onFilterChange({ ...filters, category })}
                 />
-                <AuthorFilter />
+                <AuthorFilter initialAuthor={filters.authors} onAuthorChange={(author) => onFilterChange({ ...filters, authors: author })}/>
                 <div className="flex flex-col gap-2">
                     <Select
                         value={sort}
