@@ -58,7 +58,7 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }:PriceF
                             <Label htmlFor="r3">До 1000 Р</Label>
                         </div>
                     </RadioGroup>
-                    <Button type="submit" className="w-full" onClick={(e) => onSaveClick(e)} disabled={!isValidPrice(priceFromValue) || !isValidPrice(priceToValue)}>
+                    <Button type="submit" className="w-full" onClick={(e) => onSaveClick(e)} disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}>
                         Применить
                     </Button>
                 </form>

@@ -13,7 +13,7 @@ export default function SearchBar({ value, onChange, placeholder = 'Найти �
         <InputGroup>
             <InputGroupInput value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
             <InputGroupAddon>
-                <SearchIcon />
+                <SearchIcon className='text-zinc-900' />
             </InputGroupAddon>
         </InputGroup>
     );

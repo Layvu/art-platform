@@ -13,10 +13,10 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
             data-slot="checkbox"
             className={cn(
                 // базовое состояние
-                'peer size-4 shrink-0 rounded-[4px] border border-input bg-white shadow-xs outline-none transition',
+                'peer size-4 shrink-0 rounded-[4px] border border-zinc-300 bg-white shadow-xs outline-none transition',
                 
-                // checked: ЧЕРНАЯ рамка, БЕЛЫЙ фон
-                'data-[state=checked]:border-black data-[state=checked]:bg-white',
+                // checked
+                'data-[state=checked]:border-zinc-300 data-[state=checked]:bg-white',
 
                 // focus / disabled
                 'focus-visible:ring-2 focus-visible:ring-ring/50',

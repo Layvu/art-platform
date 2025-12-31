@@ -1,11 +1,11 @@
 export const PRODUCTS_PER_PAGE = 4;
 
 export const PRODUCTS_SORT_OPTIONS = [
-    { value: 'default', label: 'Сортировка по умолчанию' },
-    { value: 'price', label: 'Цена: по возрастанию' },
-    { value: '-price', label: 'Цена: по убыванию' },
-    { value: 'created_at', label: 'Сначала новые' },
-    { value: '-created_at', label: 'Сначала старые' },
+    { value: 'default', label: 'По умолчанию' },
+    { value: 'price', label: 'По возрастанию цены' },
+    { value: '-price', label: 'По убыванию цены' },
+    { value: '-created_at', label: 'От старых к новым' },
+    { value: 'created_at', label: 'От новых к старым' }, 
 ] as const;
 
 export const PRODUCT_CATEGORIES = [

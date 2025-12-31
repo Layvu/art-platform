@@ -49,10 +49,7 @@ function CommandDialog({
     );
 }
 
-function CommandInput({
-    className,
-    ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+function CommandInput({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Input>) {
     return (
         <div
             data-slot="input-group"
@@ -62,6 +59,14 @@ function CommandInput({
                 'h-9 min-w-0',
             )}
         >
+            <div
+                data-slot="input-group-addon"
+                data-align="inline-start"
+                className="text-zinc-900 flex items-center pl-3"
+            >
+                <SearchIcon className="size-4" />
+            </div>
+
             <CommandPrimitive.Input
                 data-slot="input-group-control"
                 className={cn(
@@ -71,17 +76,9 @@ function CommandInput({
                 )}
                 {...props}
             />
-
-            <div
-                data-slot="input-group-addon"
-                data-align="inline-end"
-                className="text-muted-foreground flex items-center pr-3"
-            >
-                <SearchIcon className="size-4 opacity-50" />
-            </div>
         </div>
-    )
-}   
+    );
+}
 
 function CommandList({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) {
     return (
