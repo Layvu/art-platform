@@ -22,7 +22,6 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         category ? category.split(URL_SEPARATOR).filter(Boolean) : [],
     );
 
-
     const onSaveClick = () => {
         onCategoryChange(
             newCategories?.length ? newCategories.join(URL_SEPARATOR) : undefined, // чтобы убрать параметр из URL
@@ -30,18 +29,24 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         setOpen(false);
     };
 
+    const onResetClick = () => {
+        setNewCategories([]);
+        onCategoryChange(undefined);
+        setOpen(false);
+    };
+    
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="secondary">Категория:
-                 {/* {currentCategories.length ? 'есть' : 'нет'}  */}
+                <Button variant="secondary">
+                    Категория:
                     {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
                 <Command>
                     <CommandInput placeholder="Найти категорию" className="h-9" />
-                    <CommandList className='mt-4'>
+                    <CommandList className="mt-4">
                         <CommandEmpty>Такой категории нет.</CommandEmpty>
                         <CommandGroup>
                             <ScrollArea className="h-46 w-full">
@@ -71,7 +76,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                                                 onCheckedChange={toggle}
                                                 // Блокируем всплытие, чтобы CommandItem не срабатывал дважды
                                                 onClick={(e) => e.stopPropagation()}
-                                                className='cursor-pointer'
+                                                className="cursor-pointer"
                                             />
                                             {category.label}
                                         </CommandItem>
@@ -81,9 +86,14 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                         </CommandGroup>
                     </CommandList>
                 </Command>
-                <Button onClick={onSaveClick} className="w-full mt-4" disabled={!newCategories.length}>
-                    Применить
-                </Button>
+                <div className="mt-4 flex gap-5">
+                    <Button onClick={onSaveClick} className="flex-1" disabled={!newCategories.length}>
+                        Применить
+                    </Button>
+                    <Button onClick={onResetClick} className="flex-1" variant="outline" disabled={!newCategories.length}>
+                        Сбросить все
+                    </Button>
+                </div>
             </PopoverContent>
         </Popover>
     );
