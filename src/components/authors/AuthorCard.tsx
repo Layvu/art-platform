@@ -20,11 +20,11 @@ export default function AuthorCard({ id, name, slug, bio, products_count, produc
             <CardHeader>
                 <CardTitle>
                     <Link
-                        href={PAGES.AUTHOR(slug)}
+                        href={PAGES.AUTHOR(slug!)}
                         className="text-blue-500 hover:underline"
                         onMouseEnter={() =>
                             (timerRef.current = setTimeout(() => {
-                                queryClient.prefetchQuery(getAuthorQueryOptions({ slug }));
+                                queryClient.prefetchQuery(getAuthorQueryOptions({ slug: slug! }));
                             }, 300))
                         }
                         onMouseLeave={() => timerRef.current && clearTimeout(timerRef.current)}
@@ -49,7 +49,7 @@ export default function AuthorCard({ id, name, slug, bio, products_count, produc
 
             <CardFooter>
                 <Button variant="outline" asChild>
-                    <Link href={PAGES.AUTHOR(slug)}>Подробнее</Link>
+                    <Link href={PAGES.AUTHOR(slug!)}>Подробнее</Link>
                 </Button>
             </CardFooter>
         </Card>

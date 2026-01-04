@@ -1,9 +1,12 @@
-import type { ProductsSortOptions } from '@/shared/types/query-params.type';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import React from 'react';
-import { PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
-import { Button } from '../ui/button';
+
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
+import type { ProductsSortOptions } from '@/shared/types/query-params.type';
+
+import { Button } from '../ui/button';
 
 type SortBarProps = {
     sort?: string;

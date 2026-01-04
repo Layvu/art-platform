@@ -2,32 +2,24 @@
 
 import { useRef } from 'react';
 
+import { Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardAction,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { getQueryClient } from '@/lib/utils/get-query-client';
 import { useCartStore } from '@/services/store/cart/store';
 import { isAuthorData } from '@/shared/guards/author.guard';
+import { isProductData } from '@/shared/guards/product.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-import { isProductData } from '@/shared/guards/product.guard';
 import { isImageData } from '../../shared/guards/image.guard';
-import { Minus, Plus } from 'lucide-react';
 
-export default function ProductCard({ id, title, slug, description, price, author, gallery, category }: Product) {
+export default function ProductCard({ id, title, slug, price, author, gallery }: Product) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 
@@ -39,7 +31,7 @@ export default function ProductCard({ id, title, slug, description, price, autho
     const mainImage = gallery && isImageData(gallery[0]?.image) ? gallery[0].image : '';
 
     return (
-        <Card className='max-w-[294px]'>
+        <Card className="max-w-[294px]">
             <CardHeader className="flex flex-1 aspect-square relative items-center">
                 {mainImage ? (
                     <Image
@@ -47,8 +39,8 @@ export default function ProductCard({ id, title, slug, description, price, autho
                         src={mainImage.url || ''}
                         width={262}
                         height={262}
-                       // fill
-                       
+                        // fill
+
                         className="object-contain flex-1 "
                         priority
                     />
@@ -73,30 +65,28 @@ export default function ProductCard({ id, title, slug, description, price, autho
                     </CardTitle>
                     <CardDescription>
                         {isAuthorData(author) && (
-                            <Link href={PAGES.AUTHOR(author.slug)} className="hover:underline">
+                            <Link href={PAGES.AUTHOR(author.slug!)} className="hover:underline">
                                 @{author.name}
                             </Link>
                         )}
                     </CardDescription>
                 </div>
-                <CardAction className='w-full'>
+                <CardAction className="w-full">
                     {/* <Button variant="outline" asChild>
                         <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
                     </Button> */}
                     {productInCart ? (
                         <div className="flex w-full gap-1 items-center justify-center bg-orange-600 text-white rounded">
-                            <Button className='p-0' onClick={() => decrease(id)} variant="empty">
+                            <Button className="p-0" onClick={() => decrease(id)} variant="empty">
                                 <Minus />
                             </Button>
-                            <div className="px-2">
-                                {productInCart.quantity}
-                            </div>
-                            <Button className='p-0' onClick={() => increase(id)} variant="empty">
+                            <div className="px-2">{productInCart.quantity}</div>
+                            <Button className="p-0" onClick={() => increase(id)} variant="empty">
                                 <Plus />
                             </Button>
                         </div>
                     ) : (
-                        <Button className='w-full rounded' variant="default" onClick={() => addItem(id)}>
+                        <Button className="w-full rounded" variant="default" onClick={() => addItem(id)}>
                             {price}
                         </Button>
                     )}

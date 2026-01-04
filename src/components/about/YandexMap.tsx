@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { YMaps, Map, Placemark } from '@pbe/react-yandex-maps';
+
+import { Map, Placemark, YMaps } from '@pbe/react-yandex-maps';
 
 const COORDS: [number, number] = [56.834102, 60.602352];
 

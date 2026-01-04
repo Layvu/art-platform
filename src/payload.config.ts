@@ -34,7 +34,7 @@ export default buildConfig({
         CartsCollection,
         CustomersCollection,
         OrdersCollection,
-        MediaCollection
+        MediaCollection,
     ],
     i18n: {
         fallbackLanguage: 'en',

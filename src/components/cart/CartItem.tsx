@@ -4,14 +4,11 @@ import React from 'react';
 
 import { Minus, PlusIcon, Trash } from 'lucide-react';
 
-import NotFound from '@/app/not-found';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
 import { useCartStore } from '@/services/store/cart/store';
 import { isProductData } from '@/shared/guards/product.guard';
-import { useFetchProductById } from '@/shared/hooks/useFetchData';
 import type { ICartItem } from '@/shared/types/cart.interface';
-import type { Cart, Product } from '@/shared/types/payload-types';
 
 export default function CartItem({ item }: { item: ICartItem }) {
     const { toggleChecked, increase, decrease, removeItem } = useCartStore();

@@ -2,9 +2,8 @@ import React from 'react';
 
 import { Clock, Instagram, MapPin, Phone, Plane } from 'lucide-react';
 
-import YandexMap from '@/components/about/YandexMap';
 import AboutSlider from '@/components/about/Slider';
-
+import YandexMap from '@/components/about/YandexMap';
 
 export default function AboutPage() {
     return (
@@ -31,7 +30,7 @@ export default function AboutPage() {
                             <div className="flex flex-col gap-5">
                                 <div className="flex gap-4">
                                     <MapPin />
-                                    ​Улица Добролюбова, 2Б
+                                    Улица Добролюбова, 2Б
                                 </div>
                                 <div className="flex gap-4">
                                     <Clock />

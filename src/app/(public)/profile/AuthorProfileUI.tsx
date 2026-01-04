@@ -161,8 +161,8 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
             title: product.title,
             price: product.price,
             description: product.description || '',
+            // gallery: product.gallery,
             // category: product.category || '', // TODO: добавить остальные поля, когда станет известен полный список
-            image: product.image || '',
         });
     };
 

@@ -201,7 +201,6 @@ export const ProductsCollection: CollectionConfig = {
                 return data;
             },
 
-            // TODO: вынести, такой же у authors.collection.ts
             // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;

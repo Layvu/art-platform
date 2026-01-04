@@ -2,17 +2,17 @@
 
 import React, { useState } from 'react';
 
+import { Label } from '@radix-ui/react-label';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-import { ScrollArea } from '../ui/scroll-area';
-import { ChevronDownIcon, ChevronUpIcon, Search } from 'lucide-react';
-import { Label } from '@radix-ui/react-label';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group';
 import { useFetchAuthors } from '@/shared/hooks/useFetchData';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import { Spinner } from '../ui/spinner';
+
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { ScrollArea } from '../ui/scroll-area';
+import { Spinner } from '../ui/spinner';
 
 type AuthorFilterProps = {
     initialAuthor?: string;
@@ -21,13 +21,13 @@ type AuthorFilterProps = {
 
 export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFilterProps) {
     const [open, setOpen] = useState<boolean>(false);
-    const [search, setSearch] = useState<string>('');
+    const [search] = useState<string>('');
     const [selectedAuthor, setSelectedAuthor] = useState<string | undefined>(initialAuthor);
 
     // TODO пеерделать в infinite scroll
     // счас костыль 1000 записей
     // отсортировать по алфавиту
-    const { data, isError, error, isPlaceholderData, isFetching } = useFetchAuthors({ limit: 1000 });
+    const { data, isError, error, isFetching } = useFetchAuthors({ limit: 1000 });
     const authors = data?.docs;
     const filteredAuthors = authors?.filter((author) => author.name?.toLowerCase().includes(search.toLowerCase()));
 

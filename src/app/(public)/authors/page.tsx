@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient } from '@/lib/utils/get-query-client';
-import { toAuthorsQueryParams, toQueryParams } from '@/services/api/utils';
+import { toAuthorsQueryParams } from '@/services/api/utils';
 import type { AuthorsQueryParams } from '@/shared/types/query-params.type';
 import { getAuthorsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 

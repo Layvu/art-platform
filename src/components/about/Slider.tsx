@@ -1,25 +1,29 @@
 'use client';
 
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+
+import Image from 'next/image';
 import Slider from 'react-slick';
 
-interface ArrowProps {
-    className?: string;
-    style?: CSSProperties;
-    onClick?: () => void;
-}
+// TODO: remove unused vars
 
-function SampleNextArrow(props: ArrowProps) {
-    const { className, style, onClick } = props;
-    return <div className={className} style={{ ...style, display: 'block', background: 'red' }} onClick={onClick} />;
-}
+// interface ArrowProps {
+//     className?: string;
+//     style?: CSSProperties;
+//     onClick?: () => void;
+// }
 
-function SamplePrevArrow(props: ArrowProps) {
-    const { className, style, onClick } = props;
-    return (
-        <div className={className} style={{ ...style, display: 'block', backgroundColor: 'green' }} onClick={onClick} />
-    );
-}
+// function SampleNextArrow(props: ArrowProps) {
+//     const { className, style, onClick } = props;
+//     return <div className={className} style={{ ...style, display: 'block', background: 'red' }} onClick={onClick} />;
+// }
+
+// function SamplePrevArrow(props: ArrowProps) {
+//     const { className, style, onClick } = props;
+//     return (
+//         <div className={className} style={{ ...style, display: 'block', backgroundColor: 'green' }} onClick={onClick} />
+//     );
+// }
 
 export default function AboutSlider() {
     const settings = {
@@ -58,9 +62,10 @@ export default function AboutSlider() {
         <Slider {...settings} className="mx-auto mt-10 h-[501px] flex text-center relative">
             {images.map((url, i) => (
                 <div key={i} className="wrap">
-                    <img
+                    <Image
                         src={url}
                         alt={`Slide ${i + 1}`}
+                        fill
                         className="rounded-2xl w-full object-cover shadow-md h-[501px]"
                     />
                 </div>

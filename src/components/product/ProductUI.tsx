@@ -52,7 +52,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                     )} */}
 
                     {/* квадратным */}
-                    {gallery?.map(galleryItem => {
+                    {gallery?.map((galleryItem) => {
                         if (isImageData(galleryItem.image)) {
                             const image = galleryItem.image;
                             return (
@@ -62,7 +62,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                             );
                         } else return null;
                     })}
-          
+
                     <div>
                         <h2 className="text-lg font-semibold">{title}</h2>
                         <p className="text-sm text-gray-500">Id: {id}</p>
@@ -79,7 +79,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
             {isAuthorData(author) && (
                 <CardFooter>
                     <p className="text-sm text-gray-500">
-                        <Link href={PAGES.AUTHOR(author.slug)} className="hover:underline text-blue-500">
+                        <Link href={PAGES.AUTHOR(author.slug!)} className="hover:underline text-blue-500">
                             @{author.name}
                         </Link>
                     </p>

@@ -56,12 +56,10 @@ export const AuthorsCollection: CollectionConfig = {
         {
             name: 'name',
             type: 'text',
-            // required: true,
         },
         {
             name: 'slug',
             type: 'text',
-            required: true,
             unique: true,
             admin: {
                 position: 'sidebar',
@@ -98,7 +96,6 @@ export const AuthorsCollection: CollectionConfig = {
     ],
     hooks: {
         beforeChange: [
-            // TODO: вынести, такой же у products.collection.ts
             // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;

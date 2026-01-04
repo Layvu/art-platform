@@ -2,30 +2,30 @@
 
 import React, { useState } from 'react';
 
+import { Label } from '@radix-ui/react-label';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Label } from '@radix-ui/react-label';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { isValidPrice } from '@/shared/utils/isValidPrice';
 
+import { Input } from '../ui/input';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+
 type PriceFilterProps = {
-    priceFrom?: number,
-    priceTo?: number,
-    onPriceChange: (priceFrom?: number, priceTo?: number) => void
-}
+    priceFrom?: number;
+    priceTo?: number;
+    onPriceChange: (priceFrom?: number, priceTo?: number) => void;
+};
 
-
-export default function PriceFilter({ priceFrom, priceTo, onPriceChange }:PriceFilterProps) {
+export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: PriceFilterProps) {
     const [open, setOpen] = useState(false);
     const [priceFromValue, setPriceFromValue] = useState(priceFrom);
     const [priceToValue, setPriceToValue] = useState(priceTo);
 
     const onSaveClick = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         onPriceChange(priceFromValue, priceToValue);
         setOpen(false);
     };
@@ -41,10 +41,23 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }:PriceF
             <PopoverContent className="w-80 p-4" align="start">
                 <form className="flex flex-col gap-5">
                     <div className="flex gap-2 h-10">
-                        <Input type="number" placeholder="от" value={priceFromValue} onChange={(e) => setPriceFromValue(Number(e.target.value))}/>
-                        <Input type="number" placeholder="до" value={priceToValue} onChange={(e) => setPriceToValue(Number(e.target.value))}/>
+                        <Input
+                            type="number"
+                            placeholder="от"
+                            value={priceFromValue}
+                            onChange={(e) => setPriceFromValue(Number(e.target.value))}
+                        />
+                        <Input
+                            type="number"
+                            placeholder="до"
+                            value={priceToValue}
+                            onChange={(e) => setPriceToValue(Number(e.target.value))}
+                        />
                     </div>
-                    <RadioGroup value={priceToValue?.toString()} onValueChange={price => setPriceToValue(Number(price))}>
+                    <RadioGroup
+                        value={priceToValue?.toString()}
+                        onValueChange={(price) => setPriceToValue(Number(price))}
+                    >
                         <div className="flex items-center gap-3">
                             <RadioGroupItem value="100" id="r1" />
                             <Label htmlFor="r1">До 100 Р</Label>
@@ -58,7 +71,12 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }:PriceF
                             <Label htmlFor="r3">До 1000 Р</Label>
                         </div>
                     </RadioGroup>
-                    <Button type="submit" className="w-full" onClick={(e) => onSaveClick(e)} disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}>
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        onClick={(e) => onSaveClick(e)}
+                        disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
+                    >
                         Применить
                     </Button>
                 </form>

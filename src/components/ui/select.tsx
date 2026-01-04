@@ -102,10 +102,10 @@ function SelectItem({ className, children, ...props }: React.ComponentProps<type
         >
             <span className="absolute left-2 flex size-3.5 items-center justify-center">
                 <SelectPrimitive.ItemIndicator>
-                <CheckIcon className="size-4 text-zinc-900 stroke-[2px]" />
+                    <CheckIcon className="size-4 text-zinc-900 stroke-[2px]" />
                 </SelectPrimitive.ItemIndicator>
             </span>
-            <SelectPrimitive.ItemText className=''>{children}</SelectPrimitive.ItemText>
+            <SelectPrimitive.ItemText className="">{children}</SelectPrimitive.ItemText>
         </SelectPrimitive.Item>
     );
 }

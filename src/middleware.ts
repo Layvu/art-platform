@@ -1,12 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-import { PAGES } from './config/public-pages.config';
-
-export function middleware(request: NextRequest) {
+export function middleware() {
     return NextResponse.next();
 }
 
-const protectedPath = `/${PAGES.PRODUCTS}/:path*`;
+// const protectedPath = `/${PAGES.PRODUCTS}/:path*`;
 
 export const config = {
     //  matcher: [protectedPath],  // защищённые роуты

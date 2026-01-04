@@ -2,18 +2,13 @@ import { useCallback, useState } from 'react';
 
 import { debounce } from 'lodash';
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { URL_SEPARATOR } from '@/shared/constants/constants';
-import { PRODUCT_CATEGORIES, PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
 import type { ProductsFilters, ProductsSortOptions } from '@/shared/types/query-params.type';
 
 import SearchBar from '../shared/SearchBar';
 
+import AuthorFilter from './AuthorFilter';
 import CategoryFilter from './CategoryFilter';
 import PriceFilter from './PriceFilter';
-import AuthorFilter from './AuthorFilter';
 import SortBar from './SortBar';
 
 interface IProductFiltersBarProps {
@@ -42,16 +37,24 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
     };
 
     return (
-        <div className="flex items-start gap-6">       
+        <div className="flex items-start gap-6">
             <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
             <div className="flex gap-2">
-
-                <PriceFilter priceFrom={filters.priceFrom} priceTo={filters.priceTo} onPriceChange={(priceFrom, priceTo) => onFilterChange({ ...filters, priceFrom: priceFrom, priceTo: priceTo })}/>
+                <PriceFilter
+                    priceFrom={filters.priceFrom}
+                    priceTo={filters.priceTo}
+                    onPriceChange={(priceFrom, priceTo) =>
+                        onFilterChange({ ...filters, priceFrom: priceFrom, priceTo: priceTo })
+                    }
+                />
                 <CategoryFilter
                     category={filters?.category}
                     onCategoryChange={(category) => onFilterChange({ ...filters, category })}
                 />
-                <AuthorFilter initialAuthor={filters.authors} onAuthorChange={(author) => onFilterChange({ ...filters, authors: author })}/>
+                <AuthorFilter
+                    initialAuthor={filters.authors}
+                    onAuthorChange={(author) => onFilterChange({ ...filters, authors: author })}
+                />
                 <SortBar sort={sort} onSortChange={onSortChange} />
             </div>
         </div>

@@ -28,7 +28,7 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState(customerData.fullName || '');
     const [phone, setPhone] = useState(customerData.phone || '');
-    const [addresses, setAddresses] = useState<ICustomerAddress[]>(customerData.addresses || []);
+    const [addresses] = useState<ICustomerAddress[]>(customerData.addresses || []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

@@ -2,15 +2,16 @@
 
 import React, { useState } from 'react';
 
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { URL_SEPARATOR } from '@/shared/constants/constants';
 import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 
 import { Checkbox } from '../ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { ScrollArea } from '../ui/scroll-area';
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 type CategoryFilterProps = {
     category?: string;
@@ -22,7 +23,6 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         category ? category.split(URL_SEPARATOR).filter(Boolean) : [],
     );
 
-
     const onSaveClick = () => {
         onCategoryChange(
             newCategories?.length ? newCategories.join(URL_SEPARATOR) : undefined, // чтобы убрать параметр из URL
@@ -33,15 +33,16 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="secondary">Категория:
-                 {/* {currentCategories.length ? 'есть' : 'нет'}  */}
+                <Button variant="secondary">
+                    Категория:
+                    {/* {currentCategories.length ? 'есть' : 'нет'}  */}
                     {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
                 <Command>
                     <CommandInput placeholder="Найти категорию" className="h-9" />
-                    <CommandList className='mt-4'>
+                    <CommandList className="mt-4">
                         <CommandEmpty>Такой категории нет.</CommandEmpty>
                         <CommandGroup>
                             <ScrollArea className="h-46 w-full">
@@ -71,7 +72,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                                                 onCheckedChange={toggle}
                                                 // Блокируем всплытие, чтобы CommandItem не срабатывал дважды
                                                 onClick={(e) => e.stopPropagation()}
-                                                className='cursor-pointer'
+                                                className="cursor-pointer"
                                             />
                                             {category.label}
                                         </CommandItem>
