@@ -60,6 +60,35 @@ npx payload generate:types
 
 pnpm dlx shadcn@latest add componentName
 
+## Deployment
+
+### Локальный запуск (Windows PowerShell)
+
+Скрипт собирает проект, генерирует миграции (если есть изменения), архивирует и отправляет на сервер
+
+.\deploy.ps1
+
+### На ВМ
+
+Проект находится в `/var/app/`,
+Скрипты управления в `/var/app/scripts/`
+
+**1. Полное пересоздание проекта и БД (Сброс данных):**
+
+bash /var/app/scripts/reset_db.sh
+bash /var/app/scripts/update.sh
+bash /var/app/scripts/set_key.sh some_admin_key
+
+**2. Стандартное обновление проекта (Код + Миграции):**
+
+Применяет новые миграции (без потери данных) и обновляет код приложения
+
+bash /var/app/scripts/update.sh
+
+**3. Очистка логов и кэша:**
+
+bash /var/app/scripts/clean.sh
+
 ## Заметки
 
 в next js правильный подход такой:
