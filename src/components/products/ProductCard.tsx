@@ -9,12 +9,12 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
-import { getQueryClient } from '@/lib/utils/get-query-client';
 import { useCartStore } from '@/services/store/cart/store';
 import { isAuthorData } from '@/shared/guards/author.guard';
 import { isProductData } from '@/shared/guards/product.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
+import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
 import { isImageData } from '../../shared/guards/image.guard';

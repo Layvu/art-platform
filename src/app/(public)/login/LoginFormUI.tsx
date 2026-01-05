@@ -160,7 +160,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                         </Alert>
                     )}
 
-                    {userType === 'customer' && (
+                    {userType === UserType.CUSTOMER && (
                         <div className="mt-4 text-center text-sm">
                             Нет аккаунта?{' '}
                             <a href={PAGES.REGISTER} className="text-primary underline underline-offset-4">

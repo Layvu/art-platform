@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid';
 import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
-import { isAdmin, isAuthor } from '@/lib/utils/payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
+import { isAdmin, isAuthor } from '@/shared/utils/payload';
 
 // TODO: вынести хуки коллекций в переменную / файл
 

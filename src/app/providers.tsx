@@ -8,8 +8,8 @@ import React, { useEffect } from 'react';
 
 import { QueryClientProvider } from '@tanstack/react-query';
 
-import { getQueryClient } from '@/lib/utils/get-query-client';
 import { useAuthStore } from '@/services/store/auth/store';
+import { getQueryClient } from '@/shared/utils/get-query-client';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     // NOTE: Avoid useState when initializing the query client if you don't

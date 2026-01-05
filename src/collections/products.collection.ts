@@ -2,9 +2,9 @@ import { nanoid } from 'nanoid';
 import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
-import { isAdmin, isAuthor, isCustomer } from '@/lib/utils/payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
+import { isAdmin, isAuthor, isCreateOperation, isCustomer } from '@/shared/utils/payload';
 
 export const ProductsCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.PRODUCTS,
@@ -185,7 +185,7 @@ export const ProductsCollection: CollectionConfig = {
         beforeChange: [
             async ({ data, req, operation }) => {
                 const { user, payload } = req;
-                if (operation === 'create' && isAuthor(user)) {
+                if (isCreateOperation(operation) && isAuthor(user)) {
                     const authorRes = await payload.find({
                         collection: COLLECTION_SLUGS.AUTHORS,
                         where: { user: { equals: user!.id } },

@@ -2,9 +2,9 @@ import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 
 import AuthorUI from '@/components/author/AuthorUI';
-import { getQueryClient } from '@/lib/utils/get-query-client';
 import { payloadService } from '@/services/api/payload-service';
 import type { AuthorQueryParams } from '@/shared/types/query-params.type';
+import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
 export async function generateMetadata({ params }: { params: Promise<AuthorQueryParams> }): Promise<Metadata> {

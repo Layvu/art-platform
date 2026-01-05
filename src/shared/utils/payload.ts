@@ -13,3 +13,5 @@ export const isAuthor = (user: TypedUser | null) => {
 export const isCustomer = (user: TypedUser | null) => {
     return user?.role === UserType.CUSTOMER;
 };
+
+export const isCreateOperation = (operation: string) => operation === 'create';

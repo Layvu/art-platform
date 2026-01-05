@@ -5,7 +5,6 @@ $ErrorActionPreference = "Stop"
 # Конфиг
 $SshHost = "80.87.102.60"
 $SshUser = "root"
-$RemoteDir = "/var/app"
 $ArchiveName = "deploy.tar.gz"
 
 Write-Host "STARTING DEPLOY..." -ForegroundColor Green

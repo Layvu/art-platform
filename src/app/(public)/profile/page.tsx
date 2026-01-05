@@ -23,7 +23,6 @@ export default async function ProfilePage() {
             const author = await payloadServerAuthService.getAuthorData(user.id);
             if (!author) {
                 console.error('Author profile not found');
-                // redirect(PAGES.LOGIN);
             }
 
             const products = await payloadServerAuthService.getAuthorProducts(author.id);
@@ -31,7 +30,6 @@ export default async function ProfilePage() {
             return <AuthorProfileUI authorData={author} products={products || []} />;
         } catch (error) {
             console.error('Error loading author data:', error);
-            // redirect(PAGES.LOGIN);
         }
     }
 
@@ -41,13 +39,11 @@ export default async function ProfilePage() {
             const customer = await payloadServerAuthService.getCustomerData(user.id);
             if (!customer) {
                 console.error('Customer profile not found');
-                // redirect(PAGES.LOGIN);
             }
 
             return <CustomerProfileUI customerData={customer} />;
         } catch (error) {
             console.error('Error loading customer data:', error);
-            // redirect(PAGES.LOGIN);
         }
     }
 

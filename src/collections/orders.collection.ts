@@ -1,8 +1,9 @@
 import { type CollectionConfig } from 'payload';
 
-import { isAdmin } from '@/lib/utils/payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { DELIVERY_TYPES, ORDER_STATUS } from '@/shared/constants/order.constants';
+import { UserType } from '@/shared/types/auth.interface';
+import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
 
 export const OrdersCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.ORDERS,
@@ -159,7 +160,7 @@ export const OrdersCollection: CollectionConfig = {
             if (isAdmin(user)) return true;
 
             // Для покупателей находим их customer запись
-            if (user.role === 'customer') {
+            if (user.role === UserType.CUSTOMER) {
                 try {
                     const customerRes = await payload.find({
                         collection: COLLECTION_SLUGS.CUSTOMERS,
@@ -186,14 +187,14 @@ export const OrdersCollection: CollectionConfig = {
 
         create: ({ req }) => {
             // Разрешаем создавать заказы авторизованным покупателям
-            return req.user?.role === 'customer';
+            return req.user?.role === UserType.CUSTOMER;
         },
 
         update: async ({ req: { user, payload }, id }) => {
             if (!user) return false;
             if (isAdmin(user)) return true;
             if (!id) return false;
-            if (user.role === 'customer') {
+            if (user.role === UserType.CUSTOMER) {
                 // 1. Находим customer запись пользователя
                 const customerRes = await payload.find({
                     collection: COLLECTION_SLUGS.CUSTOMERS,
@@ -227,8 +228,7 @@ export const OrdersCollection: CollectionConfig = {
             async ({ data, req, operation }) => {
                 const { user, payload } = req;
 
-                // TODO: operations const
-                if (operation === 'create' && user && user.role === 'customer') {
+                if (isCreateOperation(operation) && user && user.role === UserType.CUSTOMER) {
                     // Находим customer запись для текущего пользователя
                     const customerRes = await payload.find({
                         collection: COLLECTION_SLUGS.CUSTOMERS,
