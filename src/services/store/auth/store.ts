@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-import { payloadClientAuthService } from '@/services/api/payload-client-auth.service';
+import { authClientService } from '@/services/api/client/auth-client.service';
 import type { ISessionUser } from '@/shared/types/auth.interface';
 import type { User } from '@/shared/types/payload-types';
 
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
 
                     set({ isLoading: true });
                     try {
-                        const user = await payloadClientAuthService.getCurrentUser();
+                        const user = await authClientService.getCurrentUser();
                         set({
                             user: toSessionUser(user),
                             isInitialized: true,
@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
                 checkAuth: async () => {
                     set({ isLoading: true });
                     try {
-                        const user = await payloadClientAuthService.getCurrentUser();
+                        const user = await authClientService.getCurrentUser();
                         const safeUser = toSessionUser(user);
                         set({ user: safeUser });
                         return safeUser;
@@ -70,7 +70,7 @@ export const useAuthStore = create<AuthState>()(
                 logout: async () => {
                     set({ isLoading: true });
                     try {
-                        await payloadClientAuthService.logout();
+                        await authClientService.logout();
                         set({ user: null });
                     } catch (error) {
                         console.error('Logout error:', error);

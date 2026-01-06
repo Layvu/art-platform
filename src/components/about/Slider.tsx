@@ -47,16 +47,7 @@ export default function AboutSlider() {
         ],
     };
 
-    const images = [
-        'https://images.unsplash.com/photo-1507149833265-60c372daea22?w=800',
-        'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=800',
-        'https://images.unsplash.com/photo-1504208434309-cb69f4fe52b0?w=800',
-        'https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=800',
-        'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?w=800',
-        'https://images.unsplash.com/photo-1517849845537-4d257902454a?w=800',
-        'https://images.unsplash.com/photo-1543852786-1cf6624b9987?w=800',
-        'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=800',
-    ];
+    const images = [''];
 
     return (
         <Slider {...settings} className="mx-auto mt-10 h-[501px] flex text-center relative">

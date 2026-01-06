@@ -28,7 +28,6 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
     }
 
     const { id, title, description, gallery, price, author } = data;
-    console.log('image:', gallery);
 
     return (
         <Card className="max-w-[800px] mx-auto mt-8">

@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { authorAuthService } from '@/services/api/author-auth-service';
+import { authorClientService } from '@/services/api/client/author-client.service';
 import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
 import type { Author, Product } from '@/shared/types/payload-types';
 import type { IProductFormData } from '@/shared/types/product.type';
@@ -68,7 +68,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         };
 
         try {
-            const result = await authorAuthService.updateProfile(updated);
+            const result = await authorClientService.updateProfile(updated);
 
             if (result.success) {
                 setSuccess('Профиль автора обновлен');
@@ -88,7 +88,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         setSuccess('');
 
         try {
-            const result = await authorAuthService.createProduct(createProductForm);
+            const result = await authorClientService.createProduct(createProductForm);
 
             if (result.success && result.product) {
                 // Добавляем новый товар в начало списка
@@ -114,7 +114,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         setSuccess('');
 
         try {
-            const result = await authorAuthService.updateProduct(editingProduct.id, editProductForm);
+            const result = await authorClientService.updateProduct(editingProduct.id, editProductForm);
 
             if (result.success && result.product) {
                 setProducts(products.map((p) => (p.id === editingProduct.id ? result.product! : p)));
@@ -138,7 +138,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         setSuccess('');
 
         try {
-            const result = await authorAuthService.deleteProduct(productToDelete.id);
+            const result = await authorClientService.deleteProduct(productToDelete.id);
 
             if (result.success) {
                 setProducts(products.filter((p) => p.id !== productToDelete.id));

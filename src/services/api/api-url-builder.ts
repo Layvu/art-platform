@@ -3,67 +3,78 @@ import { stringify } from 'qs-esm';
 import type { QueryParams } from '@/shared/types/query-params.type';
 
 export class ApiUrlBuilder {
-    private baseUrl: string;
+    private readonly baseUrl: string;
 
-    constructor(baseUrl: string = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000') {
-        this.baseUrl = baseUrl.replace(/\/$/, '');
+    constructor() {
+        this.baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
     }
 
-    // Получить URL для коллекции по slug
-    collection(slug: string): string {
-        return `${this.baseUrl}/api/${slug}`;
-    }
+    // Основной метод построения итогового URL (с параметрами запроса и без)
+    private buildUrl(path: string, params?: QueryParams): string {
+        const correctPath = path.startsWith('/') ? path : `/${path}`;
+        const url = `${this.baseUrl}${correctPath}`;
 
-    // Получить URL с параметрами запроса
-    collectionWithParams(slug: string, params: QueryParams = {}): string {
+        if (!params || Object.keys(params).length === 0) {
+            return url;
+        }
+
         const query = stringify(params, {
             addQueryPrefix: true,
             encodeValuesOnly: true, // важно для корректного where
             skipNulls: true,
         });
 
-        return `${this.collection(slug)}${query}`;
+        return `${url}${query}`;
     }
 
-    // Получить URL для item'а по slug и id
-    collectionItem(slug: string, id: string): string {
-        return `${this.baseUrl}/api/${slug}/${id}`;
-    }
-
-    // Для удобства общий метод
-    static forCollection(slug: string, params?: QueryParams) {
-        const builder = new ApiUrlBuilder();
-        return params ? builder.collectionWithParams(slug, params) : builder.collection(slug);
-    }
-
-    static forRegister(): string {
-        const builder = new ApiUrlBuilder();
-        return `${builder.baseUrl}/api/auth/register`;
-    }
-
-    static forCustomerProfileUpdate(): string {
-        const builder = new ApiUrlBuilder();
-        return `${builder.baseUrl}/api/customer/profile/update`;
-    }
-
-    static forAuthorProfileUpdate(): string {
-        const builder = new ApiUrlBuilder();
-        return `${builder.baseUrl}/api/author/profile/update`;
-    }
-
-    static forAuthorProducts(productId?: number): string {
-        const builder = new ApiUrlBuilder();
-        let url = `${builder.baseUrl}/api/author/products`;
-
-        if (productId) {
-            url += `/${productId}`;
+    // Singleton Access
+    private static instance: ApiUrlBuilder;
+    public static getInstance(): ApiUrlBuilder {
+        if (!ApiUrlBuilder.instance) {
+            ApiUrlBuilder.instance = new ApiUrlBuilder();
         }
-
-        return url;
+        return ApiUrlBuilder.instance;
     }
 
-    static getBaseUrl(): string {
-        const builder = new ApiUrlBuilder();
-        return builder.baseUrl;
+    // Получить URL для Payload коллекции
+    public collection(slug: string, params: QueryParams = {}): string {
+        return this.buildUrl(`/api/${slug}`, params);
     }
+
+    // Получить URL для элемента Payload коллекции по slug и id
+    public item(slug: string, id: string | number): string {
+        return this.buildUrl(`/api/${slug}/${id}`);
+    }
+
+    // Auth Routes
+    public auth = {
+        login: () => this.collection('users/login'),
+        logout: () => this.collection('users/logout'),
+        me: () => this.collection('users/me'),
+        register: () => this.collection('auth/register'),
+    };
+
+    // Customer Routes (Кастомные эндпоинты)
+    public customer = {
+        profileUpdate: () => this.buildUrl('/api/customer/profile/update'),
+    };
+
+    // Author Routes (Кастомные эндпоинты)
+    public author = {
+        profileUpdate: () => this.buildUrl('/api/author/profile/update'),
+        // Если товары автора получаются через кастомный эндпоинт:
+        products: (productId?: number) => {
+            const path = '/api/author/products';
+            return productId ? this.buildUrl(`${path}/${productId}`) : this.buildUrl(path);
+        },
+    };
+
+    // Order Routes (Кастомные эндпоинты)
+    public order = {
+        create: () => this.buildUrl('/api/orders/create'),
+        cancel: (id: number) => this.buildUrl(`/api/orders/${id}/cancel`),
+    };
 }
+
+// Экспортируем единый инстанс для использования в сервисах
+export const apiUrl = ApiUrlBuilder.getInstance();

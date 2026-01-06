@@ -9,3 +9,11 @@ export const COLLECTION_SLUGS = {
     CARTS: 'carts',
     ORDERS: 'orders',
 } as const;
+
+export const HTTP_METHODS = {
+    GET: 'GET',
+    POST: 'POST',
+    PUT: 'PUT',
+    PATCH: 'PATCH',
+    DELETE: 'DELETE',
+};

@@ -2,7 +2,7 @@
 
 import { useQueries, useQuery } from '@tanstack/react-query';
 
-import type { PaginatedResponse } from '@/services/api/payload-service';
+import type { PaginatedResponse } from '@/services/api/server/payload-data.service';
 
 import type { Author, Product } from '../types/payload-types';
 import type { QueryParams } from '../types/query-params.type';

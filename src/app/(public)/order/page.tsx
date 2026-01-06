@@ -1,14 +1,14 @@
 import { redirect } from 'next/navigation';
 
 import { PAGES } from '@/config/public-pages.config';
-import { customerAuthService } from '@/services/api/customer-auth-service';
-import { payloadServerAuthService } from '@/services/api/payload-server-auth.service';
+import { authServerService } from '@/services/api/server/auth-server.service';
+import { customerServerService } from '@/services/api/server/customer-server.service';
 import { UserType } from '@/shared/types/auth.interface';
 
 import OrderUI from './OrderUI';
 
 export default async function OrderPage() {
-    const user = await payloadServerAuthService.getCurrentUser();
+    const user = await authServerService.getCurrentUser();
 
     // Защита роута - страница доступна только авторизованным пользователям
     // TODO: вынести guard для защит роутов
@@ -17,7 +17,7 @@ export default async function OrderPage() {
     }
 
     // Получаем данные покупателя
-    const customer = await customerAuthService.getCustomerByUserId(user.id);
+    const customer = await customerServerService.getCustomerByUserId(user.id);
 
     return <OrderUI customer={customer} />;
 }

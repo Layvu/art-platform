@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { customerAuthService } from '@/services/api/customer-auth-service';
+import { customerClientService } from '@/services/api/client/customer-client.service';
 import type { ICustomerAddress, ICustomerUpdateInput } from '@/shared/types/customer.interface';
 import type { Customer } from '@/shared/types/payload-types';
 
@@ -39,7 +39,6 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
         // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
         // Но в целом данных мало, так что пока просто обновляем всё
         const updated: ICustomerUpdateInput = {
-            id: customerData.id,
             email,
             fullName,
             phone,
@@ -52,7 +51,7 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
         }
 
         try {
-            const result = await customerAuthService.updateProfile(updated);
+            const result = await customerClientService.updateProfile(updated);
 
             if (result.success) {
                 setSuccess('Профиль обновлен');

@@ -20,18 +20,7 @@ const nextConfig: NextConfig = {
     reactStrictMode: true,
 
     images: {
-        domains: ['images.unsplash.com'],
-        remotePatterns: [
-            getMainRemotePattern(),
-
-            // TODO: заглушка, удалить хост после замены картинок на реальные на странице "О нас"
-            // В любом случае не работает с <Image />, а он нужен для корректного билда
-            {
-                protocol: 'https',
-                hostname: 'images.unsplash.com',
-                pathname: '/**',
-            },
-        ],
+        remotePatterns: [getMainRemotePattern()],
     },
 };
 

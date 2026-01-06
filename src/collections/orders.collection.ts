@@ -3,7 +3,7 @@ import { type CollectionConfig } from 'payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { DELIVERY_TYPES, ORDER_STATUS } from '@/shared/constants/order.constants';
 import { UserType } from '@/shared/types/auth.interface';
-import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
+import { isAdmin, isCreateOperation, isCustomer } from '@/shared/utils/payload';
 
 export const OrdersCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.ORDERS,
@@ -185,16 +185,20 @@ export const OrdersCollection: CollectionConfig = {
             return false;
         },
 
-        create: ({ req }) => {
-            // Разрешаем создавать заказы авторизованным покупателям
-            return req.user?.role === UserType.CUSTOMER;
+        create: async ({ req: { user } }) => {
+            if (!user) return false;
+
+            // Разрешаем создавать заказы админам и авторизованным покупателям (последнее это TODO)
+            if (isAdmin(user) || isCustomer(user)) return true;
+
+            return false;
         },
 
         update: async ({ req: { user, payload }, id }) => {
             if (!user) return false;
             if (isAdmin(user)) return true;
             if (!id) return false;
-            if (user.role === UserType.CUSTOMER) {
+            if (isCustomer(user)) {
                 // 1. Находим customer запись пользователя
                 const customerRes = await payload.find({
                     collection: COLLECTION_SLUGS.CUSTOMERS,
@@ -228,37 +232,43 @@ export const OrdersCollection: CollectionConfig = {
             async ({ data, req, operation }) => {
                 const { user, payload } = req;
 
-                if (isCreateOperation(operation) && user && user.role === UserType.CUSTOMER) {
-                    // Находим customer запись для текущего пользователя
-                    const customerRes = await payload.find({
-                        collection: COLLECTION_SLUGS.CUSTOMERS,
-                        where: { user: { equals: user.id } },
-                        limit: 1,
-                    });
-
-                    const customer = customerRes.docs[0];
-                    if (customer && !data?.customer) {
-                        data!.customer = customer.id;
+                if (isCreateOperation(operation)) {
+                    if (user && isCustomer(user)) {
+                        // Находим customer запись для текущего пользователя
+                        const customerRes = await payload.find({
+                            collection: COLLECTION_SLUGS.CUSTOMERS,
+                            where: { user: { equals: user.id } },
+                            limit: 1,
+                        });
+                        const customer = customerRes.docs[0];
+                        if (customer) {
+                            data!.customer = customer.id;
+                        }
                     }
 
                     // Генерируем номер заказа
-                    if (!data?.orderNumber && customer) {
+
+                    if (data?.customer && !data?.orderNumber) {
+                        // data.customer может быть ID (number) или объектом
+                        const customerId = typeof data.customer === 'object' ? data.customer.id : data.customer;
+
                         const lastOrder = await payload.find({
                             collection: COLLECTION_SLUGS.ORDERS,
-                            where: { customer: { equals: customer.id } },
+                            where: { customer: { equals: customerId } },
                             limit: 1,
                         });
 
                         let orderSequence = 1;
                         if (lastOrder.docs.length > 0) {
                             const lastOrderNumber = lastOrder.docs[0]?.orderNumber;
+                            // Парсим "ORD-ID-0001"
                             const lastNumber = lastOrderNumber?.match(/-(\d+)$/);
                             if (lastNumber && lastNumber[1]) {
                                 orderSequence = parseInt(lastNumber[1], 10) + 1;
                             }
                         }
 
-                        data!.orderNumber = `ORD-${customer.id}-${orderSequence.toString().padStart(4, '0')}`;
+                        data!.orderNumber = `ORD-${customerId}-${orderSequence.toString().padStart(4, '0')}`;
                     }
                 }
 

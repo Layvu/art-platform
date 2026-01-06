@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 
 import { PAGES } from '@/config/public-pages.config';
-import { payloadServerAuthService } from '@/services/api/payload-server-auth.service';
+import { authServerService } from '@/services/api/server/auth-server.service';
+import { authorServerService } from '@/services/api/server/author-server.service';
+import { customerServerService } from '@/services/api/server/customer-server.service';
 import { UserType } from '@/shared/types/auth.interface';
 
 import AuthorProfileUI from './AuthorProfileUI';
@@ -9,7 +11,7 @@ import CustomerProfileUI from './CustomerProfileUI';
 
 export default async function ProfilePage() {
     // Получаем текущего пользователя через серверный метод
-    const user = await payloadServerAuthService.getCurrentUser();
+    const user = await authServerService.getCurrentUser();
 
     // Если пользователь не авторизован - редирект на логин
     if (!user?.id) {
@@ -20,12 +22,13 @@ export default async function ProfilePage() {
     // Для авторов
     if (user.role === UserType.AUTHOR) {
         try {
-            const author = await payloadServerAuthService.getAuthorData(user.id);
+            const author = await authorServerService.getAuthorByUserId(user.id);
             if (!author) {
                 console.error('Author profile not found');
+                redirect(PAGES.LOGIN);
             }
 
-            const products = await payloadServerAuthService.getAuthorProducts(author.id);
+            const products = await authorServerService.getAuthorProducts(author.id);
 
             return <AuthorProfileUI authorData={author} products={products || []} />;
         } catch (error) {
@@ -36,9 +39,10 @@ export default async function ProfilePage() {
     // Для покупателей
     if (user.role === UserType.CUSTOMER) {
         try {
-            const customer = await payloadServerAuthService.getCustomerData(user.id);
+            const customer = await customerServerService.getCustomerByUserId(user.id);
             if (!customer) {
                 console.error('Customer profile not found');
+                redirect(PAGES.LOGIN);
             }
 
             return <CustomerProfileUI customerData={customer} />;

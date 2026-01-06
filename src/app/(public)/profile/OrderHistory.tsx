@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
-import { orderService } from '@/services/api/order-service';
+import { orderClientService } from '@/services/api/client/order-client.service';
 import { getOrderStatusText, ORDER_STATUS } from '@/shared/constants/order.constants';
 import { useProductSlugs } from '@/shared/hooks/useFetchData';
 import type { Order } from '@/shared/types/payload-types';
@@ -32,7 +32,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
     useEffect(() => {
         const loadOrders = async () => {
             try {
-                const customerOrders = await orderService.getOrdersByCustomer(customerId);
+                const customerOrders = await orderClientService.getOrdersByCustomer(customerId);
                 setOrders(customerOrders);
             } catch (error) {
                 console.error('Failed to load orders', error);
@@ -45,7 +45,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
     }, [customerId]);
 
     const handleCancelOrder = async (orderId: number) => {
-        await orderService.cancelOrder(orderId);
+        await orderClientService.cancelOrder(orderId);
         // Обновляем список заказов
         setOrders(orders.map((order) => (order.id === orderId ? { ...order, status: ORDER_STATUS.CANCELLED } : order)));
     };

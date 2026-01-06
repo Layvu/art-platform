@@ -18,7 +18,7 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
     const params = toQueryParams(initialParams);
 
     const { data, isError, error, isPlaceholderData, isFetching } = useFetchProducts(params);
-    const products = data?.docs;
+    const products = data?.docs; // TODO: Это печально, по хорошему нужно вынести метод и типизировать
 
     const updateQueryParams = useUpdateQueryParams<ProductsQueryParams>();
 

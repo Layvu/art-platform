@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGES } from '@/config/public-pages.config';
-import { authorAuthService } from '@/services/api/author-auth-service';
-import { customerAuthService } from '@/services/api/customer-auth-service';
+import { authorClientService } from '@/services/api/client/author-client.service';
+import { customerClientService } from '@/services/api/client/customer-client.service';
 import { useAuthStore } from '@/services/store/auth/store';
 import { type UserRole, UserType } from '@/shared/types/auth.interface';
 
@@ -41,10 +41,10 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
             let authResult;
             if (userType === UserType.CUSTOMER) {
                 // Аутентификация покупателя через Payload
-                authResult = await customerAuthService.authenticate(email, password);
+                authResult = await customerClientService.authenticate(email, password);
             } else if (userType === UserType.AUTHOR) {
                 // Аутентификация автора через Payload
-                authResult = await authorAuthService.authenticate(email, password);
+                authResult = await authorClientService.authenticate(email, password);
             } else {
                 setError('Неверный тип пользователя');
                 return;
