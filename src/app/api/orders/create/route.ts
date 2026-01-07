@@ -38,9 +38,16 @@ export async function POST(req: Request) {
             order: newOrder,
         });
     } catch (error) {
+        let message = 'Ошибка при создании заказа';
+        if (error instanceof Error) message = error.message;
+
+        // Если ошибка "Товар не найден" или "Снят с продажи" (выбрасывается в prepareOrder) - это ошибка клиента (данные устарели) - возвращаем 400
+        if (message.includes('не найден') || message.includes('снят с продажи') || message.includes('quantity')) {
+            console.warn(`Order creation failed (bad request): ${message}`);
+            return NextResponse.json({ success: false, message }, { status: 400 });
+        }
+
         console.error('Order creation error:', error);
-        // Если ошибка пришла из сервиса (например "Товар не найден") - отправляем её клиенту
-        const message = error instanceof Error ? error.message : 'Ошибка при создании заказа';
         return NextResponse.json({ success: false, message }, { status: 500 });
     }
 }

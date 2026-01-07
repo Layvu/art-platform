@@ -46,7 +46,7 @@ export default function RegisterPage() {
             const authResult = await customerClientService.authenticate(userData.email, userData.password!);
 
             if (!authResult.success) {
-                setError('Регистрация прошла успешно, но не удалось войти. Попробуйте войти снова');
+                setError(authResult.error || 'Регистрация прошла успешно, но не удалось войти. Попробуйте войти снова');
                 return;
             }
 
@@ -71,7 +71,7 @@ export default function RegisterPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input

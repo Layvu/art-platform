@@ -55,21 +55,31 @@ export const ProductsCollection: CollectionConfig = {
                 const author = authorRes.docs[0];
                 if (!author) return false;
 
-                // Получаем товар
-                const product = await payload.findByID({
-                    collection: COLLECTION_SLUGS.PRODUCTS,
-                    id: id!,
-                });
-                if (!product) return false;
+                if (!id) return false;
 
-                // Сравниваем ID автора товара с ID автора
-                // product.author может быть объектом или ID
-                // ^ TODO: странно это, пофиксить мб
+                try {
+                    // Получаем товар
+                    const product = await payload.findByID({
+                        collection: COLLECTION_SLUGS.PRODUCTS,
+                        id: id,
+                    });
 
-                const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
-                const hasAccess = productAuthorId === author.id;
+                    if (!product) return false; // На всякий случай
 
-                return hasAccess;
+                    // Сравниваем ID автора товара с ID автора
+                    // product.author может быть объектом или ID
+                    // ^ TODO: странно это, пофиксить мб
+
+                    const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
+                    const hasAccess = productAuthorId === author.id;
+
+                    return hasAccess;
+                } catch (error) {
+                    // Если товар не найден (findByID выбросил ошибку),
+                    // значит и обновлять нечего => запрещаем доступ
+                    console.error('Error: product not found', error);
+                    return false;
+                }
             }
 
             return false;
@@ -110,16 +120,22 @@ export const ProductsCollection: CollectionConfig = {
                 const author = authorRes.docs[0];
                 if (!author) return false;
 
-                const product = await payload.findByID({
-                    collection: COLLECTION_SLUGS.PRODUCTS,
-                    id: id!,
-                });
-                if (!product) return false;
+                if (!id) return false;
 
-                const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
-                const hasAccess = productAuthorId === author.id;
+                try {
+                    const product = await payload.findByID({
+                        collection: COLLECTION_SLUGS.PRODUCTS,
+                        id: id,
+                    });
 
-                return hasAccess;
+                    if (!product) return false;
+
+                    const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
+                    return productAuthorId === author.id;
+                } catch (error) {
+                    console.error('Error: product not found', error);
+                    return false;
+                }
             }
 
             return false;

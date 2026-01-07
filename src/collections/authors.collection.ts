@@ -27,8 +27,8 @@ export const AuthorsCollection: CollectionConfig = {
                 };
             }
 
-            // Все остальные не видят авторов
-            return false;
+            // Все остальные видят авторов
+            return true;
         },
 
         update: async ({ req: { user } }) => {

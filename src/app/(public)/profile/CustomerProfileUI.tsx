@@ -58,7 +58,7 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                 setPassword('');
                 setLoading(false);
             } else {
-                setError('Произошла ошибка при обновлении профиля');
+                setError(result.error || 'Произошла ошибка при обновлении профиля');
                 console.error(result.error);
             }
         } finally {

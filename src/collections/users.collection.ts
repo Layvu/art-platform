@@ -4,16 +4,18 @@ import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { UserType } from '@/shared/types/auth.interface';
 import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
 
+// TODO: удалить после подключения HTTPS
+// Определяем, используется ли HTTPS
+const isHttps = process.env.NEXT_PUBLIC_BASE_URL?.startsWith('https:');
+
 // Коллекция пользователей панели администратора, управляемая через PayloadCMS
 export const UsersCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.USERS,
     auth: {
-        // Поддержка API-ключей. Изменение данных о пользователе возможна только от лица главного админа (через его API key)
-        // Получаем его ключ в админке и храним в PAYLOAD_API_KEY
-        useAPIKey: true,
-        // TODO: разобраться с cookie, так ли они тут нужны
         cookies: {
-            // secure: process.env.NODE_ENV === 'production',
+            // Включаем secure только если сайт работает по HTTPS
+            secure: isHttps,
+            // Lax достаточно, так как фронт и бэк на одном домене
             sameSite: 'Lax',
         },
         // Оставляем API ключи для серверных запросов

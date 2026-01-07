@@ -13,19 +13,20 @@ export async function PATCH(req: Request) {
     }
 
     if (user.role !== UserType.CUSTOMER) {
-        return NextResponse.json({ error: 'Доступ только для покупателей' }, { status: 401 });
+        return NextResponse.json({ error: 'Доступ только для авторизованных покупателей' }, { status: 401 });
     }
 
     const body = await req.json();
     try {
         // Обновляем профиль
-        const { password, email } = body;
+        const { password, email, fullName, phone } = body;
 
         // Получаем профиль покупателя для обновления
         const customer = await customerServerService.getCustomerByUserId(user.id);
 
         // Обновляем данные покупателя в коллекции customers
-        await customerServerService.updateCustomerProfile(customer.id, body);
+        const customerUpdates = { fullName, phone };
+        await customerServerService.updateCustomerProfile(customer.id, customerUpdates);
 
         // Если есть пароль или email, обновляем запись в коллекции users
         if (password || email) {
@@ -42,7 +43,25 @@ export async function PATCH(req: Request) {
             message: 'Профиль успешно обновлен',
         });
     } catch (error) {
+        let errorMessage = '';
+        if (error instanceof Error) {
+            errorMessage = error.message.toLowerCase();
+        }
+
+        console.log('errorMessage', errorMessage);
+
+        // Ловим попытку смены email на занятый
+        if (errorMessage.includes('unique') || errorMessage.includes('email')) {
+            console.log('email', errorMessage.includes('email'));
+            return NextResponse.json({ error: 'Этот email уже занят другим пользователем' }, { status: 400 });
+        }
+
+        // Ловим ошибки валидации
+        if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {
+            return NextResponse.json({ error: 'Некорректные данные' }, { status: 400 });
+        }
+
         console.error('Profile update error:', error);
-        return NextResponse.json({ success: false, message: 'Ошибка при обновлении профиля' }, { status: 500 });
+        return NextResponse.json({ error: 'Ошибка при обновлении профиля' }, { status: 500 });
     }
 }

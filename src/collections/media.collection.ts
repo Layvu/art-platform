@@ -2,6 +2,7 @@
 import type { CollectionConfig } from 'payload';
 
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
+import { isAdmin, isAuthor } from '@/shared/utils/payload';
 
 export const MediaCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.MEDIA,
@@ -19,5 +20,32 @@ export const MediaCollection: CollectionConfig = {
     admin: { useAsTitle: 'filename' },
     fields: [],
 
-    access: { read: () => true },
+    access: {
+        read: () => true,
+
+        // Загружать, обновлять и удалять медиа-файлы могут только админы и авторы
+        create: async ({ req: { user } }) => {
+            if (!user) return false;
+
+            if (isAdmin(user) || isAuthor(user)) return true;
+
+            return false;
+        },
+
+        update: async ({ req: { user } }) => {
+            if (!user) return false;
+
+            if (isAdmin(user) || isAuthor(user)) return true;
+
+            return false;
+        },
+
+        delete: async ({ req: { user } }) => {
+            if (!user) return false;
+
+            if (isAdmin(user) || isAuthor(user)) return true;
+
+            return false;
+        },
+    },
 };

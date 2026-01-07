@@ -18,15 +18,25 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
     try {
+        // Проверка, что обновляем своего автора
+        const author = await authorServerService.getAuthorByUserId(user.id);
+        if (!author) return NextResponse.json({ error: 'Автор не найден' }, { status: 404 });
+
         // Обновляем профиль
-        const { id, ...updates } = body;
-        await authorServerService.updateAuthorProfile(id, updates);
+        await authorServerService.updateAuthorProfile(author.id, body);
 
         return NextResponse.json({
             success: true,
             message: 'Профиль успешно обновлен',
         });
     } catch (error) {
+        let errorMessage = '';
+        if (error instanceof Error) errorMessage = error.message;
+
+        if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {
+            return NextResponse.json({ success: false, message: errorMessage }, { status: 400 });
+        }
+
         console.error('Profile update error:', error);
         return NextResponse.json({ success: false, message: 'Ошибка при обновлении профиля' }, { status: 500 });
     }

@@ -34,8 +34,22 @@ export class PayloadDataService {
         const url = apiUrl.collection(slug, params);
         const response = await fetch(url, fetchOptions);
 
-        if (!response.ok) throw new Error(`Failed to fetch collection: ${slug}`);
-        return response.json();
+        if (!response.ok) {
+            // Пытаемся прочитать текст ошибки
+            const errorText = await response.text();
+            throw new Error(
+                `Failed to fetch collection ${slug}: ${response.status} ${response.statusText} - ${errorText}`,
+            );
+        }
+
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(`JSON Parse Error for URL: ${url}`);
+            console.error('Received response:', text.slice(0, 500)); // Логируем начало ответа
+            throw new Error(`Invalid JSON response from ${slug}`, error as Error);
+        }
     }
 
     private async getItem<T>(
@@ -47,8 +61,21 @@ export class PayloadDataService {
         const url = apiUrl.item(slug, id);
         const response = await fetch(url, fetchOptions);
 
-        if (!response.ok) throw new Error(`Failed to fetch item: ${slug}/${id}`);
-        return response.json();
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(
+                `Failed to fetch item ${slug}/${id}: ${response.status} ${response.statusText} - ${errorText}`,
+            );
+        }
+
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.error(`JSON Parse Error for URL: ${url}`);
+            console.error('Received response:', text.slice(0, 500));
+            throw new Error(`Invalid JSON response from item ${slug}/${id}`, error as Error);
+        }
     }
 
     async getProducts(params?: QueryParams): Promise<PaginatedResponse<Product>> {

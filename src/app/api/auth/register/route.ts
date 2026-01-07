@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { authServerService } from '@/services/api/server/auth-server.service';
 import { customerServerService } from '@/services/api/server/customer-server.service';
 
 // Нам нужен этот эндпоинт, потому что в Payload имеет доступ к пользовательской сессии только на сервере
@@ -14,13 +13,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        // Проверяем, существует ли пользователь
-        const userExists = await authServerService.checkUserExists(email);
-        if (userExists) {
-            return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 });
-        }
-
-        // Создаём нового покупателя
+        // Создаём нового покупателя. Если email занят, Payload сам выбросит ошибку
         await customerServerService.createCustomer({
             email,
             password,
@@ -30,7 +23,31 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Registration error:', error);
-        return NextResponse.json({ error: 'Ощибка при создании пользователя' }, { status: 500 });
+        let errorMessage = '';
+        if (error instanceof Error) {
+            errorMessage = error.message.toLowerCase();
+        }
+
+        // Ловим дубликаты (unique) и ошибки валидации (invalid format, required, etc)
+        if (
+            errorMessage.includes('unique') ||
+            errorMessage.includes('email') ||
+            errorMessage.includes('invalid') ||
+            errorMessage.includes('already exists')
+        ) {
+            // Если ошибка про email, возвращаем понятный текст
+            if (errorMessage.includes('email') && errorMessage.includes('unique')) {
+                return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 });
+            }
+            if (errorMessage.includes('email') && errorMessage.includes('invalid')) {
+                return NextResponse.json({ error: 'Некорректный формат email' }, { status: 400 });
+            }
+
+            // Для остальных ошибок валидации возвращаем текст как есть
+            return NextResponse.json({ error: errorMessage }, { status: 400 });
+        }
+
+        console.error('Unexpected Registration error:', error);
+        return NextResponse.json({ error: 'Ошибка при создании пользователя' }, { status: 500 });
     }
 }

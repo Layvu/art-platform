@@ -1,22 +1,33 @@
-import { COLLECTION_SLUGS } from '@/shared/constants/constants';
+import { headers } from 'next/headers';
 
 // Базовый класс для серверных сервисов для переиспользования заголовков
 export abstract class BaseServerService {
-    protected readonly apiKey: string;
+    // Метод асинхронный, так как headers() в Next.js асинхронный
+    protected async getAuthHeaders() {
+        const headersList = await headers();
+        const cookie = headersList.get('cookie') || '';
 
-    constructor() {
-        this.apiKey = process.env.PAYLOAD_API_KEY!;
-        if (!this.apiKey) {
-            console.warn('PAYLOAD_API_KEY is not set in env variables');
-        }
-    }
+        // Извлекаем Origin или Referer, чтобы Payload мог проверить CSRF
+        const origin = headersList.get('origin') || '';
+        const referer = headersList.get('referer') || '';
 
-    protected getAuthHeaders() {
-        // TODO: исправить эту логику, дав возможность юзерам в зависимости от их ролей читать и изменять данные:
-        // Чтение и изменение данных в БД возможно только от лица главного админа. Логика проверки реализуема в access коллекциях
-        return {
+        console.log('headers', origin, referer);
+
+        const authHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
-            Authorization: `${COLLECTION_SLUGS.USERS} API-Key ${this.apiKey}`,
+            // Передаем куки текущего запроса.
+            // Payload автоматически распознает 'payload-token' внутри Cookie и определит пользователя
+            Cookie: cookie,
         };
+
+        // Пробрасываем Origin, если он есть.
+        // Это поможет Payload CSRF-защите понять, что запрос легитимен
+        if (origin) {
+            authHeaders['Origin'] = origin;
+        } else if (referer) {
+            authHeaders['Referer'] = referer;
+        }
+
+        return authHeaders;
     }
 }

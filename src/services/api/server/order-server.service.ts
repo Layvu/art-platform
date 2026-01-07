@@ -14,7 +14,7 @@ export class OrderServerService extends BaseServerService {
 
         const response = await fetch(url, {
             method: HTTP_METHODS.POST,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify(orderData),
         });
 
@@ -73,7 +73,7 @@ export class OrderServerService extends BaseServerService {
 
         const response = await fetch(url, {
             method: HTTP_METHODS.PATCH,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify({ status }),
         });
 
@@ -84,7 +84,7 @@ export class OrderServerService extends BaseServerService {
         const url = apiUrl.item(COLLECTION_SLUGS.ORDERS, orderId);
 
         const response = await fetch(url, {
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             cache: 'no-store', // Всегда актуальное состояние заказа
         });
         if (!response.ok) {

@@ -62,7 +62,6 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         setSuccess('');
 
         const updated: IAuthorUpdateInput = {
-            id: authorData.id,
             name,
             bio,
         };
@@ -73,7 +72,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
             if (result.success) {
                 setSuccess('Профиль автора обновлен');
             } else {
-                setError('Ошибка обновления профиля автора');
+                setError(result.error || 'Ошибка обновления профиля автора');
                 console.error('Update profile error:', result.error);
             }
         } finally {
@@ -97,7 +96,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                 setCreateProductForm(initialProductForm);
                 setSuccess('Новый товар успешно создан');
             } else {
-                setError('Ошибка создания товара');
+                setError(result.error || 'Ошибка создания товара');
                 console.error('Create product error:', result.error);
             }
         } finally {
@@ -122,7 +121,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                 setEditProductForm(initialProductForm);
                 setSuccess('Товар успешно обновлен');
             } else {
-                setError('Ошибка обновления товара');
+                setError(result.error || 'Ошибка обновления товара');
                 console.error('Update product error:', result.error);
             }
         } finally {
@@ -146,7 +145,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                 setProductToDelete(null);
                 setSuccess('Товар успешно удален');
             } else {
-                setError('Ошибка удаления товара');
+                setError(result.error || 'Ошибка удаления товара');
                 console.error('Delete product error:', result.error);
             }
         } finally {

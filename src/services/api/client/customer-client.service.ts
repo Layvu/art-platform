@@ -21,7 +21,7 @@ export class CustomerClientService {
 
             // Проверяем роль
             if (userData.user.role !== UserType.CUSTOMER) {
-                return { success: false, error: 'Доступ только для покупателей' };
+                return { success: false, error: 'Доступ только для авторизованных покупателей' };
             }
 
             return { success: true };

@@ -15,7 +15,9 @@ export class AuthorServerService extends BaseServerService {
             depth: 1,
         });
 
-        const response = await fetch(url, { headers: this.getAuthHeaders() });
+        const response = await fetch(url, {
+            headers: await this.getAuthHeaders(),
+        });
 
         if (!response.ok) {
             console.error('Failed to get author data');
@@ -33,7 +35,7 @@ export class AuthorServerService extends BaseServerService {
         });
 
         const response = await fetch(url, {
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             cache: 'no-store', // Для админки важно свежее состояние ??? TODO
         });
 
@@ -51,7 +53,7 @@ export class AuthorServerService extends BaseServerService {
         // Запрос на кастомный эндпоинт
         const response = await fetch(url, {
             method: HTTP_METHODS.POST,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify(productData),
         });
 
@@ -66,7 +68,7 @@ export class AuthorServerService extends BaseServerService {
 
         const response = await fetch(url, {
             method: HTTP_METHODS.PATCH,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify(updates),
         });
 
@@ -81,7 +83,7 @@ export class AuthorServerService extends BaseServerService {
 
         const response = await fetch(url, {
             method: HTTP_METHODS.PATCH,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify(updates),
         });
 
@@ -93,7 +95,7 @@ export class AuthorServerService extends BaseServerService {
 
         const response = await fetch(url, {
             method: HTTP_METHODS.DELETE,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
         });
 
         if (!response.ok) throw new Error('Server: Failed to delete product');

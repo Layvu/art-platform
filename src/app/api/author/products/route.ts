@@ -35,6 +35,26 @@ export async function POST(req: Request) {
         const newProduct = await authorServerService.createAuthorProduct(productData);
         return NextResponse.json({ product: newProduct });
     } catch (error) {
+        let errorMessage = '';
+        if (error instanceof Error) errorMessage = error.message;
+
+        // Проверка на уникальность на всякий случай (если вдруг slug совпал, хотя мы его генерируем)
+        if (errorMessage.includes('unique')) {
+            return NextResponse.json(
+                { error: 'Товар с таким названием или slug уже существует, попробуйте снова' },
+                { status: 400 },
+            );
+        }
+
+        // Ошибки валидации (например, пропущена цена)
+        if (
+            errorMessage.includes('validation') ||
+            errorMessage.includes('invalid') ||
+            errorMessage.includes('required')
+        ) {
+            return NextResponse.json({ error: errorMessage }, { status: 400 });
+        }
+
         console.error('Create product error:', error);
         return NextResponse.json({ error: 'Ошибка создания товара' }, { status: 500 });
     }

@@ -29,33 +29,64 @@ export class AuthServerService extends BaseServerService {
         return responseData.user || null;
     }
 
+    // Метод для получения куки сессии (логин на сервере)
+    // Используется при регистрации, чтобы сразу выполнить действия от лица нового юзера
+    async loginUser(email: string, password: string): Promise<string | null> {
+        const url = apiUrl.auth.login();
+
+        const response = await fetch(url, {
+            method: HTTP_METHODS.POST,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) return null;
+
+        // Возвращаем строку с куками (payload-token)
+        return response.headers.get('set-cookie');
+    }
+
     async updateUserCredentials(userId: number, updates: ICredentials): Promise<void> {
-        // Обновление email/password требует прав админа или самого пользователя
-        // Пока что используем админский ключ
+        // Обновление email/password требует прав авторизованного пользователя
         const url = apiUrl.item(COLLECTION_SLUGS.USERS, userId);
 
         const response = await fetch(url, {
             method: HTTP_METHODS.PATCH,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify(updates),
         });
 
-        if (!response.ok) throw new Error('Failed to update credentials');
+        if (!response.ok) {
+            const errorData = await response.json();
+
+            // Достаём сообщение об ошибке от Payload
+            const validationMessage = errorData.errors?.[0]?.message;
+            const mainMessage = errorData.message;
+
+            // Выбрасываем ошибку, содержащую детали (например, "The following field is invalid: email")
+            throw new Error(validationMessage || mainMessage || 'Failed to update credentials');
+        }
     }
 
     // Далее методы для работы с User сущностью
     async createUser(email: string, password: string, role: UserRole): Promise<User> {
         const url = apiUrl.collection(COLLECTION_SLUGS.USERS);
 
+        // При создании юзера cookies могут быть пустыми, но access.create в UsersCollection разрешает анонимное создание
         const response = await fetch(url, {
             method: HTTP_METHODS.POST,
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
             body: JSON.stringify({ email, password, role }),
         });
 
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Failed to create user');
+            const errorData = await response.json();
+
+            const validationMessage = errorData.errors?.[0]?.message;
+            const mainMessage = errorData.message;
+
+            // Выбрасываем наиболее конкретную ошибку
+            throw new Error(validationMessage || mainMessage || 'Failed to create user');
         }
 
         const data = await response.json();
@@ -69,18 +100,12 @@ export class AuthServerService extends BaseServerService {
         });
 
         const response = await fetch(url, {
-            headers: this.getAuthHeaders(),
+            headers: await this.getAuthHeaders(),
         });
         if (!response.ok) return null;
 
         const data = await response.json();
         return data.docs[0] || null;
-    }
-
-    // Проверка существования пользователя по email
-    async checkUserExists(email: string): Promise<boolean> {
-        const user = await this.findUserByEmail(email);
-        return !!user;
     }
 }
 
