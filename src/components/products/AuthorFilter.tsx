@@ -21,7 +21,7 @@ type AuthorFilterProps = {
 
 export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFilterProps) {
     const [open, setOpen] = useState<boolean>(false);
-    const [search] = useState<string>('');
+    const [search, setSearch] = useState<string>('');
     const [selectedAuthor, setSelectedAuthor] = useState<string | undefined>(initialAuthor);
 
     // TODO пеерделать в infinite scroll

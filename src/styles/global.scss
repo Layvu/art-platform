@@ -1,7 +1,7 @@
 @use 'mixins' as *;
 
-.example {
-    color: red;
+body{
+    color: var(--color-zinc-900);
 }
 
 .container {
