@@ -16,12 +16,12 @@ import { Spinner } from '../ui/spinner';
 
 type AuthorFilterProps = {
     initialAuthor?: string;
-    onAuthorChange: (author: string) => void;
+    onAuthorChange: (author?: string) => void;
 };
 
 export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFilterProps) {
     const [open, setOpen] = useState<boolean>(false);
-    const [search] = useState<string>('');
+    const [search, setSearch] = useState<string>('');
     const [selectedAuthor, setSelectedAuthor] = useState<string | undefined>(initialAuthor);
 
     // TODO пеерделать в infinite scroll
@@ -31,10 +31,15 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
     const authors = data?.docs;
     const filteredAuthors = authors?.filter((author) => author.name?.toLowerCase().includes(search.toLowerCase()));
 
-    const onSaveClick = (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSaveClick = () => {
         if (!selectedAuthor) return;
         onAuthorChange(selectedAuthor);
+        setOpen(false);
+    };
+
+    const onResetClick = () => {
+        setSelectedAuthor(undefined);
+        onAuthorChange(undefined);
         setOpen(false);
     };
 
@@ -48,7 +53,7 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
                 <Command>
-                    <CommandInput placeholder="Найти автора" className="h-9" />
+                    <CommandInput value={search} onValueChange={setSearch} placeholder="Найти автора" className="h-9" />
                     <CommandList className="mt-4">
                         <CommandEmpty>Такого автора нет.</CommandEmpty>
                         <CommandGroup>
@@ -100,14 +105,20 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
                         </CommandGroup>
                     </CommandList>
                 </Command>
+                <div className="mt-4 flex gap-5">
                 <Button
                     disabled={!selectedAuthor}
                     type="submit"
-                    className="w-full mt-4"
-                    onClick={(e) => onSaveClick(e)}
+                    className="flex-1"
+                    onClick={onSaveClick}
                 >
                     Применить
                 </Button>
+                    <Button onClick={onResetClick} className="flex-1" variant="outline" disabled={!selectedAuthor}>
+                        Сбросить все
+                    </Button>
+                </div>
+            
             </PopoverContent>
         </Popover>
     );

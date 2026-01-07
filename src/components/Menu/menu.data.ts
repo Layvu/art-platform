@@ -18,15 +18,11 @@ export const MENU: IMenuItem[] = [
     },
     {
         href: PAGES.PRODUCTS,
-        name: 'Арт-товары',
+        name: 'Товары',
     },
     {
         href: PAGES.AUTHORS,
         name: 'Авторы',
-    },
-    {
-        href: PAGES.CART,
-        name: 'Корзина',
     },
     {
         href: PAGES.LOGIN,

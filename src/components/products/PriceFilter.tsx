@@ -23,10 +23,15 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
     const [priceFromValue, setPriceFromValue] = useState(priceFrom);
     const [priceToValue, setPriceToValue] = useState(priceTo);
 
-    const onSaveClick = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const onSaveClick = () => {
         onPriceChange(priceFromValue, priceToValue);
+        setOpen(false);
+    };
+
+    const onResetClick = () => {
+        setPriceFromValue(undefined);
+        setPriceToValue(undefined);
+        onPriceChange(undefined, undefined);
         setOpen(false);
     };
 
@@ -39,7 +44,7 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
-                <form className="flex flex-col gap-5">
+                <div className="flex flex-col gap-5">
                     <div className="flex gap-2 h-10">
                         <Input
                             type="number"
@@ -71,15 +76,25 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
                             <Label htmlFor="r3">До 1000 Р</Label>
                         </div>
                     </RadioGroup>
-                    <Button
-                        type="submit"
-                        className="w-full"
-                        onClick={(e) => onSaveClick(e)}
-                        disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
-                    >
-                        Применить
-                    </Button>
-                </form>
+
+                    <div className="flex gap-5">
+                        <Button
+                            className="flex-1"
+                            onClick={onSaveClick}
+                            disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
+                        >
+                            Применить
+                        </Button>
+                        <Button
+                            onClick={onResetClick}
+                            className="flex-1"
+                            variant="outline"
+                            disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
+                        >
+                            Сбросить все
+                        </Button>
+                    </div>
+                </div>
             </PopoverContent>
         </Popover>
     );

@@ -30,6 +30,12 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         setOpen(false);
     };
 
+    const onResetClick = () => {
+        setNewCategories([]);
+        onCategoryChange(undefined);
+        setOpen(false);
+    };
+    
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -82,9 +88,14 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                         </CommandGroup>
                     </CommandList>
                 </Command>
-                <Button onClick={onSaveClick} className="w-full mt-4" disabled={!newCategories.length}>
-                    Применить
-                </Button>
+                <div className="mt-4 flex gap-5">
+                    <Button onClick={onSaveClick} className="flex-1" disabled={!newCategories.length}>
+                        Применить
+                    </Button>
+                    <Button onClick={onResetClick} className="flex-1" variant="outline" disabled={!newCategories.length}>
+                        Сбросить все
+                    </Button>
+                </div>
             </PopoverContent>
         </Popover>
     );
