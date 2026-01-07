@@ -5,7 +5,7 @@ export const PRODUCTS_SORT_OPTIONS = [
     { value: 'price', label: 'По возрастанию цены' },
     { value: '-price', label: 'По убыванию цены' },
     { value: '-created_at', label: 'От старых к новым' },
-    { value: 'created_at', label: 'От новых к старым' },     
+    { value: 'created_at', label: 'От новых к старым' },
 ] as const;
 
 export const PRODUCT_CATEGORIES = [

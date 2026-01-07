@@ -1,5 +1,6 @@
 import type { Product } from '../types/payload-types';
 
+// TODO: может просто тип создать и сделать его type of?
 export const isProductData = (object: unknown): object is Product => {
     return (
         typeof object === 'object' &&

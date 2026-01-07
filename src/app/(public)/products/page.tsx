@@ -1,8 +1,8 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
-import { getQueryClient } from '@/lib/utils/get-query-client';
 import { toQueryParams } from '@/services/api/utils';
 import type { ProductsQueryParams } from '@/shared/types/query-params.type';
+import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
 import ProductsUI from '../../../components/products/ProductsUI';

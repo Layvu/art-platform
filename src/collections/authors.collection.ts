@@ -2,8 +2,8 @@ import { nanoid } from 'nanoid';
 import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
-import { isAdmin, isAuthor } from '@/lib/utils/payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
+import { isAdmin, isAuthor } from '@/shared/utils/payload';
 
 // TODO: вынести хуки коллекций в переменную / файл
 
@@ -56,12 +56,10 @@ export const AuthorsCollection: CollectionConfig = {
         {
             name: 'name',
             type: 'text',
-            // required: true,
         },
         {
             name: 'slug',
             type: 'text',
-            required: true,
             unique: true,
             admin: {
                 position: 'sidebar',
@@ -98,7 +96,6 @@ export const AuthorsCollection: CollectionConfig = {
     ],
     hooks: {
         beforeChange: [
-            // TODO: вынести, такой же у products.collection.ts
             // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;

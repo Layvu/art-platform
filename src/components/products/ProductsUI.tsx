@@ -18,7 +18,7 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
     const params = toQueryParams(initialParams);
 
     const { data, isError, error, isPlaceholderData, isFetching } = useFetchProducts(params);
-    const products = data?.docs;
+    const products = data?.docs; // TODO: Это печально, по хорошему нужно вынести метод и типизировать
 
     const updateQueryParams = useUpdateQueryParams<ProductsQueryParams>();
 
@@ -33,7 +33,7 @@ export default function ProductsUI({ initialParams }: { initialParams: ProductsQ
         return <div>Products not found</div>;
     }
 
-    const { hasNextPage = false, hasPrevPage = false, totalPages = 0, prevPage, nextPage, totalDocs } = data;
+    const { hasNextPage = false, hasPrevPage = false, prevPage, nextPage } = data;
 
     return (
         <div className="wrap">

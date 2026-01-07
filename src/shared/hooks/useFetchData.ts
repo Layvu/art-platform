@@ -2,7 +2,7 @@
 
 import { useQueries, useQuery } from '@tanstack/react-query';
 
-import type { PaginatedResponse } from '@/services/api/payload-service';
+import type { PaginatedResponse } from '@/services/api/server/payload-data.service';
 
 import type { Author, Product } from '../types/payload-types';
 import type { QueryParams } from '../types/query-params.type';
@@ -48,7 +48,7 @@ export const useProductsByIds = (ids: number[]) => {
 
     const isLoading = queries.some((q) => q.isLoading);
     const isError = queries.some((q) => q.isError);
-   // const error = queries.some(q => q.isError) ? queries.find(q => q.isError)?.error : null;
+    // const error = queries.some(q => q.isError) ? queries.find(q => q.isError)?.error : null;
     const products = queries.map((q) => q.data).filter(Boolean) as Product[];
 
     return {
@@ -62,7 +62,6 @@ export const useProductsByIds = (ids: number[]) => {
 export const useFetchAuthor = ({ slug }: { slug: string }) => {
     return useQuery<Author | null>(getAuthorQueryOptions({ slug }));
 };
-
 
 export const useProductSlugs = (productIds: number[]) => {
     const queries = useQueries({

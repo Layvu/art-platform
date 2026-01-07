@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PAGES } from '@/config/public-pages.config';
-import { customerAuthService } from '@/services/api/customer-auth-service';
+import { customerClientService } from '@/services/api/client/customer-client.service';
 import { useAuthStore } from '@/services/store/auth/store';
 import type { ICustomerCreateInput } from '@/shared/types/customer.interface';
 
@@ -36,14 +36,14 @@ export default function RegisterPage() {
 
         try {
             // Вызов сервиса регистрации
-            const registerResult = await customerAuthService.register(userData);
+            const registerResult = await customerClientService.register(userData);
             if (!registerResult.success) {
                 setError(registerResult.error || 'Ошибка при регистрации');
                 return;
             }
 
             // Автоматический логин покупателя
-            const authResult = await customerAuthService.authenticate(userData.email, userData.password!);
+            const authResult = await customerClientService.authenticate(userData.email, userData.password!);
 
             if (!authResult.success) {
                 setError('Регистрация прошла успешно, но не удалось войти. Попробуйте войти снова');

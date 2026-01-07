@@ -189,7 +189,7 @@ export interface Media {
 export interface Author {
     id: number;
     name?: string | null;
-    slug: string;
+    slug?: string | null;
     bio?: string | null;
     avatar?: string | null;
     products_count?: number | null;

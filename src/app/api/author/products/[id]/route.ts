@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 
-import { authorAuthService } from '@/services/api/author-auth-service';
-import { payloadServerAuthService } from '@/services/api/payload-server-auth.service';
+import { authServerService } from '@/services/api/server/auth-server.service';
+import { authorServerService } from '@/services/api/server/author-server.service';
 import { UserType } from '@/shared/types/auth.interface';
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
     // Получаем текущего пользователя
-    const user = await payloadServerAuthService.getCurrentUser();
+    const user = await authServerService.getCurrentUser();
 
     if (!user?.id) {
         return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
@@ -18,11 +18,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     const { id } = await params;
 
-    const productId = id;
+    const productId = Number(id);
     const body = await req.json();
 
     try {
-        const updatedProduct = await authorAuthService.updateAuthorProduct(productId, body);
+        const updatedProduct = await authorServerService.updateAuthorProduct(productId, body);
         return NextResponse.json({ product: updatedProduct });
     } catch (error) {
         console.error('Update product error:', error);
@@ -32,7 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     // Получаем текущего пользователя
-    const user = await payloadServerAuthService.getCurrentUser();
+    const user = await authServerService.getCurrentUser();
 
     if (!user?.id) {
         return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
@@ -44,10 +44,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     const { id } = await params;
 
-    const productId = id;
+    const productId = Number(id);
 
     try {
-        await authorAuthService.deleteAuthorProduct(productId);
+        await authorServerService.deleteAuthorProduct(productId);
         return NextResponse.json({ success: true, message: 'Товар удален' });
     } catch (error) {
         console.error('Delete product error:', error);

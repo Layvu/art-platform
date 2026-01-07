@@ -2,15 +2,15 @@ import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 import type { Metadata } from 'next';
 
 import ProductUI from '@/components/product/ProductUI';
-import { getQueryClient } from '@/lib/utils/get-query-client';
-import { payloadService } from '@/services/api/payload-service';
+import { payloadDataService } from '@/services/api/server/payload-data.service';
 import type { ProductQueryParams } from '@/shared/types/query-params.type';
+import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
 export async function generateMetadata({ params }: { params: Promise<ProductQueryParams> }): Promise<Metadata> {
     const { product } = await params;
 
-    const productData = await payloadService.getProductBySlug(product);
+    const productData = await payloadDataService.getProductBySlug(product);
 
     if (!productData) {
         return { title: 'Продукт не найден' };

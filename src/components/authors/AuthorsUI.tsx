@@ -31,7 +31,7 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
         return <div>Products not found</div>;
     }
 
-    const { hasNextPage = false, hasPrevPage = false, totalPages = 0, prevPage, nextPage, totalDocs } = data;
+    const { hasNextPage = false, hasPrevPage = false, prevPage, nextPage } = data;
 
     return (
         <>

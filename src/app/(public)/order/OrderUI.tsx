@@ -10,13 +10,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PAGES } from '@/config/public-pages.config';
-import { customerAuthService } from '@/services/api/customer-auth-service';
-import { orderService } from '@/services/api/order-service';
+import { customerClientService } from '@/services/api/client/customer-client.service';
+import { orderClientService } from '@/services/api/client/order-client.service';
 import { useCartStore } from '@/services/store/cart/store';
 import { DELIVERY_TYPES } from '@/shared/constants/order.constants';
 import { isProductData } from '@/shared/guards/product.guard';
 import { useProductsByIds } from '@/shared/hooks/useFetchData';
-import { type IDeliveryType, type IOrderCreateInput } from '@/shared/types/order.interface';
+import { type IDeliveryType, type IOrderCreateRequest } from '@/shared/types/order.interface';
 import type { Customer } from '@/shared/types/payload-types';
 
 interface OrderUIProps {
@@ -97,45 +97,32 @@ export default function OrderUI({ customer }: OrderUIProps) {
         try {
             // Обновляем профиль пользователя, если данные изменились
             if (formData.fullName !== customer.fullName || formData.phone !== customer.phone) {
-                await customerAuthService.updateProfile({
-                    id: customer.id,
+                await customerClientService.updateProfile({
                     fullName: formData.fullName,
                     phone: formData.phone,
                 });
             }
 
             // Подготавливаем данные заказа
-            const orderData: IOrderCreateInput = {
-                customer: customer.id, // только ID
+            const requestOrderData: IOrderCreateRequest = {
                 items: checkedItems.map((item) => {
                     const productId = isProductData(item.product) ? item.product.id : item.product;
-                    const product = products.find((p) => p.id === productId);
-
-                    if (!product) {
-                        throw new Error(`Товар с ID ${productId} не найден`);
-                    }
-
                     return {
-                        productSnapshot: {
-                            productId: product.id,
-                            title: product.title,
-                            price: product.price,
-                        },
+                        id: productId,
                         quantity: item.quantity,
                     };
                 }),
                 deliveryType: formData.deliveryType,
                 address: formData.deliveryType === DELIVERY_TYPES.DELIVERY ? formData.address : PICKUP_ADDRESS,
-                total,
             };
 
             // Создаем заказ
-            await orderService.createOrder(orderData);
+            await orderClientService.createOrder(requestOrderData);
 
             // Очищаем корзину (только отмеченные товары)
             clearCheckedItems();
 
-            // 5. Перенаправляем в профиль
+            // Перенаправляем в профиль
             router.push(PAGES.PROFILE);
         } catch (error) {
             console.error('Order creation error:', error);

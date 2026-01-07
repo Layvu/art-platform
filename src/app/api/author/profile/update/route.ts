@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 
-import { authorAuthService } from '@/services/api/author-auth-service';
-import { payloadServerAuthService } from '@/services/api/payload-server-auth.service';
+import { authServerService } from '@/services/api/server/auth-server.service';
+import { authorServerService } from '@/services/api/server/author-server.service';
 import { UserType } from '@/shared/types/auth.interface';
 
 export async function PATCH(req: Request) {
     // Получаем текущего пользователя
-    const user = await payloadServerAuthService.getCurrentUser();
+    const user = await authServerService.getCurrentUser();
 
     if (!user?.id) {
         return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
@@ -20,7 +20,7 @@ export async function PATCH(req: Request) {
     try {
         // Обновляем профиль
         const { id, ...updates } = body;
-        await authorAuthService.updateAuthorProfile(id, updates);
+        await authorServerService.updateAuthorProfile(id, updates);
 
         return NextResponse.json({
             success: true,

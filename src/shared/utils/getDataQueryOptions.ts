@@ -1,4 +1,4 @@
-import { payloadService } from '@/services/api/payload-service';
+import { payloadDataService } from '@/services/api/server/payload-data.service';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
 import { AUTHORS_PER_PAGE } from '../constants/authors.constants';
@@ -11,7 +11,7 @@ export const getProductsQueryOptions = (queryParams: QueryParams) => {
     const updatedQueryParams = { ...queryParams, limit };
     return {
         queryKey: [COLLECTION_SLUGS.PRODUCTS, updatedQueryParams],
-        queryFn: () => payloadService.getProducts(updatedQueryParams),
+        queryFn: () => payloadDataService.getProducts(updatedQueryParams),
         staleTime: 1000 * 60, // минута,
     };
 };
@@ -22,7 +22,7 @@ export const getAuthorsQueryOptions = (queryParams: QueryParams) => {
     const updatedQueryParams = { ...queryParams, limit };
     return {
         queryKey: [COLLECTION_SLUGS.AUTHORS, updatedQueryParams],
-        queryFn: () => payloadService.getAuthors(updatedQueryParams),
+        queryFn: () => payloadDataService.getAuthors(updatedQueryParams),
         staleTime: 1000 * 60, // минута,
     };
 };
@@ -30,7 +30,7 @@ export const getAuthorsQueryOptions = (queryParams: QueryParams) => {
 export const getProductQueryOptions = ({ slug }: { slug: string }) => {
     return {
         queryKey: [COLLECTION_SLUGS.PRODUCTS, slug],
-        queryFn: () => payloadService.getProductBySlug(slug),
+        queryFn: () => payloadDataService.getProductBySlug(slug),
         staleTime: 1000 * 60, // минута,
     };
 };
@@ -38,7 +38,7 @@ export const getProductQueryOptions = ({ slug }: { slug: string }) => {
 export const getProductByIdQueryOptions = ({ id }: { id: number }) => {
     return {
         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
-        queryFn: () => payloadService.getProductById(id),
+        queryFn: () => payloadDataService.getProductById(id),
         staleTime: 1000 * 60, // минута,
     };
 };
@@ -46,7 +46,7 @@ export const getProductByIdQueryOptions = ({ id }: { id: number }) => {
 export const getAuthorQueryOptions = ({ slug }: { slug: string }) => {
     return {
         queryKey: [COLLECTION_SLUGS.AUTHORS, slug],
-        queryFn: () => payloadService.getAuthorBySlug(slug),
+        queryFn: () => payloadDataService.getAuthorBySlug(slug),
         staleTime: 1000 * 60, // минута,
     };
 };
@@ -55,14 +55,14 @@ export const getAuthorQueryOptions = ({ slug }: { slug: string }) => {
 export const getProductSlugQueryOptions = ({ id }: { id: number }) => {
     return {
         queryKey: [COLLECTION_SLUGS.PRODUCTS, id, 'slug'],
-        queryFn: () => payloadService.getProductById(id),
+        queryFn: () => payloadDataService.getProductById(id),
         staleTime: 1000 * 60, // минута,
     };
 };
 // export const getMediaQueryOptions = ({ id }: { id: number }) => {
 //     return {
 //         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
-//         queryFn: () => payloadService.getMediaById(id),
+//         queryFn: () => payloadDataService.getMediaById(id),
 //         staleTime: 1000 * 60, // минута,
 //     };
 // };

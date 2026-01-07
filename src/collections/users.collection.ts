@@ -1,8 +1,8 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAdmin } from '@/lib/utils/payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { UserType } from '@/shared/types/auth.interface';
+import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
 
 // Коллекция пользователей панели администратора, управляемая через PayloadCMS
 export const UsersCollection: CollectionConfig = {
@@ -102,7 +102,7 @@ export const UsersCollection: CollectionConfig = {
         beforeChange: [
             // Если создаём первого юзера, делаем его админом
             async ({ data, req, operation }) => {
-                if (operation === 'create') {
+                if (isCreateOperation(operation)) {
                     const { payload } = req;
 
                     const existingUsers = await payload.find({
@@ -121,15 +121,11 @@ export const UsersCollection: CollectionConfig = {
 
         afterChange: [
             async ({ doc, req, operation }) => {
-                // const { payload } = req;
-
                 // При создании автора создаем запись в authors
-                if (operation === 'create' && doc.role === UserType.AUTHOR) {
+                if (isCreateOperation(operation) && doc.role === UserType.AUTHOR) {
                     try {
                         await req.payload.create({
                             collection: COLLECTION_SLUGS.AUTHORS,
-                            // TODO: по сути ошибка потому что нет slug в data, но он генерится в beforeChange.
-                            // => Пока игнорирую ошибку
                             data: {
                                 user: doc.id,
                             },
@@ -141,7 +137,7 @@ export const UsersCollection: CollectionConfig = {
                 }
 
                 // При создании покупателя создаем запись в customers
-                if (operation === 'create' && doc.role === UserType.CUSTOMER) {
+                if (isCreateOperation(operation) && doc.role === UserType.CUSTOMER) {
                     try {
                         await req.payload.create({
                             collection: COLLECTION_SLUGS.CUSTOMERS,

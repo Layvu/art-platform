@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload';
 
-import { isAdmin, isCustomer } from '@/lib/utils/payload';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
+import { isAdmin, isCustomer } from '@/shared/utils/payload';
 
 export const CartsCollection: CollectionConfig = {
     slug: 'carts',

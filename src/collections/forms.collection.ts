@@ -1,8 +1,8 @@
 import type { CollectionConfig } from 'payload';
 
-import { sendEmail } from '@/lib/utils/email';
-import { isAdmin } from '@/lib/utils/payload';
 import type { Form } from '@/shared/types/payload-types';
+import { sendEmail } from '@/shared/utils/email';
+import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
 
 export const FormsCollection: CollectionConfig = {
     slug: 'forms',
@@ -29,7 +29,7 @@ export const FormsCollection: CollectionConfig = {
     hooks: {
         afterChange: [
             async ({ operation, doc }) => {
-                if (operation === 'create') {
+                if (isCreateOperation(operation)) {
                     const formDoc = doc as Form;
                     await sendEmail({
                         to: process.env.EMAIL_TO || 'zemskyalexey.writer@mail.ru',
