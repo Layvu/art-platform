@@ -35,7 +35,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         onCategoryChange(undefined);
         setOpen(false);
     };
-    
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -92,7 +92,12 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                     <Button onClick={onSaveClick} className="flex-1" disabled={!newCategories.length}>
                         Применить
                     </Button>
-                    <Button onClick={onResetClick} className="flex-1" variant="outline" disabled={!newCategories.length}>
+                    <Button
+                        onClick={onResetClick}
+                        className="flex-1"
+                        variant="outline"
+                        disabled={!newCategories.length}
+                    >
                         Сбросить все
                     </Button>
                 </div>

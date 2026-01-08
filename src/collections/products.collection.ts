@@ -8,8 +8,11 @@ import { isAdmin, isAuthor, isCreateOperation, isCustomer } from '@/shared/utils
 
 export const ProductsCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.PRODUCTS,
-    labels: { singular: 'Product', plural: 'Products' },
-    admin: { useAsTitle: 'title' },
+    labels: { singular: 'Товар', plural: 'Товары' },
+    admin: {
+        useAsTitle: 'title',
+        defaultColumns: ['title', 'price', 'category', 'author', 'createdAt'],
+    },
 
     access: {
         read: async ({ req: { user, payload } }) => {
@@ -143,10 +146,16 @@ export const ProductsCollection: CollectionConfig = {
     },
 
     fields: [
-        { name: 'title', type: 'text', required: true },
+        {
+            name: 'title',
+            type: 'text',
+            label: 'Название',
+            required: true,
+        },
         {
             name: 'slug',
             type: 'text',
+            label: 'Уникальная часть URL',
             required: true,
             unique: true,
             admin: {
@@ -154,18 +163,21 @@ export const ProductsCollection: CollectionConfig = {
                 readOnly: true,
             },
         },
-        { name: 'price', type: 'number', required: true },
-        { name: 'description', type: 'textarea' },
-        // { name: 'image', type: 'text' }, // TODO: relationTo: 'media'
-        // {
-        //     name: 'image',
-        //     type: 'upload',
-        //     relationTo: COLLECTION_SLUGS.MEDIA as CollectionSlug,
-        // },
-
+        {
+            name: 'price',
+            type: 'number',
+            label: 'Цена',
+            required: true,
+        },
+        {
+            name: 'description',
+            type: 'textarea',
+            label: 'Описание',
+        },
         {
             name: 'gallery',
             type: 'array',
+            label: 'Изображения',
             fields: [
                 {
                     name: 'image',
@@ -174,11 +186,11 @@ export const ProductsCollection: CollectionConfig = {
                 },
             ],
         },
-
         //{ name: 'quantity', type: 'number' },
         {
             name: 'category',
             type: 'select',
+            label: 'Категория',
             options: [...PRODUCT_CATEGORIES.map(({ value, label }) => ({ value, label }))],
             required: false,
         },
@@ -187,6 +199,7 @@ export const ProductsCollection: CollectionConfig = {
             type: 'relationship',
             relationTo: COLLECTION_SLUGS.AUTHORS,
             required: true,
+            label: 'Продавец (Автор)',
             // Текущий автор не может добавить товар другому автору
             access: {
                 create: ({ req }) => isAdmin(req.user),
@@ -194,6 +207,30 @@ export const ProductsCollection: CollectionConfig = {
             },
             admin: {
                 position: 'sidebar',
+            },
+        },
+        {
+            name: 'createdAt',
+            type: 'date',
+            label: 'Дата создания товара',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
+        {
+            name: 'updatedAt',
+            type: 'date',
+            label: 'Дата последнего обновления данных товара',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
             },
         },
     ],

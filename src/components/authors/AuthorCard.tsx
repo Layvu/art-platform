@@ -9,7 +9,7 @@ import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-export default function AuthorCard({ name, slug}: Author) {
+export default function AuthorCard({ name, slug }: Author) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 

@@ -25,6 +25,10 @@ export const MENU: IMenuItem[] = [
         name: 'Авторы',
     },
     {
+        href: PAGES.CART,
+        name: 'Корзина',
+    },
+    {
         href: PAGES.LOGIN,
         name: 'Вход',
         guestOnly: true,

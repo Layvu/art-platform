@@ -5,8 +5,9 @@ import { isAdmin, isCustomer } from '@/shared/utils/payload';
 
 export const CartsCollection: CollectionConfig = {
     slug: 'carts',
-    labels: { singular: 'Cart', plural: 'Carts' },
-    admin: { useAsTitle: 'owner' },
+    admin: {
+        hidden: true,
+    },
 
     fields: [
         {

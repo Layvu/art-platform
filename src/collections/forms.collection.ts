@@ -6,7 +6,11 @@ import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
 
 export const FormsCollection: CollectionConfig = {
     slug: 'forms',
-    labels: { singular: 'Form', plural: 'Forms' },
+    labels: { singular: 'Анкета', plural: 'Анкеты' },
+    admin: {
+        useAsTitle: 'content',
+        defaultColumns: ['content'],
+    },
 
     access: {
         read: ({ req: { user } }) => isAdmin(user),
@@ -19,11 +23,27 @@ export const FormsCollection: CollectionConfig = {
         {
             name: 'content',
             type: 'textarea',
+            label: 'Сообщение',
             required: true,
+            admin: {
+                readOnly: true,
+            },
         },
         // TODO: добавить новые поля:
         // { name: 'name', type: 'text' },
         // { name: 'email', type: 'email', required: true },
+        {
+            name: 'createdAt',
+            type: 'date',
+            label: 'Дата получения анкеты',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
     ],
 
     hooks: {

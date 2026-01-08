@@ -36,10 +36,26 @@ export default buildConfig({
         OrdersCollection,
         MediaCollection,
     ],
+
     i18n: {
-        fallbackLanguage: 'en',
+        fallbackLanguage: 'ru',
         supportedLanguages: { en, ru },
     },
+    localization: {
+        locales: [
+            {
+                label: 'Русский',
+                code: 'ru',
+            },
+            {
+                label: 'English',
+                code: 'en',
+            },
+        ],
+        defaultLocale: 'ru',
+        fallback: true,
+    },
+
     db: postgresAdapter({
         pool: {
             connectionString: process.env.DATABASE_URL,

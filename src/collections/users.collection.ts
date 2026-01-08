@@ -21,9 +21,10 @@ export const UsersCollection: CollectionConfig = {
         // Оставляем API ключи для серверных запросов
         tokenExpiration: 7200, // 2 часа
     },
-    labels: { singular: 'User', plural: 'Users' },
+    labels: { singular: 'Учётная запись', plural: 'Учётные записи' },
     admin: {
         useAsTitle: 'email',
+        defaultColumns: ['email', 'role', 'createdAt'],
 
         hidden: (args) => {
             // Безопасная проверка на наличие user (воизбежание ошибок с созданием первого юзера)
@@ -37,6 +38,7 @@ export const UsersCollection: CollectionConfig = {
         {
             name: 'email',
             type: 'email',
+            label: 'Адрес электронной почты',
             required: true,
             unique: true,
         },
@@ -48,6 +50,7 @@ export const UsersCollection: CollectionConfig = {
                 { label: 'Автор', value: UserType.AUTHOR },
                 { label: 'Покупатель', value: UserType.CUSTOMER }, // TODO: Оставить только создание автора без выбора через админку
             ],
+            label: 'Тип пользователя',
             required: true,
             defaultValue: UserType.CUSTOMER,
             admin: {
@@ -62,6 +65,30 @@ export const UsersCollection: CollectionConfig = {
 
                     // Иначе показываем только админам
                     return isAdmin(args.req.user);
+                },
+            },
+        },
+        {
+            name: 'createdAt',
+            type: 'date',
+            label: 'Дата создания учётной записи',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
+        {
+            name: 'updatedAt',
+            type: 'date',
+            label: 'Дата последнего обновления данных учётной записи',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
                 },
             },
         },

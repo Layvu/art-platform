@@ -98,7 +98,7 @@ export interface Config {
   };
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'ru' | 'en';
   user: User & {
     collection: 'users';
   };
@@ -143,8 +143,8 @@ export interface Product {
     | null;
   category?: ('shoppers' | 'clothes' | 'trinkets' | 'postcards' | 'ceramics' | 'stickers' | 'knitted') | null;
   author: number | Author;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -152,8 +152,8 @@ export interface Product {
  */
 export interface Media {
   id: number;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -200,8 +200,8 @@ export interface Author {
       }[]
     | null;
   user?: (number | null) | User;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -210,8 +210,8 @@ export interface Author {
 export interface User {
   id: number;
   role?: ('admin' | 'author' | 'customer') | null;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -235,8 +235,8 @@ export interface User {
 export interface Form {
   id: number;
   content: string;
-  updatedAt: string;
   createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -401,8 +401,8 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   category?: T;
   author?: T;
-  updatedAt?: T;
   createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -421,8 +421,8 @@ export interface AuthorsSelect<T extends boolean = true> {
         id?: T;
       };
   user?: T;
-  updatedAt?: T;
   createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -430,8 +430,8 @@ export interface AuthorsSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   role?: T;
-  updatedAt?: T;
   createdAt?: T;
+  updatedAt?: T;
   email?: T;
   resetPasswordToken?: T;
   resetPasswordExpiration?: T;
@@ -453,8 +453,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface FormsSelect<T extends boolean = true> {
   content?: T;
-  updatedAt?: T;
   createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -527,8 +527,8 @@ export interface OrdersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  updatedAt?: T;
   createdAt?: T;
+  updatedAt?: T;
   url?: T;
   thumbnailURL?: T;
   filename?: T;

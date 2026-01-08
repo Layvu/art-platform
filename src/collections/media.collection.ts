@@ -6,7 +6,7 @@ import { isAdmin, isAuthor } from '@/shared/utils/payload';
 
 export const MediaCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.MEDIA,
-    labels: { singular: 'Media', plural: 'Media' },
+    labels: { singular: 'Изображение', plural: 'Изображения' },
 
     upload: {
         mimeTypes: ['image/*'],
@@ -17,8 +17,45 @@ export const MediaCollection: CollectionConfig = {
         adminThumbnail: 'thumbnail',
     },
 
-    admin: { useAsTitle: 'filename' },
-    fields: [],
+    admin: {
+        useAsTitle: 'filename',
+    },
+    fields: [
+        {
+            name: 'filename',
+            type: 'text',
+            label: 'Название файла',
+        },
+        {
+            name: 'url',
+            type: 'text',
+            label: 'URL-адрес',
+        },
+        {
+            name: 'createdAt',
+            type: 'date',
+            label: 'Дата создания файла',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
+        {
+            name: 'updatedAt',
+            type: 'date',
+            label: 'Дата последнего обновления файла',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
+    ],
 
     access: {
         read: () => true,

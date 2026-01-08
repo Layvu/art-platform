@@ -9,8 +9,11 @@ import { isAdmin, isAuthor } from '@/shared/utils/payload';
 
 export const AuthorsCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.AUTHORS,
-    labels: { singular: 'Author', plural: 'Authors' },
-    admin: { useAsTitle: 'name' },
+    labels: { singular: 'Автор', plural: 'Авторы' },
+    admin: {
+        useAsTitle: 'name',
+        defaultColumns: ['name', 'avatar', 'user', 'createdAt'],
+    },
 
     access: {
         read: async ({ req: { user } }) => {
@@ -56,22 +59,33 @@ export const AuthorsCollection: CollectionConfig = {
         {
             name: 'name',
             type: 'text',
+            label: 'Имя',
         },
         {
             name: 'slug',
             type: 'text',
+            label: 'Уникальная часть URL',
             unique: true,
             admin: {
                 position: 'sidebar',
                 readOnly: true,
             },
         },
-        { name: 'bio', type: 'textarea' },
-        { name: 'avatar', type: 'text' }, // TODO: relationTo: 'media'
+        {
+            name: 'bio',
+            type: 'textarea',
+            label: 'Описание профиля',
+        },
+        {
+            name: 'avatar',
+            type: 'text',
+            label: 'Изображение профиля',
+        }, // TODO: relationTo: 'media'
         {
             name: 'products_count',
             type: 'number',
             defaultValue: 0,
+            label: 'Общее количество товаров',
             admin: { readOnly: true },
             access: {
                 create: () => false,
@@ -82,7 +96,11 @@ export const AuthorsCollection: CollectionConfig = {
             name: 'product_categories',
             type: 'array',
             admin: { readOnly: true },
-            access: { create: () => false, update: () => false },
+            label: 'Категории продаваемых товаров',
+            access: {
+                create: () => false,
+                update: () => false,
+            },
             fields: [{ name: 'category', type: 'text' }],
         },
         {
@@ -91,7 +109,34 @@ export const AuthorsCollection: CollectionConfig = {
             relationTo: COLLECTION_SLUGS.USERS,
             required: false,
             unique: true,
-            admin: { position: 'sidebar' },
+            label: 'Связанная учётная запись',
+            admin: {
+                position: 'sidebar',
+            },
+        },
+        {
+            name: 'createdAt',
+            type: 'date',
+            label: 'Дата создания профиля',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
+        {
+            name: 'updatedAt',
+            type: 'date',
+            label: 'Дата последнего обновления данных профиля',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
         },
     ],
     hooks: {

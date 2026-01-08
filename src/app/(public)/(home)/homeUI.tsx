@@ -10,15 +10,15 @@ import { Button } from '@/components/ui/button';
 import { useFetchAuthors, useFetchProducts } from '@/shared/hooks/useFetchData';
 
 export default function HomeUI() {
-    const { data : products } = useFetchProducts({ limit: 4 });
-    const { data : authors } = useFetchAuthors({ limit: 4});
-     
+    const { data: products } = useFetchProducts({ limit: 4 });
+    const { data: authors } = useFetchAuthors({ limit: 4 });
+
     return (
         <div className="wrap mb-18 flex flex-col gap-26">
             <div className="flex flex-col gap-6">
                 <div className="flex justify-between">
                     <h2 className="text-2xl font-semibold">Новые товары</h2>
-                    <Button className="w-fit" variant='outline' onClick={() => {}}>
+                    <Button className="w-fit" variant="outline" onClick={() => {}}>
                         <Link href="/products">Показать все</Link>
                     </Button>
                 </div>
@@ -28,7 +28,6 @@ export default function HomeUI() {
                     ))}
                 </div>
             </div>
-
 
             <div className="h-[250px] pl-15 bg-orange-100 flex gap-10">
                 <div className="w-1/2 pt-10 pb-10 flex gap-10 flex-col">

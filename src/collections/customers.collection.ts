@@ -6,17 +6,17 @@ import { isAdmin, isCustomer } from '@/shared/utils/payload';
 // Коллекция покупателей без данных для авторизации
 export const CustomersCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.CUSTOMERS,
-    labels: { singular: 'Customer', plural: 'Customers' },
+    labels: { singular: 'Покупатель', plural: 'Покупатели' },
     admin: {
         useAsTitle: 'email',
-        defaultColumns: ['email', 'fullName', 'phone'],
+        defaultColumns: ['fullName', 'email', 'user', 'phone', 'createdAt'],
     },
 
     fields: [
         {
             name: 'email',
             type: 'email',
-            label: 'Электронная почта',
+            label: 'Адрес электронной почты',
             required: true,
             unique: true,
             admin: { readOnly: true },
@@ -24,6 +24,7 @@ export const CustomersCollection: CollectionConfig = {
         {
             name: 'user',
             type: 'relationship',
+            label: 'Связанная учётная запись',
             relationTo: COLLECTION_SLUGS.USERS,
             required: true,
             unique: true,
@@ -32,13 +33,13 @@ export const CustomersCollection: CollectionConfig = {
         {
             name: 'fullName',
             type: 'text',
-            label: 'ФИО',
+            label: 'Полное имя',
             admin: { readOnly: true },
         },
         {
             name: 'phone',
             type: 'text',
-            label: 'Телефон',
+            label: 'Номер телефона',
             admin: { readOnly: true },
         },
         {
@@ -80,13 +81,33 @@ export const CustomersCollection: CollectionConfig = {
             name: 'cart',
             type: 'relationship',
             relationTo: COLLECTION_SLUGS.CARTS,
-            admin: { readOnly: true },
+            admin: {
+                hidden: true,
+            },
         },
         {
             name: 'createdAt',
             type: 'date',
-            label: 'Дата регистрации',
-            admin: { readOnly: true },
+            label: 'Дата создания профиля покупателя',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
+        },
+        {
+            name: 'updatedAt',
+            type: 'date',
+            label: 'Дата последнего обновления данных профиля покупателя',
+            admin: {
+                readOnly: true,
+                date: {
+                    displayFormat: 'dd/MM/yyyy HH:mm',
+                    pickerAppearance: 'dayAndTime',
+                },
+            },
         },
     ],
 

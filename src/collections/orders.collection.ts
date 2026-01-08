@@ -7,11 +7,10 @@ import { isAdmin, isCreateOperation, isCustomer } from '@/shared/utils/payload';
 
 export const OrdersCollection: CollectionConfig = {
     slug: COLLECTION_SLUGS.ORDERS,
-    // TODO: Везде сменить на русский язык названия коллекций и полей в админке
     labels: { singular: 'Заказ', plural: 'Заказы' },
     admin: {
         useAsTitle: 'orderNumber',
-        defaultColumns: ['orderNumber', 'customer', 'status', 'total', 'createdAt'],
+        defaultColumns: ['orderNumber', 'deliveryType', 'status', 'total', 'createdAt'],
     },
 
     fields: [
@@ -98,6 +97,7 @@ export const OrdersCollection: CollectionConfig = {
         {
             name: 'address',
             type: 'text',
+            label: 'Адрес доставки',
             // Поле адреса обязательно только для доставки
             admin: {
                 readOnly: true,
@@ -127,7 +127,6 @@ export const OrdersCollection: CollectionConfig = {
             label: 'Общая сумма заказа',
             min: 0,
         },
-        // TODO: сделать формат даты понятным во всех коллекциях
         {
             name: 'createdAt',
             type: 'date',

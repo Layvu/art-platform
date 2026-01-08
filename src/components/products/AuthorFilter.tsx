@@ -106,19 +106,13 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
                     </CommandList>
                 </Command>
                 <div className="mt-4 flex gap-5">
-                <Button
-                    disabled={!selectedAuthor}
-                    type="submit"
-                    className="flex-1"
-                    onClick={onSaveClick}
-                >
-                    Применить
-                </Button>
+                    <Button disabled={!selectedAuthor} type="submit" className="flex-1" onClick={onSaveClick}>
+                        Применить
+                    </Button>
                     <Button onClick={onResetClick} className="flex-1" variant="outline" disabled={!selectedAuthor}>
                         Сбросить все
                     </Button>
                 </div>
-            
             </PopoverContent>
         </Popover>
     );
