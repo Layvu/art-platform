@@ -8,9 +8,6 @@ import { useUpdateQueryParams } from '@/shared/hooks/useUpdateQueryParams';
 import type { AuthorsQueryParams } from '@/shared/types/query-params.type';
 
 import AuthorsFiltersBar from './AuthorFiltersBar';
-import { AuthorForm } from './AuthorForm';
-
-// TODO: loading и error
 
 export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQueryParams }) {
     const page = Number(initialParams.page) || 1;
@@ -35,10 +32,8 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
 
     return (
         <>
-            <div className="max-w-6xl mx-auto p-4">
-                <h1 className="text-2xl font-bold mb-6">Authors</h1>
-
-                <AuthorForm />
+            <div className="wrap">
+                {/* <AuthorForm /> */}
 
                 {/* Поиск, фильтры и сортировка */}
                 <AuthorsFiltersBar
@@ -56,29 +51,37 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                     onSortChange={(value) => updateQueryParams({ sort: value })}
                 />
 
-                <div className={`grid grid-cols-4 gap-6 m-2.5 ${isPlaceholderData && 'opacity-50'}`}>
+                <div className={`grid grid-cols-4 gap-5 ${isPlaceholderData && 'opacity-50'}`}>
                     {authors.map((author) => (
                         <AuthorCard key={author.id} {...author} />
                     ))}
                 </div>
 
                 {authors.length === 0 ? (
-                    <div>Products not found</div>
+                    <div>authors not found</div>
                 ) : (
                     <div className="flex gap-2 mt-3">
                         {/* TODO: случай множества кликов отработать */}
-                        <Button
-                            onClick={() => updateQueryParams({ page: prevPage || 0 }, { resetPage: false })}
-                            disabled={!hasPrevPage}
-                        >
-                            prev page: {page - 1}
+                        {prevPage && (
+                            <Button
+                                variant="ghost"
+                                onClick={() => updateQueryParams({ page: prevPage || 0 }, { resetPage: false })}
+                                disabled={!hasPrevPage}
+                            >
+                                {page - 1}
+                            </Button>
+                        )}
+                        <Button variant="secondary" disabled={true}>
+                            {page}
                         </Button>
-                        <Button
-                            onClick={() => updateQueryParams({ page: nextPage || 2 }, { resetPage: false })}
-                            disabled={!hasNextPage}
-                        >
-                            next page: {page + 1}
-                        </Button>
+                        {hasNextPage && (
+                            <Button
+                                variant="ghost"
+                                onClick={() => updateQueryParams({ page: nextPage || 2 }, { resetPage: false })}
+                            >
+                                {page + 1}
+                            </Button>
+                        )}
                     </div>
                 )}
             </div>

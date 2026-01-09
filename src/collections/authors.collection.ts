@@ -78,9 +78,9 @@ export const AuthorsCollection: CollectionConfig = {
         },
         {
             name: 'avatar',
-            type: 'text',
-            label: 'Изображение профиля',
-        }, // TODO: relationTo: 'media'
+            type: 'upload',
+            relationTo: COLLECTION_SLUGS.MEDIA,
+        },
         {
             name: 'products_count',
             type: 'number',

@@ -3,26 +3,26 @@ import React from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
-import type { ProductsSortOptions } from '@/shared/types/query-params.type';
 
 import { Button } from '../ui/button';
 
-type SortBarProps = {
-    sort?: string;
-    onSortChange: (value: ProductsSortOptions | undefined) => void;
+type SortBarProps<T extends string> = {
+    sort?: T;
+    options: readonly { value: T; label: string }[];
+    onSortChange: (value: T | undefined) => void;
 };
-export default function SortBar({ sort, onSortChange }: SortBarProps) {
-    const [open, setOpen] = React.useState<boolean>(false);
+
+export default function SortBar<T extends string>({ sort, options, onSortChange }: SortBarProps<T>) {
+    const [open, setOpen] = React.useState(false);
 
     return (
         <Select
-            value={sort}
-            onValueChange={(value) => onSortChange(value === 'default' ? undefined : (value as ProductsSortOptions))}
+            value={sort ?? 'default'}
+            onValueChange={(value) => onSortChange(value === 'default' ? undefined : (value as T))}
             open={open}
             onOpenChange={setOpen}
         >
-            <SelectTrigger className="">
+            <SelectTrigger>
                 <Button variant="secondary">
                     <SelectValue placeholder="По умолчанию" />
                     {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
@@ -30,7 +30,8 @@ export default function SortBar({ sort, onSortChange }: SortBarProps) {
             </SelectTrigger>
 
             <SelectContent>
-                {PRODUCTS_SORT_OPTIONS.map((s) => (
+                <SelectItem value="default">По умолчанию</SelectItem>
+                {options.map((s) => (
                     <SelectItem key={s.value} value={s.value}>
                         {s.label}
                     </SelectItem>

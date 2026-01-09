@@ -29,7 +29,6 @@ export default function AuthorUI({ initialParams }: { initialParams: AuthorQuery
         <Card className="max-w-[800px] mx-auto mt-8">
             <CardHeader>
                 <div className="flex items-center gap-4">
-                    {avatar && name && <Image src={avatar} alt={name} width={48} height={48} />}
                     <div>
                         <h2 className="text-lg font-semibold">{name}</h2>
                         <p className="text-sm text-gray-500">Id: {id}</p>

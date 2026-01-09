@@ -191,7 +191,7 @@ export interface Author {
     name?: string | null;
     slug?: string | null;
     bio?: string | null;
-    avatar?: string | null;
+    avatar?: (number | null) | Media;
     products_count?: number | null;
     product_categories?:
         | {

@@ -2,14 +2,15 @@ import { useCallback, useState } from 'react';
 
 import { debounce } from 'lodash';
 
+import { PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
 import type { ProductsFilters, ProductsSortOptions } from '@/shared/types/query-params.type';
 
+import CategoryFilter from '../shared/CategoryFilter';
 import SearchBar from '../shared/SearchBar';
+import SortBar from '../shared/SortBar';
 
 import AuthorFilter from './AuthorFilter';
-import CategoryFilter from './CategoryFilter';
 import PriceFilter from './PriceFilter';
-import SortBar from './SortBar';
 
 interface IProductFiltersBarProps {
     filters: ProductsFilters;
@@ -18,7 +19,6 @@ interface IProductFiltersBarProps {
     onSortChange: (value: ProductsSortOptions) => void;
 }
 
-// TODO: переиспользовать, передавая категории и опции сортировки
 export default function ProductFiltersBar({ filters, sort, onFilterChange, onSortChange }: IProductFiltersBarProps) {
     const [searchValue, setSearchValue] = useState<string>(filters.search || '');
 
@@ -55,7 +55,7 @@ export default function ProductFiltersBar({ filters, sort, onFilterChange, onSor
                     initialAuthor={filters.authors}
                     onAuthorChange={(author) => onFilterChange({ ...filters, authors: author })}
                 />
-                <SortBar sort={sort} onSortChange={onSortChange} />
+                <SortBar sort={sort} onSortChange={onSortChange} options={PRODUCTS_SORT_OPTIONS} />
             </div>
         </div>
     );
