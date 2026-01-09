@@ -2,14 +2,26 @@
 
 import React from 'react';
 
+import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useFetchAuthor } from '@/shared/hooks/useFetchData';
-import type { AuthorQueryParams } from '@/shared/types/query-params.type';
+import type { AuthorQueryParams, ProductsQueryParams } from '@/shared/types/query-params.type';
 
-export default function AuthorUI({ initialParams }: { initialParams: AuthorQueryParams }) {
+import { isImageData } from '../../shared/guards/image.guard';
+import ProductsUI from '../products/ProductsUI';
+import { Button } from '../ui/button';
+
+export default function AuthorUI({
+    initialParams,
+    searchParams,
+}: {
+    initialParams: AuthorQueryParams;
+    searchParams: ProductsQueryParams;
+}) {
+    console.log(initialParams, 'au');
+
     const slug = initialParams.author;
     const { data, isError, error, isFetching } = useFetchAuthor({ slug });
 
@@ -23,28 +35,30 @@ export default function AuthorUI({ initialParams }: { initialParams: AuthorQuery
         notFound();
     }
 
-    const { id, name, avatar, bio, product_categories, products_count } = data;
+    const { name, avatar, bio } = data;
 
     return (
-        <Card className="max-w-[800px] mx-auto mt-8">
-            <CardHeader>
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h2 className="text-lg font-semibold">{name}</h2>
-                        <p className="text-sm text-gray-500">Id: {id}</p>
-                        <p className="text-sm text-gray-500">Slug: {slug}</p>
+        <div className="wrap mt-10">
+            <div className="bg-zinc-100 p-9 flex gap-6 mb-12">
+                <Image
+                    src={isImageData(avatar) ? avatar?.url || '' : ''}
+                    alt={'avatar'}
+                    width={115}
+                    height={115}
+                    className="rounded-full object-cover h-[115px] w-[115px]"
+                />
+                <div className="flex gap-6 flex-1">
+                    <div className="flex flex-col gap-4 flex-1">
+                        <h2 className="text-2xl font-semibold text-black">{name}</h2>
+                        <p className="text-lg text-zinc-600 font-normal">{bio}</p>
                     </div>
+                    <Button className="" variant={'outline'}>
+                        Соц-сети автора <ExternalLink />
+                    </Button>
                 </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="flex flex-col gap-2">
-                {bio && <p>{bio.slice(0, 100)}</p>}
-                <span>Общее количество товаров: {products_count}</span>
-                <span>
-                    Категории товаров:{' '}
-                    {product_categories?.map((category) => category.category).join(', ') || 'НЕТ КАТЕГОРИЙ'}
-                </span>
-            </CardContent>
-        </Card>
+            <ProductsUI initialParams={{ ...searchParams, authors: name! }} showAuthorFilter={false} />
+        </div>
     );
 }

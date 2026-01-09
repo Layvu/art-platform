@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 import AuthorUI from '@/components/author/AuthorUI';
 import { payloadDataService } from '@/services/api/server/payload-data.service';
-import type { AuthorQueryParams } from '@/shared/types/query-params.type';
+import type { AuthorQueryParams, ProductsQueryParams } from '@/shared/types/query-params.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
@@ -21,15 +21,22 @@ export async function generateMetadata({ params }: { params: Promise<AuthorQuery
     };
 }
 
-export default async function AuthorPage({ params }: { params: Promise<AuthorQueryParams> }) {
-    const productQueryParams = await params;
+export default async function AuthorPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<AuthorQueryParams>;
+    searchParams: Promise<ProductsQueryParams>;
+}) {
+    const authorParams = await params;
+    const authorQueryParams = await searchParams;
 
     const queryClient = getQueryClient();
-    await queryClient.prefetchQuery(getAuthorQueryOptions({ slug: productQueryParams.author }));
+    await queryClient.prefetchQuery(getAuthorQueryOptions({ slug: authorParams.author }));
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
-            <AuthorUI initialParams={productQueryParams} />
+            <AuthorUI initialParams={authorParams} searchParams={authorQueryParams} />
         </HydrationBoundary>
     );
 }

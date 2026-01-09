@@ -45,7 +45,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                     {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="start">
+            <PopoverContent className="w-80 p-4" align="start" side="bottom" avoidCollisions={false}>
                 <Command>
                     <CommandInput placeholder="Найти категорию" className="h-9" />
                     <CommandList className="mt-4">

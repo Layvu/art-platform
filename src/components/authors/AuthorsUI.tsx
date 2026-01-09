@@ -51,7 +51,7 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                     onSortChange={(value) => updateQueryParams({ sort: value })}
                 />
 
-                <div className={`grid grid-cols-4 gap-5 ${isPlaceholderData && 'opacity-50'}`}>
+                <div className={`grid grid-cols-4 gap-5 mb-10 ${isPlaceholderData && 'opacity-50'}`}>
                     {authors.map((author) => (
                         <AuthorCard key={author.id} {...author} />
                     ))}
@@ -60,7 +60,7 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                 {authors.length === 0 ? (
                     <div>authors not found</div>
                 ) : (
-                    <div className="flex gap-2 mt-3">
+                    <div className="flex gap-2 justify-center">
                         {/* TODO: случай множества кликов отработать */}
                         {prevPage && (
                             <Button

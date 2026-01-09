@@ -7,7 +7,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { useCartStore } from '@/services/store/cart/store';
 import { isAuthorData } from '@/shared/guards/author.guard';
@@ -79,8 +78,14 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                     {/* TODO характеристики     */}
 
                     {isAuthorData(author) && (
-                        <div className="flex  gap-3">
-                            <div className="w-10 h-10 rounded-full bg-zinc-400"></div>
+                        <div className="flex gap-3">
+                            <Image
+                                width={40}
+                                height={40}
+                                src={isImageData(author.avatar) ? author.avatar?.url || '' : ''}
+                                alt="avatar"
+                                className="w-10 h-10 rounded-full object-cover"
+                            ></Image>
                             <Link href={PAGES.AUTHOR(author.slug!)} className="hover:underline text-2xl font-semibold">
                                 {author.name}
                             </Link>
@@ -88,22 +93,6 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                     )}
                 </div>
             </div>
-
-            {/* 
-            <CardContent className="flex flex-col gap-2">
-                {description && <p>{description.slice(0, 100)}</p>}
-                <span>Цена: {price}</span>
-            </CardContent>
-
-            {isAuthorData(author) && (
-                <CardFooter>
-                    <p className="text-sm text-gray-500">
-                        <Link href={PAGES.AUTHOR(author.slug!)} className="hover:underline text-blue-500">
-                            @{author.name}
-                        </Link>
-                    </p>
-                </CardFooter>
-            )} */}
         </div>
     );
 }

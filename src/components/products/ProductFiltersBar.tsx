@@ -1,12 +1,12 @@
-import { useCallback, useState } from 'react';
+'use client';
 
-import { debounce } from 'lodash';
+
 
 import { PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
 import type { ProductsFilters, ProductsSortOptions } from '@/shared/types/query-params.type';
 
 import CategoryFilter from '../shared/CategoryFilter';
-import SearchBar from '../shared/SearchBar';
+import { FiltersBarShell } from '../shared/FiltersBarShell';
 import SortBar from '../shared/SortBar';
 
 import AuthorFilter from './AuthorFilter';
@@ -17,46 +17,36 @@ interface IProductFiltersBarProps {
     sort: ProductsSortOptions;
     onFilterChange: (filters: ProductsFilters) => void;
     onSortChange: (value: ProductsSortOptions) => void;
+    showAuthorFilter?: boolean;
 }
 
-export default function ProductFiltersBar({ filters, sort, onFilterChange, onSortChange }: IProductFiltersBarProps) {
-    const [searchValue, setSearchValue] = useState<string>(filters.search || '');
-
-    const debouncedSearch = useCallback(
-        debounce((value: string) => {
-            onFilterChange({
-                ...filters,
-                search: value,
-            });
-        }, 500),
-        [filters],
-    );
-    const handleSearchChange = (value: string) => {
-        setSearchValue(value);
-        debouncedSearch(value);
-    };
-
+export default function ProductFiltersBar({
+    filters,
+    sort,
+    onFilterChange,
+    onSortChange,
+    showAuthorFilter = true,
+}: IProductFiltersBarProps) {
     return (
-        <div className="flex items-start gap-6">
-            <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
-            <div className="flex gap-2">
-                <PriceFilter
-                    priceFrom={filters.priceFrom}
-                    priceTo={filters.priceTo}
-                    onPriceChange={(priceFrom, priceTo) =>
-                        onFilterChange({ ...filters, priceFrom: priceFrom, priceTo: priceTo })
-                    }
-                />
-                <CategoryFilter
-                    category={filters?.category}
-                    onCategoryChange={(category) => onFilterChange({ ...filters, category })}
-                />
+        <FiltersBarShell search={filters.search} onSearchChange={(search) => onFilterChange({ ...filters, search })}>
+            <PriceFilter
+                priceFrom={filters.priceFrom}
+                priceTo={filters.priceTo}
+                onPriceChange={(priceFrom, priceTo) =>
+                    onFilterChange({ ...filters, priceFrom: priceFrom, priceTo: priceTo })
+                }
+            />
+            <CategoryFilter
+                category={filters?.category}
+                onCategoryChange={(category) => onFilterChange({ ...filters, category })}
+            />
+            {showAuthorFilter && (
                 <AuthorFilter
                     initialAuthor={filters.authors}
                     onAuthorChange={(author) => onFilterChange({ ...filters, authors: author })}
                 />
-                <SortBar sort={sort} onSortChange={onSortChange} options={PRODUCTS_SORT_OPTIONS} />
-            </div>
-        </div>
+            )}
+            <SortBar sort={sort} onSortChange={onSortChange} options={PRODUCTS_SORT_OPTIONS} />
+        </FiltersBarShell>
     );
 }

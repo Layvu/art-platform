@@ -1,3 +1,5 @@
+'use client';
+
 import { useRef } from 'react';
 
 import Image from 'next/image';
@@ -5,12 +7,11 @@ import Link from 'next/link';
 
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
+import { isImageData } from '@/shared/guards/image.guard';
 import type { Author } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorQueryOptions } from '@/shared/utils/getDataQueryOptions';
-
-import { isImageData } from '@/shared/guards/image.guard';
 
 export default function AuthorCard({ name, slug, avatar }: Author) {
     const timerRef = useRef<Timer | null>(null);
@@ -31,7 +32,7 @@ export default function AuthorCard({ name, slug, avatar }: Author) {
                         alt="Картинка"
                         src={isImageData(avatar) ? (avatar?.url ? avatar.url : '') : ''}
                         fill
-                        className="object-cover"
+                        className="object-cover rounded-md"
                         priority
                     />
                 ) : null}

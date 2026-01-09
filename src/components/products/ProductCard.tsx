@@ -86,7 +86,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                         </div>
                     ) : (
                         <Button className="w-full rounded" variant="default" onClick={() => addItem(id)}>
-                            {price}
+                            {price} ₽
                         </Button>
                     )}
                 </CardAction>

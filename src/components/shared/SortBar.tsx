@@ -30,7 +30,7 @@ export default function SortBar<T extends string>({ sort, options, onSortChange 
             </SelectTrigger>
 
             <SelectContent>
-                <SelectItem value="default">По умолчанию</SelectItem>
+                {/* <SelectItem value="default">По умолчанию</SelectItem> */}
                 {options.map((s) => (
                     <SelectItem key={s.value} value={s.value}>
                         {s.label}

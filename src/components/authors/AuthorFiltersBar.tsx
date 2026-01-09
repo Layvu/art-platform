@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
+'use client';
 
-import { debounce } from 'lodash';
+
 import { AUTHORS_SORT_OPTIONS } from '@/shared/constants/authors.constants';
 import type { AuthorsFilters, AuthorsSortOptions } from '@/shared/types/query-params.type';
 
 import CategoryFilter from '../shared/CategoryFilter';
-import SearchBar from '../shared/SearchBar';
+import { FiltersBarShell } from '../shared/FiltersBarShell';
 import SortBar from '../shared/SortBar';
 
 interface IAuthorFiltersBarProps {
@@ -15,29 +15,9 @@ interface IAuthorFiltersBarProps {
     onSortChange: (value: AuthorsSortOptions) => void;
 }
 
-// TODO: переиспользовать, передавая категории и опции сортировки
 export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSortChange }: IAuthorFiltersBarProps) {
-    const [searchValue, setSearchValue] = useState<string>(filters.search || '');
-
-    const debouncedSearch = useCallback(
-        debounce((value: string) => {
-            onFilterChange({
-                ...filters,
-                search: value,
-            });
-        }, 500),
-        [filters],
-    );
-    const handleSearchChange = (value: string) => {
-        setSearchValue(value);
-        debouncedSearch(value);
-    };
-
     return (
-        <div className="flex items-start gap-6 mb-9">
-            {/* Поиск */}
-            <SearchBar value={searchValue} onChange={(value) => handleSearchChange(value)} />
-
+        <FiltersBarShell search={filters.search} onSearchChange={(search) => onFilterChange({ ...filters, search })}>
             {/* Категории */}
             <CategoryFilter
                 category={filters?.category}
@@ -46,6 +26,6 @@ export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSor
 
             {/* Сортировка */}
             <SortBar sort={sort} onSortChange={onSortChange} options={AUTHORS_SORT_OPTIONS} />
-        </div>
+        </FiltersBarShell>
     );
 }
