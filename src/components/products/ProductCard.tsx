@@ -11,13 +11,12 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { PAGES } from '@/config/public-pages.config';
 import { useCartStore } from '@/services/store/cart/store';
 import { isAuthorData } from '@/shared/guards/author.guard';
+import { isImageData } from '@/shared/guards/image.guard';
 import { isProductData } from '@/shared/guards/product.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
-
-import { isImageData } from '../../shared/guards/image.guard';
 
 export default function ProductCard({ id, title, slug, price, author, gallery }: Product) {
     const timerRef = useRef<Timer | null>(null);
@@ -76,7 +75,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                         <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
                     </Button> */}
                     {productInCart ? (
-                        <div className="flex w-full gap-1 items-center justify-center bg-orange-600 text-white rounded">
+                        <div className="flex w-full gap-1 items-center justify-center bg-linear-to-l from-orange-400 to-orange-500 text-white rounded">
                             <Button className="p-0" onClick={() => decrease(id)} variant="empty">
                                 <Minus />
                             </Button>

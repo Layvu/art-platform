@@ -2,20 +2,31 @@
 
 import React from 'react';
 
+import { Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
+import { useCartStore } from '@/services/store/cart/store';
 import { isAuthorData } from '@/shared/guards/author.guard';
 import { isImageData } from '@/shared/guards/image.guard';
+import { isProductData } from '@/shared/guards/product.guard';
 import { useFetchProduct } from '@/shared/hooks/useFetchData';
+import type { Media } from '@/shared/types/payload-types';
 import type { ProductQueryParams } from '@/shared/types/query-params.type';
+
+import { Button } from '../ui/button';
+
+import ProductSlider from './ProductSlider';
+
+import './product.scss';
 
 export default function ProductUI({ initialParams }: { initialParams: ProductQueryParams }) {
     const slug = initialParams.product;
     const { data, isError, error, isFetching } = useFetchProduct({ slug });
+    const { cart, addItem, increase, decrease } = useCartStore();
 
     if (isError) {
         return <div>Error: {error.message}</div>;
@@ -28,48 +39,57 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
     }
 
     const { id, title, description, gallery, price, author } = data;
+    const productInCart = cart?.items?.find((item) =>
+        isProductData(item.product) ? item?.product.id == id : item.product == id,
+    );
 
+    const images = gallery?.map((galleryItem) => galleryItem.image).filter((image) => isImageData(image)) || [];
     return (
-        <Card className="max-w-[800px] mx-auto mt-8">
-            <CardHeader>
-                <div className="flex items-center gap-4">
-                    {/* {isImageData(image) && (
-                        <Image
-                            src={image.url || ''}
-                            alt={title}
-                            width={500}
-                            height={500}
-                            style={{ objectFit: 'cover' }}
-                        />
-                    )} */}
+        <div className="wrap mt-8 grid grid-cols-12 gap-x-10 h-[617px] overflow-hidden mb-20">
+            <div className="col-span-7">
+                <ProductSlider gallery={images as Media[]} />
+            </div>
 
-                    {/* На случай если контейнер будет прямоугольным */}
-                    {/* {isImageData(image) && (
-                        <div className="w-[500px] aspect-video relative">
-                            <Image src={image.url || ''} alt={title} fill className="object-cover" />
+            <div className="col-span-5 ">
+                <div className="flex flex-col gap-8 mb-26">
+                    <h2 className=" font-semibold text-[32px] leading-10 ">{title}</h2>
+                    {productInCart ? (
+                        <div className="flex w-full gap-1 items-center justify-center bg-linear-to-l from-orange-400 to-orange-500 text-white rounded">
+                            <Button className="p-0" onClick={() => decrease(id)} variant="empty">
+                                <Minus />
+                            </Button>
+                            <div className="px-2">{productInCart.quantity}</div>
+                            <Button className="p-0" onClick={() => increase(id)} variant="empty">
+                                <Plus />
+                            </Button>
                         </div>
-                    )} */}
-
-                    {/* квадратным */}
-                    {gallery?.map((galleryItem) => {
-                        if (isImageData(galleryItem.image)) {
-                            const image = galleryItem.image;
-                            return (
-                                <div key={galleryItem.id} className="w-[500px] aspect-square relative">
-                                    <Image src={image.url || ''} alt={title} fill className="object-cover" />
-                                </div>
-                            );
-                        } else return null;
-                    })}
-
-                    <div>
-                        <h2 className="text-lg font-semibold">{title}</h2>
-                        <p className="text-sm text-gray-500">Id: {id}</p>
-                        <p className="text-sm text-gray-500">Slug: {slug}</p>
-                    </div>
+                    ) : (
+                        <Button className="w-full rounded" variant="default" onClick={() => addItem(id)}>
+                            {price} ₽
+                        </Button>
+                    )}
                 </div>
-            </CardHeader>
+                <div className="flex flex-col gap-10">
+                    {description && (
+                        <div className="flex flex-col gap-3">
+                            <h3 className="text-2xl font-semibold">Описание</h3>
+                            <div className="text-zinc-600">{description}</div>
+                        </div>
+                    )}
+                    {/* TODO характеристики     */}
 
+                    {isAuthorData(author) && (
+                        <div className="flex  gap-3">
+                            <div className="w-10 h-10 rounded-full bg-zinc-400"></div>
+                            <Link href={PAGES.AUTHOR(author.slug!)} className="hover:underline text-2xl font-semibold">
+                                {author.name}
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* 
             <CardContent className="flex flex-col gap-2">
                 {description && <p>{description.slice(0, 100)}</p>}
                 <span>Цена: {price}</span>
@@ -83,7 +103,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                         </Link>
                     </p>
                 </CardFooter>
-            )}
-        </Card>
+            )} */}
+        </div>
     );
 }
