@@ -1,14 +1,15 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { getQueryClient } from '@/shared/utils/get-query-client';
-import { getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
+import { getAuthorsQueryOptions, getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-import HomeUI from './homeUI';
+import HomeUI from '@/components/home/homeUI';
 
 export default async function HomePage() {
     const queryClient = getQueryClient();
 
-    await queryClient.prefetchQuery(getProductsQueryOptions({ limit: 10 }));
+    await queryClient.prefetchQuery(getProductsQueryOptions({ limit: 4 }));
+    await queryClient.prefetchQuery(getAuthorsQueryOptions({ limit: 4 }));
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>
