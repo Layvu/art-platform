@@ -13,7 +13,7 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
             data-slot="checkbox"
             className={cn(
                 // базовое состояние
-                'peer size-4 shrink-0 rounded-[4px] border border-zinc-300 bg-white shadow-xs outline-none transition',
+                'peer size-5 shrink-0 rounded-[4px] border border-zinc-300  bg-white shadow-xs outline-none transition',
 
                 // checked
                 'data-[state=checked]:border-zinc-300 data-[state=checked]:bg-white',
@@ -23,11 +23,12 @@ function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxP
                 'disabled:cursor-not-allowed disabled:opacity-50',
 
                 className,
+                'cursor-pointer',
             )}
             {...props}
         >
             <CheckboxPrimitive.Indicator className="flex items-center justify-center">
-                <CheckIcon className="size-3" stroke="black" strokeWidth={3} />
+                <CheckIcon className="size-4" stroke="black" strokeWidth={3} />
             </CheckboxPrimitive.Indicator>
         </CheckboxPrimitive.Root>
     );

@@ -55,6 +55,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
 
     // итоговая цена
     const total = checkedItems.reduce((sum, item) => sum + item.quantity * item.product.price, 0);
+    const itemsCount = checkedItems.reduce((sum, item) => sum + item.quantity, 0);
 
     const handleCheckout = () => {
         if (isLoading) return;
@@ -71,25 +72,23 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
     };
 
     return (
-        <div className="p-4">
-            <h1 className="mb-4 text-2xl font-bold">Корзина</h1>
-
+        <div className="wrap mt-10 flex gap-10 ">
             {itemsWithProducts.length === 0 && <p>Корзина пуста</p>}
 
-            <ItemGroup className="flex w-full max-w-md flex-col gap-6">
+            <ItemGroup className="flex flex-1 w-full max-w-[851px] flex-col gap-6">
                 {itemsWithProducts.map((item) => (
                     <CartItem key={item.id ?? item.product.id} item={item} />
                 ))}
             </ItemGroup>
 
             {checkedItems.length > 0 && (
-                <div className="mt-6 p-4 border rounded-lg max-w-md">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-lg font-semibold">Итого к оплате:</span>
-                        <span className="text-xl font-bold">{total} руб.</span>
+                <div className="p-4 bg-zinc-50 flex flex-col gap-4 w-full max-w-[405px] rounded-md">
+                    <div className="flex justify-between items-center">
+                        <span className="text-lg font-semibold">{itemsCount} товар(ов)</span>
+                        <span className="text-xl font-bold">{total} ₽</span>
                     </div>
 
-                    <Button onClick={handleCheckout} className="w-full" size="lg">
+                    <Button onClick={handleCheckout} className="w-full">
                         Оформить заказ
                     </Button>
                 </div>

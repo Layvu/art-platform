@@ -33,10 +33,10 @@ export default function HomeSlider() {
 
     return (
         <div className="relative home-slider wrap">
-            <Slider ref={sliderRef} {...settings}>
-                {[1, 2, 3, 4, 5, 6].map((n) => (
+            <Slider ref={sliderRef} {...settings} className="">
+                {[1, 2].map((n) => (
                     <div key={n}>
-                        <div className="h-[500px] rounded-lg shadow-md grid grid-cols-12 gap-x-10 pl-10">
+                        <div className="h-[500px] rounded-lg grid grid-cols-12 gap-x-10 pl-10 shadow-[0_3px_40px_0_rgba(39,39,42,0.05)]">
                             <div className="col-span-5">
                                 <div className="flex flex-col h-full justify-between py-10">
                                     <div className="flex flex-col gap-10">

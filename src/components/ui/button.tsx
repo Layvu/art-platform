@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { Minus, Plus } from 'lucide-react';
 
 import { cn } from '@/shared/utils/tailwind';
 
@@ -49,4 +50,59 @@ function Button({
     return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
 }
 
-export { Button, buttonVariants };
+export const counterVariants = cva(
+    'relative flex w-full items-center justify-center gap-1 rounded-md transition isolate',
+    {
+        variants: {
+            variant: {
+                default: 'bg-gradient-to-l from-orange-400 to-orange-500 text-white',
+
+                outline: [
+                    'bg-transparent text-orange-400 border-transparent', // Делаем основной фон прозрачным
+
+                    // 1. Слой Градиента (наша "рамка") - самый нижний слой
+                    'before:absolute before:inset-0 before:-z-20',
+                    'before:rounded-md before:bg-gradient-to-r before:from-orange-400 before:to-orange-500',
+
+                    // 2. Слой Белого фона - лежит поверх градиента, но под контентом
+                    // inset-[2px] создает отступ от края, имитируя толщину границы
+                    'after:absolute after:inset-[2px] after:-z-10',
+                    'after:rounded-[6px] after:bg-white',
+                ].join(' '),
+            },
+        },
+        defaultVariants: {
+            variant: 'default',
+        },
+    },
+);
+
+function CounterButton({
+    quantity,
+    increase,
+    decrease,
+    id,
+    variant,
+}: {
+    quantity: number;
+    increase: (id: number) => void;
+    decrease: (id: number) => void;
+    id: number;
+    variant?: VariantProps<typeof counterVariants>['variant'];
+}) {
+    return (
+        <div className={cn(counterVariants({ variant }))}>
+            <Button variant="empty" className="" onClick={() => decrease(id)} size="icon">
+                <Minus />
+            </Button>
+
+            <div className="px-2 font-semibold select-none">{quantity}</div>
+
+            <Button variant="empty" size="icon" className="" onClick={() => increase(id)}>
+                <Plus />
+            </Button>
+        </div>
+    );
+}
+
+export { Button, buttonVariants, CounterButton };
