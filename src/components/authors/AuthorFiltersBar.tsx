@@ -1,6 +1,5 @@
 'use client';
 
-
 import { AUTHORS_SORT_OPTIONS } from '@/shared/constants/authors.constants';
 import type { AuthorsFilters, AuthorsSortOptions } from '@/shared/types/query-params.type';
 

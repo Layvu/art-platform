@@ -175,6 +175,11 @@ export const ProductsCollection: CollectionConfig = {
             label: 'Описание',
         },
         {
+            name: 'characteristics',
+            type: 'textarea',
+            label: 'Характеристики',
+        },
+        {
             name: 'gallery',
             type: 'array',
             label: 'Изображения',

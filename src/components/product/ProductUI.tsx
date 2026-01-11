@@ -37,7 +37,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
         notFound();
     }
 
-    const { id, title, description, gallery, price, author } = data;
+    const { id, title, description, gallery, price, author, characteristics } = data;
     const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
@@ -72,10 +72,15 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                     {description && (
                         <div className="flex flex-col gap-3">
                             <h3 className="text-2xl font-semibold">Описание</h3>
-                            <div className="text-zinc-600">{description}</div>
+                            <div className="text-zinc-600 text-lg">{description}</div>
                         </div>
                     )}
-                    {/* TODO характеристики     */}
+                    {characteristics && (
+                        <div className="flex flex-col gap-3">
+                            <h3 className="text-2xl font-semibold">Характеристики</h3>
+                            <div className="text-zinc-600 text-lg">{characteristics}</div>
+                        </div>
+                    )}
 
                     {isAuthorData(author) && (
                         <div className="flex gap-3">

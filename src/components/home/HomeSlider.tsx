@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useRef } from 'react';
-import Slider from 'react-slick';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import './home-slider.scss';
-import { Badge } from '../ui/badge';
 import Image from 'next/image';
+import Slider from 'react-slick';
+
+import { Badge } from '../ui/badge';
+
+import './home-slider.scss';
 
 export default function HomeSlider() {
     const sliderRef = useRef<Slider | null>(null);

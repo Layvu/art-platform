@@ -1,9 +1,8 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
+import HomeUI from '@/components/home/homeUI';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorsQueryOptions, getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
-
-import HomeUI from '@/components/home/homeUI';
 
 export default async function HomePage() {
     const queryClient = getQueryClient();

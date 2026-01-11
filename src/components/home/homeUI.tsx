@@ -8,7 +8,9 @@ import Link from 'next/link';
 import ProductCard from '@/components/products/ProductCard';
 import { Button } from '@/components/ui/button';
 import { useFetchAuthors, useFetchProducts } from '@/shared/hooks/useFetchData';
+
 import AuthorCard from '../authors/AuthorCard';
+
 import HomeSlider from './HomeSlider';
 
 export default function HomeUI() {

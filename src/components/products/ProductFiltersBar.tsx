@@ -1,7 +1,5 @@
 'use client';
 
-
-
 import { PRODUCTS_SORT_OPTIONS } from '@/shared/constants/products.constants';
 import type { ProductsFilters, ProductsSortOptions } from '@/shared/types/query-params.type';
 
