@@ -82,7 +82,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
             </ItemGroup>
 
             {checkedItems.length > 0 && (
-                <div className="p-4 bg-zinc-50 flex flex-col gap-4 w-full max-w-[405px] rounded-md">
+                <div className="p-4 bg-zinc-50 flex flex-col gap-4 h-fit w-full max-w-[405px] rounded-md ">
                     <div className="flex justify-between items-center">
                         <span className="text-lg font-semibold">{itemsCount} товар(ов)</span>
                         <span className="text-xl font-bold">{total} ₽</span>

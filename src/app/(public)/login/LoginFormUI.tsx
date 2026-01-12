@@ -68,7 +68,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
     };
 
     return (
-        <div className="container max-w-md mx-auto p-6">
+        <div className="max-w-lg mx-auto p-6">
             <Card>
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl text-center">Вход в аккаунт</CardTitle>

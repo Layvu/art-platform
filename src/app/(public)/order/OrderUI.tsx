@@ -48,6 +48,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
         phone: customer.phone || '',
         deliveryType: DELIVERY_TYPES.PICKUP as IDeliveryType,
         address: '',
+        comment: '',
     });
 
     // Рассчитываем общую сумму
@@ -69,7 +70,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
 
     if (checkedItems.length === 0) {
         return (
-            <div className="container max-w-2xl mx-auto p-6">
+            <div className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-bold mb-4">Оформление заказа</h1>
                 <p>Нет выбранных товаров для заказа.</p>
                 <Button onClick={() => router.push(PAGES.CART)} className="mt-4">
@@ -135,88 +136,103 @@ export default function OrderUI({ customer }: OrderUIProps) {
     const isDelivery = formData.deliveryType === DELIVERY_TYPES.DELIVERY;
 
     return (
-        <div className="container max-w-2xl mx-auto p-6">
-            <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="wrap mx-auto p-6">
+            <form onSubmit={handleSubmit} className="flex gap-10">
                 {/* Данные покупателя */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Данные для заказа</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="fullName">ФИО *</Label>
-                            <Input
-                                id="fullName"
-                                value={formData.fullName}
-                                onChange={(e) => handleInputChange('fullName', e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">Телефон *</Label>
-                            <Input
-                                id="phone"
-                                value={formData.phone}
-                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                                required
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
+                <Card className="flex flex-col gap-8 flex-1">
+                    <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
 
-                {/* Способ получения */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Способ получения</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <RadioGroup
-                            value={formData.deliveryType}
-                            onValueChange={handleDeliveryTypeChange}
-                            className="space-y-3"
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value={DELIVERY_TYPES.PICKUP} id="pickup" />
-                                <Label htmlFor="pickup" className="cursor-pointer">
-                                    Самовывоз
-                                </Label>
+                    <div className='space-y-4'>
+                        <CardHeader>
+                            <CardTitle>Личные данные</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 p-0">
+                            <div className="space-y-2">
+                                <Label htmlFor="fullName">ФИО *</Label>
+                                <Input
+                                    id="fullName"
+                                    value={formData.fullName}
+                                    onChange={(e) => handleInputChange('fullName', e.target.value)}
+                                    required
+                                />
                             </div>
-                            {formData.deliveryType === DELIVERY_TYPES.PICKUP && (
-                                <div className="ml-6 p-3 bg-muted rounded-md">
-                                    <p className="text-sm">Адрес самовывоза: {PICKUP_ADDRESS}</p>
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Телефон *</Label>
+                                <Input
+                                    id="phone"
+                                    value={formData.phone}
+                                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </CardContent>
+                    </div>
+                    {/* Способ получения */}
+                    <div className='space-y-4'>
+                        <CardHeader>
+                            <CardTitle>Способ получения</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 p-0">
+                            <RadioGroup
+                                value={formData.deliveryType}
+                                onValueChange={handleDeliveryTypeChange}
+                                className="space-y-3"
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value={DELIVERY_TYPES.PICKUP} id="pickup" />
+                                    <Label htmlFor="pickup" className="cursor-pointer">
+                                        Самовывоз
+                                    </Label>
                                 </div>
-                            )}
+                                {formData.deliveryType === DELIVERY_TYPES.PICKUP && (
+                                    <div className="ml-6 p-3 bg-muted rounded-md">
+                                        <p className="text-sm">Адрес самовывоза: {PICKUP_ADDRESS}</p>
+                                    </div>
+                                )}
 
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
-                                <Label htmlFor="delivery" className="cursor-pointer">
-                                    Доставка
-                                </Label>
-                            </div>
-                            {isDelivery && (
-                                <div className="ml-6 space-y-2">
-                                    <Label htmlFor="address">Адрес доставки *</Label>
-                                    <Input
-                                        id="address"
-                                        value={formData.address}
-                                        onChange={(e) => handleInputChange('address', e.target.value)}
-                                        placeholder="Введите полный адрес доставки"
-                                        required={isDelivery}
-                                    />
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
+                                    <Label htmlFor="delivery" className="cursor-pointer">
+                                        Доставка
+                                    </Label>
                                 </div>
-                            )}
-                        </RadioGroup>
-                    </CardContent>
+                                {isDelivery && (
+                                    <div className="ml-6 space-y-2">
+                                        <Label htmlFor="address">Адрес доставки *</Label>
+                                        <Input
+                                            id="address"
+                                            value={formData.address}
+                                            onChange={(e) => handleInputChange('address', e.target.value)}
+                                            placeholder="Введите полный адрес доставки"
+                                            required={isDelivery}
+                                        />
+                                    </div>
+                                )}
+                            </RadioGroup>
+                        </CardContent>
+                    </div>
+                    <div className='space-y-4'>
+                        <CardHeader>
+                            <CardTitle>Комментарий к заказу</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 p-0">
+                            <div className="space-y-2">
+                                <Input
+                                    id="comment"
+                                    value={formData.comment}
+                                    onChange={(e) => handleInputChange('comment', e.target.value)}
+                                />
+                            </div>
+                        </CardContent>
+                    </div>
                 </Card>
 
                 {/* Товары в заказе */}
-                <Card>
+                <Card className="h-fit bg-zinc-100 w-[405px]">
                     <CardHeader>
                         <CardTitle>Товары в заказе</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className='p-0'>
                         <div className="space-y-3">
                             {checkedItems.map((item) => {
                                 const productId = isProductData(item.product) ? item.product.id : item.product;
@@ -238,17 +254,17 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                 );
                             })}
 
-                            <div className="flex justify-between items-center pt-3 border-t font-bold text-lg">
+                            <div className="flex justify-between items-center pt-3 font-bold text-lg">
                                 <p>Итого:</p>
                                 <p>{total.toFixed(2)} руб.</p>
                             </div>
                         </div>
                     </CardContent>
-                </Card>
 
-                <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
-                    {isSubmitting ? 'Оформление заказа...' : 'Завершить заказ'}
-                </Button>
+                    <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
+                        {isSubmitting ? 'Оформление заказа...' : 'Завершить заказ'}
+                    </Button>
+                </Card>
             </form>
         </div>
     );
