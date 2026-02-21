@@ -1,11 +1,13 @@
 ﻿import { type MigrateDownArgs, type MigrateUpArgs, sql } from '@payloadcms/db-postgres';
 
-export async function up({ db }: MigrateUpArgs): Promise<void> {
-    await db.execute(sql`
-   CREATE TYPE "public"."enum_products_category" AS ENUM('shoppers', 'clothes', 'trinkets', 'postcards', 'ceramics', 'stickers', 'knitted');
+export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+   CREATE TYPE "public"."_locales" AS ENUM('ru', 'en');
+  CREATE TYPE "public"."enum_products_category" AS ENUM('shoppers', 'clothes', 'trinkets', 'postcards', 'ceramics', 'stickers', 'knitted');
   CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'author', 'customer');
   CREATE TYPE "public"."enum_orders_delivery_type" AS ENUM('pickup', 'delivery');
-  CREATE TYPE "public"."enum_orders_status" AS ENUM('processing', 'assembled', 'sent', 'delivered', 'completed', 'cancelled');
+  CREATE TYPE "public"."enum_orders_status" AS ENUM('prepared', 'processing', 'assembled', 'sent', 'delivered', 'completed', 'cancelled');
+  CREATE TYPE "public"."enum_orders_payment_status" AS ENUM('pending', 'waiting_for_capture', 'succeeded', 'canceled');
   CREATE TABLE "products_gallery" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
@@ -19,10 +21,11 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"slug" varchar NOT NULL,
   	"price" numeric NOT NULL,
   	"description" varchar,
+  	"characteristics" varchar,
   	"category" "enum_products_category",
   	"author_id" integer NOT NULL,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
   CREATE TABLE "authors_product_categories" (
@@ -37,11 +40,11 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"name" varchar,
   	"slug" varchar,
   	"bio" varchar,
-  	"avatar" varchar,
+  	"avatar_id" integer,
   	"products_count" numeric DEFAULT 0,
   	"user_id" integer,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
   CREATE TABLE "users_sessions" (
@@ -55,11 +58,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "users" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"role" "enum_users_role" DEFAULT 'customer',
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"enable_a_p_i_key" boolean,
-  	"api_key" varchar,
-  	"api_key_index" varchar,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"email" varchar NOT NULL,
   	"reset_password_token" varchar,
   	"reset_password_expiration" timestamp(3) with time zone,
@@ -72,8 +72,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "forms" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"content" varchar NOT NULL,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
   CREATE TABLE "carts_items" (
@@ -129,7 +129,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   	"customer_id" integer NOT NULL,
   	"delivery_type" "enum_orders_delivery_type" DEFAULT 'pickup' NOT NULL,
   	"address" varchar,
-  	"status" "enum_orders_status" DEFAULT 'processing',
+  	"status" "enum_orders_status" DEFAULT 'prepared' NOT NULL,
+  	"payment_status" "enum_orders_payment_status" DEFAULT 'pending',
+  	"payment_id" varchar,
+  	"payment_link" varchar,
   	"total" numeric NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -137,8 +140,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   
   CREATE TABLE "media" (
   	"id" serial PRIMARY KEY NOT NULL,
-  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"url" varchar,
   	"thumbnail_u_r_l" varchar,
   	"filename" varchar,
@@ -212,6 +215,7 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "products_gallery" ADD CONSTRAINT "products_gallery_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "products" ADD CONSTRAINT "products_author_id_authors_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."authors"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "authors_product_categories" ADD CONSTRAINT "authors_product_categories_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."authors"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "authors" ADD CONSTRAINT "authors_avatar_id_media_id_fk" FOREIGN KEY ("avatar_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "authors" ADD CONSTRAINT "authors_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "users_sessions" ADD CONSTRAINT "users_sessions_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "carts_items" ADD CONSTRAINT "carts_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action;
@@ -238,21 +242,15 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "products_gallery_image_idx" ON "products_gallery" USING btree ("image_id");
   CREATE UNIQUE INDEX "products_slug_idx" ON "products" USING btree ("slug");
   CREATE INDEX "products_author_idx" ON "products" USING btree ("author_id");
-  CREATE INDEX "products_updated_at_idx" ON "products" USING btree ("updated_at");
-  CREATE INDEX "products_created_at_idx" ON "products" USING btree ("created_at");
   CREATE INDEX "authors_product_categories_order_idx" ON "authors_product_categories" USING btree ("_order");
   CREATE INDEX "authors_product_categories_parent_id_idx" ON "authors_product_categories" USING btree ("_parent_id");
   CREATE UNIQUE INDEX "authors_slug_idx" ON "authors" USING btree ("slug");
+  CREATE INDEX "authors_avatar_idx" ON "authors" USING btree ("avatar_id");
   CREATE UNIQUE INDEX "authors_user_idx" ON "authors" USING btree ("user_id");
-  CREATE INDEX "authors_updated_at_idx" ON "authors" USING btree ("updated_at");
-  CREATE INDEX "authors_created_at_idx" ON "authors" USING btree ("created_at");
   CREATE INDEX "users_sessions_order_idx" ON "users_sessions" USING btree ("_order");
   CREATE INDEX "users_sessions_parent_id_idx" ON "users_sessions" USING btree ("_parent_id");
-  CREATE INDEX "users_updated_at_idx" ON "users" USING btree ("updated_at");
-  CREATE INDEX "users_created_at_idx" ON "users" USING btree ("created_at");
   CREATE UNIQUE INDEX "users_email_idx" ON "users" USING btree ("email");
   CREATE INDEX "forms_updated_at_idx" ON "forms" USING btree ("updated_at");
-  CREATE INDEX "forms_created_at_idx" ON "forms" USING btree ("created_at");
   CREATE INDEX "carts_items_order_idx" ON "carts_items" USING btree ("_order");
   CREATE INDEX "carts_items_parent_id_idx" ON "carts_items" USING btree ("_parent_id");
   CREATE INDEX "carts_items_product_idx" ON "carts_items" USING btree ("product_id");
@@ -264,13 +262,10 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE UNIQUE INDEX "customers_email_idx" ON "customers" USING btree ("email");
   CREATE UNIQUE INDEX "customers_user_idx" ON "customers" USING btree ("user_id");
   CREATE INDEX "customers_cart_idx" ON "customers" USING btree ("cart_id");
-  CREATE INDEX "customers_updated_at_idx" ON "customers" USING btree ("updated_at");
   CREATE INDEX "orders_items_order_idx" ON "orders_items" USING btree ("_order");
   CREATE INDEX "orders_items_parent_id_idx" ON "orders_items" USING btree ("_parent_id");
   CREATE UNIQUE INDEX "orders_order_number_idx" ON "orders" USING btree ("order_number");
   CREATE INDEX "orders_customer_idx" ON "orders" USING btree ("customer_id");
-  CREATE INDEX "media_updated_at_idx" ON "media" USING btree ("updated_at");
-  CREATE INDEX "media_created_at_idx" ON "media" USING btree ("created_at");
   CREATE UNIQUE INDEX "media_filename_idx" ON "media" USING btree ("filename");
   CREATE INDEX "media_sizes_thumbnail_sizes_thumbnail_filename_idx" ON "media" USING btree ("sizes_thumbnail_filename");
   CREATE INDEX "media_sizes_medium_sizes_medium_filename_idx" ON "media" USING btree ("sizes_medium_filename");
@@ -296,11 +291,11 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_preferences_rels_path_idx" ON "payload_preferences_rels" USING btree ("path");
   CREATE INDEX "payload_preferences_rels_users_id_idx" ON "payload_preferences_rels" USING btree ("users_id");
   CREATE INDEX "payload_migrations_updated_at_idx" ON "payload_migrations" USING btree ("updated_at");
-  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`);
+  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`)
 }
 
-export async function down({ db }: MigrateDownArgs): Promise<void> {
-    await db.execute(sql`
+export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+  await db.execute(sql`
    DROP TABLE "products_gallery" CASCADE;
   DROP TABLE "products" CASCADE;
   DROP TABLE "authors_product_categories" CASCADE;
@@ -320,8 +315,10 @@ export async function down({ db }: MigrateDownArgs): Promise<void> {
   DROP TABLE "payload_preferences" CASCADE;
   DROP TABLE "payload_preferences_rels" CASCADE;
   DROP TABLE "payload_migrations" CASCADE;
+  DROP TYPE "public"."_locales";
   DROP TYPE "public"."enum_products_category";
   DROP TYPE "public"."enum_users_role";
   DROP TYPE "public"."enum_orders_delivery_type";
-  DROP TYPE "public"."enum_orders_status";`);
+  DROP TYPE "public"."enum_orders_status";
+  DROP TYPE "public"."enum_orders_payment_status";`)
 }

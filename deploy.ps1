@@ -44,7 +44,6 @@ Write-Host "DONE!" -ForegroundColor Green
 # 1. Полное пересоздание проекта и БД:
 # bash /var/app/scripts/reset_db.sh
 # bash /var/app/scripts/update.sh
-# bash /var/app/scripts/set_key.sh some_admin_key
 
 # 2. Просто обновление проекта и миграция БД:
 # bash /var/app/scripts/update.sh
@@ -52,3 +51,13 @@ Write-Host "DONE!" -ForegroundColor Green
 # 3. Очистка логов и кэша:
 # TODO: настроить cron
 # bash /var/app/scripts/clean-logs-and-cache.sh
+
+# Логи указаны в:
+# /etc/nginx/sites-available/polki-minto.ru
+
+# Nginx:
+# /etc/nginx/nginx.conf
+
+# Сертификаты:
+# /etc/nginx/sites-enabled/polki-minto.ru
+# /etc/nginx/sites-enabled/polki-minto.ru
