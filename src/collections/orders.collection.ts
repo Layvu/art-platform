@@ -1,8 +1,11 @@
-import { type CollectionConfig } from 'payload';
+import { APIError, type CollectionConfig } from 'payload';
 
+import { yookassaService } from '@/services/api/server/yookassa.service';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { DELIVERY_TYPES, ORDER_STATUS } from '@/shared/constants/order.constants';
+import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
 import { UserType } from '@/shared/types/auth.interface';
+import type { PaymentStatusType } from '@/shared/types/yookassa.interface';
 import { isAdmin, isCreateOperation, isCustomer } from '@/shared/utils/payload';
 
 export const OrdersCollection: CollectionConfig = {
@@ -108,16 +111,56 @@ export const OrdersCollection: CollectionConfig = {
             // Единственное редактируемое поле
             name: 'status',
             type: 'select',
+            label: 'Статус заказа',
             options: [
-                { value: ORDER_STATUS.PROCESSING, label: 'В обработке' },
+                { value: ORDER_STATUS.PREPARED, label: 'Ожидает оплаты' },
+                { value: ORDER_STATUS.PROCESSING, label: 'В обработке (Платёж оплачен)' },
                 { value: ORDER_STATUS.ASSEMBLED, label: 'Собран' },
                 { value: ORDER_STATUS.SENT, label: 'Отправлен' },
                 { value: ORDER_STATUS.DELIVERED, label: 'Доставлен' },
-                { value: ORDER_STATUS.COMPLETED, label: 'Выполнен' },
-                { value: ORDER_STATUS.CANCELLED, label: 'Отменён' },
+                { value: ORDER_STATUS.COMPLETED, label: 'Выполнен (Будет подтверждено зачисление средств)' },
+                { value: ORDER_STATUS.CANCELLED, label: 'Отменён (Деньги будут возвращены)' },
             ],
-            defaultValue: ORDER_STATUS.PROCESSING,
-            label: 'Статус заказа',
+            defaultValue: ORDER_STATUS.PREPARED,
+            required: true,
+        },
+        {
+            name: 'paymentStatus',
+            type: 'select',
+            label: 'Статус оплаты в ЮКассе',
+            options: [
+                { value: PAYMENT_STATUS.PENDING, label: 'Платеж создан, ожидает оплаты' },
+                { value: PAYMENT_STATUS.WAITING_FOR_CAPTURE, label: 'Платеж оплачен, деньги ожидают списания' },
+                { value: PAYMENT_STATUS.SUCCEEDED, label: 'Платёж успешно завершён' },
+                { value: PAYMENT_STATUS.CANCELED, label: 'Платёж отменён' },
+            ],
+            defaultValue: PAYMENT_STATUS.PENDING,
+            admin: {
+                position: 'sidebar',
+                description: 'Статус обновляется периодически. Актуальное значение можно узнать в ЮКассе',
+                readOnly: true, // Только ЮКасса может менять это поле
+                style: {
+                    fontWeight: 'bold',
+                },
+            },
+        },
+        {
+            name: 'paymentId',
+            type: 'text',
+            label: 'ID Платежа ЮКассы',
+            admin: {
+                readOnly: true,
+                position: 'sidebar',
+            },
+        },
+        {
+            name: 'paymentLink',
+            type: 'text',
+            label: 'Ссылка на оплату',
+            admin: {
+                readOnly: true,
+                position: 'sidebar',
+            },
         },
         {
             name: 'total',
@@ -187,7 +230,7 @@ export const OrdersCollection: CollectionConfig = {
         create: async ({ req: { user } }) => {
             if (!user) return false;
 
-            // Разрешаем создавать заказы админам и авторизованным покупателям (последнее это TODO)
+            // Разрешаем создавать заказы админам и авторизованным покупателям
             if (isAdmin(user) || isCustomer(user)) return true;
 
             return false;
@@ -214,10 +257,14 @@ export const OrdersCollection: CollectionConfig = {
                 });
                 if (!order) return false;
 
-                // 3. Проверяем, что заказ принадлежит покупателю и в статусе PROCESSING
+                // 3. Проверяем, что заказ принадлежит покупателю и не в финальном статусе
                 const orderCustomerId = typeof order.customer === 'object' ? order.customer.id : order.customer;
 
-                return orderCustomerId === customer.id && order.status === ORDER_STATUS.PROCESSING;
+                const isOwner = orderCustomerId === customer.id;
+                const isEditableStatus =
+                    order.status !== ORDER_STATUS.CANCELLED && order.status !== ORDER_STATUS.COMPLETED;
+
+                return isOwner && isEditableStatus;
             }
 
             return false;
@@ -227,7 +274,87 @@ export const OrdersCollection: CollectionConfig = {
     },
 
     hooks: {
-        beforeValidate: [
+        // Хук нужен только для обработки ручных изменений админом через админ-панель
+        beforeChange: [
+            async ({ data, originalDoc }) => {
+                // Игнорируем операцию создания заказа
+                if (!originalDoc) return data;
+
+                const newStatus = data.status;
+                const oldStatus = originalDoc.status;
+                const newPaymentStatus = data.paymentStatus as PaymentStatusType;
+                const oldPaymentStatus = originalDoc.paymentStatus as PaymentStatusType;
+                const paymentId = originalDoc.paymentId;
+
+                // Блокировка изменения статуса:
+                // Если платеж уже финальный (успех или отмена), запрещаем менять статус заказа вручную
+                // Исключение: обновление через вебхук (когда меняется paymentStatus)
+                const isWebhookUpdate = newPaymentStatus !== oldPaymentStatus;
+                if (!isWebhookUpdate) {
+                    if (oldPaymentStatus === PAYMENT_STATUS.SUCCEEDED) {
+                        throw new APIError('Заказ выполнен и оплачен. Редактирование статуса запрещено.', 400);
+                    }
+                    if (oldPaymentStatus === PAYMENT_STATUS.CANCELED) {
+                        throw new APIError('Оплата отменена. Нельзя возобновить этот заказ.', 400);
+                    }
+                }
+
+                // Синхронизация: если пришел вебхук и поменял paymentStatus (PaymentStatus -> Status)
+                if (newPaymentStatus && newPaymentStatus !== oldPaymentStatus) {
+                    if (newPaymentStatus === PAYMENT_STATUS.WAITING_FOR_CAPTURE) {
+                        if (oldStatus === ORDER_STATUS.PREPARED) {
+                            data.status = ORDER_STATUS.PROCESSING;
+                        }
+                    } else if (newPaymentStatus === PAYMENT_STATUS.SUCCEEDED) {
+                        data.status = ORDER_STATUS.COMPLETED;
+                    } else if (newPaymentStatus === PAYMENT_STATUS.CANCELED) {
+                        data.status = ORDER_STATUS.CANCELLED;
+                    }
+
+                    return data;
+                }
+
+                // Синхронизация: если админ меняет статус заказа вручную (Status -> API Yookassa)
+                if (newStatus !== oldStatus && paymentId) {
+                    // Админ ставит "Выполнен" -> Подтверждаем списание (Capture)
+                    if (newStatus === ORDER_STATUS.COMPLETED) {
+                        if (oldPaymentStatus !== PAYMENT_STATUS.WAITING_FOR_CAPTURE) {
+                            throw new APIError('Нельзя завершить заказ, пока платёж не оплачен', 400);
+                        }
+                        try {
+                            const amount = originalDoc.total.toFixed(2);
+                            await yookassaService.capturePayment(paymentId, amount);
+                            data.paymentStatus = PAYMENT_STATUS.SUCCEEDED; // для UX лучше обновить сразу, вебхук потом подтвердит
+                        } catch (e) {
+                            const msg = e instanceof Error ? e.message : 'Unknown error';
+                            throw new APIError(`Ошибка подтверждения оплаты: ${msg}`, 400);
+                        }
+                    }
+
+                    // Админ ставит "Отменён" -> Отменяем платёж
+                    if (newStatus === ORDER_STATUS.CANCELLED) {
+                        if (oldPaymentStatus === PAYMENT_STATUS.WAITING_FOR_CAPTURE) {
+                            try {
+                                await yookassaService.cancelPayment(paymentId);
+                                data.paymentStatus = PAYMENT_STATUS.CANCELED;
+                            } catch (e) {
+                                const msg = e instanceof Error ? e.message : 'Unknown error';
+                                throw new APIError(`Ошибка отмены оплаты в ЮКассе: ${msg}`, 400);
+                            }
+                        } else if (oldPaymentStatus === PAYMENT_STATUS.PENDING) {
+                            data.paymentStatus = PAYMENT_STATUS.CANCELED;
+                        } else if (oldPaymentStatus === PAYMENT_STATUS.SUCCEEDED) {
+                            throw new APIError(
+                                'Оплата уже проведена. Для возврата средств обратитесь в службу поддержки.',
+                                400,
+                            );
+                        }
+                    }
+                }
+
+                return data;
+            },
+
             async ({ data, req, operation }) => {
                 const { user, payload } = req;
 

@@ -1,6 +1,7 @@
 import type { IOrderStatus } from '../types/order.interface';
 
 export const ORDER_STATUS = {
+    PREPARED: 'prepared',
     PROCESSING: 'processing',
     ASSEMBLED: 'assembled',
     SENT: 'sent',
@@ -16,6 +17,8 @@ export const DELIVERY_TYPES = {
 
 export const getOrderStatusText = (status: IOrderStatus): string => {
     switch (status) {
+        case ORDER_STATUS.PREPARED:
+            return 'Ожидает оплаты';
         case ORDER_STATUS.PROCESSING:
             return 'В обработке';
         case ORDER_STATUS.ASSEMBLED:

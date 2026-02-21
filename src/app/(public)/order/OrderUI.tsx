@@ -118,13 +118,18 @@ export default function OrderUI({ customer }: OrderUIProps) {
             };
 
             // Создаем заказ
-            await orderClientService.createOrder(requestOrderData);
+            const result = await orderClientService.createOrder(requestOrderData);
 
             // Очищаем корзину (только отмеченные товары)
             clearCheckedItems();
 
-            // Перенаправляем в профиль
-            router.push(PAGES.PROFILE);
+            // Перенаправляем на страницу оплаты
+            if (result.paymentUrl) {
+                router.push(result.paymentUrl);
+            } else {
+                // Фолбек, если не удалось получить ссылку на оплату
+                router.push(PAGES.PROFILE);
+            }
         } catch (error) {
             console.error('Order creation error:', error);
             alert('Произошла ошибка при оформлении заказа');
@@ -142,7 +147,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                 <Card className="flex flex-col gap-8 flex-1">
                     <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
 
-                    <div className='space-y-4'>
+                    <div className="space-y-4">
                         <CardHeader>
                             <CardTitle>Личные данные</CardTitle>
                         </CardHeader>
@@ -168,7 +173,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                         </CardContent>
                     </div>
                     {/* Способ получения */}
-                    <div className='space-y-4'>
+                    <div className="space-y-4">
                         <CardHeader>
                             <CardTitle>Способ получения</CardTitle>
                         </CardHeader>
@@ -211,7 +216,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                             </RadioGroup>
                         </CardContent>
                     </div>
-                    <div className='space-y-4'>
+                    <div className="space-y-4">
                         <CardHeader>
                             <CardTitle>Комментарий к заказу</CardTitle>
                         </CardHeader>
@@ -232,7 +237,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                     <CardHeader>
                         <CardTitle>Товары в заказе</CardTitle>
                     </CardHeader>
-                    <CardContent className='p-0'>
+                    <CardContent className="p-0">
                         <div className="space-y-3">
                             {checkedItems.map((item) => {
                                 const productId = isProductData(item.product) ? item.product.id : item.product;

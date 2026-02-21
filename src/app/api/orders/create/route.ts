@@ -28,14 +28,13 @@ export async function POST(req: Request) {
         // Находим профиль покупателя (Customer) по ID пользователя (User)
         const customer = await customerServerService.getCustomerByUserId(user.id);
 
-        // Сервис сам подготивит данные заказа: запросит товары, проверит их актуальные данные и посчитает общую сумму
-        // Необходимо, чтобы защититься от подмены запроса со стороны клиента
-        const preparedOrderData = await orderServerService.prepareOrder(customer.id, body);
-        const newOrder = await orderServerService.createOrder(preparedOrderData);
+        // Создаем заказ и платеж
+        const result = await orderServerService.createOrderWithPayment(customer.id, body, user.email);
 
         return NextResponse.json({
             success: true,
-            order: newOrder,
+            orderId: result.order.id,
+            paymentUrl: result.paymentUrl,
         });
     } catch (error) {
         let message = 'Ошибка при создании заказа';

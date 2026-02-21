@@ -1,15 +1,133 @@
+import configPromise from '@payload-config';
+import { getPayload } from 'payload';
+
+import { PAGES } from '@/config/public-pages.config';
 import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
-import type { IOrderCreatePayloadData, IOrderCreateRequest, IOrderStatus } from '@/shared/types/order.interface';
+import { ORDER_STATUS } from '@/shared/constants/order.constants';
+import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
+import type { IOrderCreatePayloadData, IOrderCreateRequest } from '@/shared/types/order.interface';
 import type { Order } from '@/shared/types/payload-types';
+import type { IYookassaPaymentResponse, PaymentStatusType } from '@/shared/types/yookassa.interface';
+import { isOrderFinished, isOrderInDelivery } from '@/shared/utils/orders.utils';
 
 import { apiUrl } from '../api-url-builder';
 
 import { BaseServerService } from './base-server.service';
 import { payloadDataService } from './payload-data.service';
+import { yookassaService } from './yookassa.service';
 
 export class OrderServerService extends BaseServerService {
-    // Метод для записи заказа в БД
-    async createOrder(orderData: IOrderCreatePayloadData): Promise<Order> {
+    async createOrderWithPayment(
+        customerId: number,
+        requestData: IOrderCreateRequest,
+        customerEmail?: string,
+    ): Promise<{ order: Order; paymentUrl?: string }> {
+        console.log('createOrderWithPayment', customerId, requestData, customerEmail);
+
+        // Заново пересчитываем данные заказа: запрашиваем товары, проверяем их актуальные данные и считаем общую сумму
+        // Необходимо, чтобы защититься от подмены запроса со стороны клиента
+        const preparedData = await this.prepareOrder(customerId, requestData);
+
+        // Создание в БД (Status: Prepared, Payment: Pending)
+        const newOrder = await this.createOrderInDb(preparedData);
+
+        // Создание платежа в ЮКассе
+        const payment = await yookassaService.createPayment({
+            amount: newOrder.total,
+            description: `Оплата заказа №${newOrder.orderNumber}`,
+            returnUrl: apiUrl.publicPage(PAGES.PROFILE),
+            metadata: { order_id: newOrder.id.toString() },
+            customerEmail: customerEmail,
+            items: preparedData.items.map((item) => ({
+                title: item.productSnapshot.title,
+                price: item.productSnapshot.price,
+                quantity: item.quantity,
+            })),
+        });
+
+        // Обновление paymentId и paymentLink в заказе
+        await this.updateOrderField(newOrder.id, {
+            paymentId: payment.id,
+            paymentLink: payment.confirmation?.confirmation_url,
+        });
+
+        return {
+            order: newOrder,
+            paymentUrl: payment.confirmation?.confirmation_url,
+        };
+    }
+
+    async captureOrderPayment(orderId: number): Promise<IYookassaPaymentResponse> {
+        console.log('captureOrderPayment', orderId);
+
+        const order = await this.getOrderById(orderId);
+        if (!order || !order.paymentId) {
+            throw new Error('Заказ или ID платежа не найдены');
+        }
+
+        // Подтверждаем в ЮКассе
+        const capturedPayment = await yookassaService.capturePayment(order.paymentId, order.total.toFixed(2));
+
+        // Обновляем статус платежа в БД
+        await this.updateOrderField(orderId, {
+            paymentStatus: capturedPayment.status,
+        });
+
+        return capturedPayment;
+    }
+
+    async cancelOrder(orderId: number, isUserAction = false): Promise<void> {
+        console.log('cancelOrder', orderId, isUserAction);
+
+        const order = await this.getOrderById(orderId);
+        if (!order || !order.paymentId) {
+            throw new Error('Заказ не найден');
+        }
+
+        // Проверяем статус заказа
+        if (isUserAction) {
+            if (isOrderFinished(order)) {
+                throw new Error('Невозможно отменить завершенный заказ');
+            }
+            if (isOrderInDelivery(order)) {
+                throw new Error('Невозможно отменить заказ в процессе доставки');
+            }
+        }
+
+        // Отмена в ЮКассе
+        await yookassaService.cancelPayment(order.paymentId);
+
+        console.log('cancelOrder', 'payment canceled');
+
+        // Обновление в БД (Статус заказа и статус оплаты)
+        await this.updateOrderField(orderId, {
+            status: ORDER_STATUS.CANCELLED,
+            paymentStatus: PAYMENT_STATUS.CANCELED,
+        });
+    }
+
+    async processWebhookUpdate(orderId: string, yookassaStatus: string): Promise<void> {
+        console.log('processWebhookUpdate', orderId, yookassaStatus);
+
+        const payload = await getPayload({ config: configPromise });
+
+        const paymentStatus = yookassaStatus as PaymentStatusType;
+
+        // Здесь мы меняем только paymentStatus, а хук коллекции Orders обновит статус заказа (Status)
+        // Источник правды - PaymentStatus
+
+        await payload.update({
+            collection: COLLECTION_SLUGS.ORDERS,
+            id: orderId,
+            data: {
+                paymentStatus: paymentStatus,
+            },
+        });
+    }
+
+    private async createOrderInDb(orderData: IOrderCreatePayloadData): Promise<Order> {
+        console.log('createOrderInDb', orderData);
+
         const url = apiUrl.collection(COLLECTION_SLUGS.ORDERS);
 
         const response = await fetch(url, {
@@ -17,15 +135,30 @@ export class OrderServerService extends BaseServerService {
             headers: await this.getAuthHeaders(),
             body: JSON.stringify(orderData),
         });
-
         if (!response.ok) throw new Error('Server: Failed to create order');
 
         const data = await response.json();
         return data.doc || data;
     }
 
-    // Считает сумму и делает снапшоты товаров для заказа
+    private async updateOrderField(orderId: number, data: Partial<Order>): Promise<void> {
+        console.log('updateOrderField', orderId, data);
+
+        const url = apiUrl.item(COLLECTION_SLUGS.ORDERS, orderId);
+
+        const response = await fetch(url, {
+            method: HTTP_METHODS.PATCH,
+            headers: await this.getAuthHeaders(),
+            body: JSON.stringify(data),
+        });
+
+        if (!response.ok) throw new Error('Server: Failed to update order');
+    }
+
+    // Считает сумму и делает снэпшоты товаров для заказа
     async prepareOrder(customerId: number, requestData: IOrderCreateRequest): Promise<IOrderCreatePayloadData> {
+        console.log('prepareOrder', customerId, requestData);
+
         const { items: orderItems, deliveryType, address } = requestData;
 
         // Получаем данные товаров из БД
@@ -68,19 +201,9 @@ export class OrderServerService extends BaseServerService {
         return orderPayload;
     }
 
-    async updateOrderStatus(orderId: number, status: IOrderStatus): Promise<void> {
-        const url = apiUrl.item(COLLECTION_SLUGS.ORDERS, orderId);
-
-        const response = await fetch(url, {
-            method: HTTP_METHODS.PATCH,
-            headers: await this.getAuthHeaders(),
-            body: JSON.stringify({ status }),
-        });
-
-        if (!response.ok) throw new Error('Server: Failed to update order status');
-    }
-
     async getOrderById(orderId: number): Promise<Order | null> {
+        console.log('getOrderById', orderId);
+
         const url = apiUrl.item(COLLECTION_SLUGS.ORDERS, orderId);
 
         const response = await fetch(url, {

@@ -19,3 +19,10 @@ export interface IOrderCreateRequest {
     deliveryType: IDeliveryType;
     address?: string;
 }
+
+export interface IOrderCreateResponse {
+    success: boolean;
+    orderId: number;
+    paymentUrl?: string;
+    message?: string;
+}

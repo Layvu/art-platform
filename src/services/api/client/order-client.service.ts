@@ -1,12 +1,12 @@
 import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
-import { type IOrderCreateRequest } from '@/shared/types/order.interface';
+import { type IOrderCreateRequest, type IOrderCreateResponse } from '@/shared/types/order.interface';
 import type { Order } from '@/shared/types/payload-types';
 
 import { apiUrl } from '../api-url-builder';
 
 export class OrderClientService {
     // Создание заказа через кастомный эндпоинт
-    async createOrder(orderData: IOrderCreateRequest): Promise<Order> {
+    async createOrder(orderData: IOrderCreateRequest): Promise<IOrderCreateResponse> {
         const url = apiUrl.order.create();
 
         const response = await fetch(url, {
@@ -22,7 +22,7 @@ export class OrderClientService {
             throw new Error(data.message || data.error || 'Failed to create order');
         }
 
-        return data.order;
+        return data as IOrderCreateResponse;
     }
 
     // Отмена заказа через кастомный эндпоинт

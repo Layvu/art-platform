@@ -96,7 +96,6 @@ export const ProductsCollection: CollectionConfig = {
 
             if (isAuthor(user)) {
                 // Проверяем, что у автора есть профиль
-                // const payload = await getPayload({ config });
                 const authorRes = await payload.find({
                     collection: COLLECTION_SLUGS.AUTHORS,
                     where: { user: { equals: user.id } },
@@ -114,7 +113,6 @@ export const ProductsCollection: CollectionConfig = {
             if (isAdmin(user)) return true;
 
             if (isAuthor(user)) {
-                // const payload = await getPayload({ config });
                 const authorRes = await payload.find({
                     collection: COLLECTION_SLUGS.AUTHORS,
                     where: { user: { equals: user.id } },

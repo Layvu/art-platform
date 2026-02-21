@@ -299,7 +299,13 @@ export interface Order {
   }[];
   deliveryType: 'pickup' | 'delivery';
   address?: string | null;
-  status?: ('processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled') | null;
+  status: 'prepared' | 'processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled';
+  /**
+   * Статус обновляется периодически. Актуальное значение можно узнать в ЮКассе
+   */
+  paymentStatus?: ('pending' | 'waiting_for_capture' | 'succeeded' | 'canceled') | null;
+  paymentId?: string | null;
+  paymentLink?: string | null;
   total: number;
   createdAt: string;
   updatedAt: string;
@@ -520,6 +526,9 @@ export interface OrdersSelect<T extends boolean = true> {
   deliveryType?: T;
   address?: T;
   status?: T;
+  paymentStatus?: T;
+  paymentId?: T;
+  paymentLink?: T;
   total?: T;
   createdAt?: T;
   updatedAt?: T;

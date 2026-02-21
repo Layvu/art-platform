@@ -14,6 +14,6 @@ export const isCustomer = (user: TypedUser | null) => {
     return user?.role === UserType.CUSTOMER;
 };
 
-// TODO: везде заюзать методы выше
-
 export const isCreateOperation = (operation: string) => operation === 'create';
+
+export const isUpdateOperation = (operation: string) => operation === 'update';
