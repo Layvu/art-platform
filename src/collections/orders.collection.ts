@@ -90,7 +90,7 @@ export const OrdersCollection: CollectionConfig = {
             type: 'select',
             options: [
                 { value: DELIVERY_TYPES.PICKUP, label: 'Самовывоз' },
-                { value: DELIVERY_TYPES.DELIVERY, label: 'Доставка' },
+                { value: DELIVERY_TYPES.DELIVERY, label: 'Доставка СДЭК' },
             ],
             defaultValue: DELIVERY_TYPES.PICKUP,
             label: 'Выбранный способ доставки',
@@ -98,13 +98,51 @@ export const OrdersCollection: CollectionConfig = {
             required: true,
         },
         {
-            name: 'address',
+            name: 'cdekData',
+            type: 'group',
+            label: 'Данные СДЭК',
+            fields: [
+                {
+                    name: 'type',
+                    type: 'select',
+                    options: [
+                        { value: 'pvz', label: 'ПВЗ' },
+                        { value: 'courier', label: 'Курьер' },
+                    ],
+                    label: 'Тип доставки СДЭК',
+                    admin: {
+                        readOnly: true,
+                    },
+                },
+                {
+                    name: 'address',
+                    type: 'text',
+                    label: 'Адрес доставки',
+                    required: true,
+                    admin: {
+                        readOnly: true,
+                    },
+                },
+                {
+                    name: 'code',
+                    type: 'text',
+                    label: 'Код ПВЗ',
+                    admin: {
+                        condition: (_, siblingData) => siblingData.type === 'pvz',
+                        readOnly: true,
+                    },
+                },
+            ],
+            admin: {
+                condition: (data) => data.deliveryType === DELIVERY_TYPES.DELIVERY,
+            },
+        },
+        {
+            name: 'comment',
             type: 'text',
-            label: 'Адрес доставки',
-            // Поле адреса обязательно только для доставки
+            label: 'Комментарий к заказу',
             admin: {
                 readOnly: true,
-                condition: (data) => data.deliveryType === DELIVERY_TYPES.DELIVERY,
             },
         },
         {

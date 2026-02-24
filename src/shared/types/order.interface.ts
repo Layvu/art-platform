@@ -1,4 +1,4 @@
-import type { Order } from '@/shared/types/payload-types';
+import type { Customer, Order } from '@/shared/types/payload-types';
 
 import type { DELIVERY_TYPES, ORDER_STATUS } from '../constants/order.constants';
 
@@ -9,6 +9,7 @@ export type IOrderCreatePayloadData = Omit<Order, 'id' | 'orderNumber' | 'status
 export type IOrderStatus = (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
 export type IDeliveryType = (typeof DELIVERY_TYPES)[keyof typeof DELIVERY_TYPES];
 export type IOrderItems = Exclude<Order['items'], null | undefined>;
+export type IOrderCdek = Exclude<Order['cdekData'], null | undefined>;
 
 // То, что отправляет фронт на бэк
 export interface IOrderCreateRequest {
@@ -17,7 +18,8 @@ export interface IOrderCreateRequest {
         quantity: number;
     }[];
     deliveryType: IDeliveryType;
-    address?: string;
+    cdekData?: IOrderCdek; // отсутствует при самовывозе
+    comment: string;
 }
 
 export interface IOrderCreateResponse {
@@ -25,4 +27,8 @@ export interface IOrderCreateResponse {
     orderId: number;
     paymentUrl?: string;
     message?: string;
+}
+
+export interface OrderUIProps {
+    customer: Customer;
 }

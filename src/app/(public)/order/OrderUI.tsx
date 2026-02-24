@@ -16,12 +16,14 @@ import { useCartStore } from '@/services/store/cart/store';
 import { DELIVERY_TYPES } from '@/shared/constants/order.constants';
 import { isProductData } from '@/shared/guards/product.guard';
 import { useProductsByIds } from '@/shared/hooks/useFetchData';
-import { type IDeliveryType, type IOrderCreateRequest } from '@/shared/types/order.interface';
-import type { Customer } from '@/shared/types/payload-types';
+import {
+    type IDeliveryType,
+    type IOrderCdek,
+    type IOrderCreateRequest,
+    type OrderUIProps,
+} from '@/shared/types/order.interface';
 
-interface OrderUIProps {
-    customer: Customer;
-}
+import { CdekWidget } from './CdekWidget';
 
 const PICKUP_ADDRESS = 'Екатеринбург, ул. Добролюбова, д. 2Б';
 
@@ -47,7 +49,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
         fullName: customer.fullName || '',
         phone: customer.phone || '',
         deliveryType: DELIVERY_TYPES.PICKUP as IDeliveryType,
-        address: '',
+        cdekData: null as IOrderCdek | null,
         comment: '',
     });
 
@@ -88,19 +90,33 @@ export default function OrderUI({ customer }: OrderUIProps) {
         setFormData((prev) => ({
             ...prev,
             deliveryType: value,
+            cdekData: value === DELIVERY_TYPES.PICKUP ? null : prev.cdekData,
         }));
+    };
+
+    const handleCdekSelect = (selected: IOrderCdek) => {
+        setFormData((prev) => ({ ...prev, cdekData: selected }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const { fullName, phone, deliveryType, cdekData, comment } = formData;
+
+        // Валидация для СДЭК
+        if (isDelivery && !cdekData) {
+            alert('Пожалуйста, выберите пункт выдачи или адрес доставки на карте');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
             // Обновляем профиль пользователя, если данные изменились
-            if (formData.fullName !== customer.fullName || formData.phone !== customer.phone) {
+            if (fullName !== customer.fullName || phone !== customer.phone) {
                 await customerClientService.updateProfile({
-                    fullName: formData.fullName,
-                    phone: formData.phone,
+                    fullName,
+                    phone,
                 });
             }
 
@@ -108,13 +124,12 @@ export default function OrderUI({ customer }: OrderUIProps) {
             const requestOrderData: IOrderCreateRequest = {
                 items: checkedItems.map((item) => {
                     const productId = isProductData(item.product) ? item.product.id : item.product;
-                    return {
-                        id: productId,
-                        quantity: item.quantity,
-                    };
+                    return { id: productId, quantity: item.quantity };
                 }),
-                deliveryType: formData.deliveryType,
-                address: formData.deliveryType === DELIVERY_TYPES.DELIVERY ? formData.address : PICKUP_ADDRESS,
+                deliveryType,
+                // Добавляем cdekData только если выбран тип доставки и данные существуют
+                ...(isDelivery && cdekData ? { cdekData } : {}),
+                comment,
             };
 
             // Создаем заказ
@@ -172,6 +187,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                             </div>
                         </CardContent>
                     </div>
+
                     {/* Способ получения */}
                     <div className="space-y-4">
                         <CardHeader>
@@ -189,7 +205,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                         Самовывоз
                                     </Label>
                                 </div>
-                                {formData.deliveryType === DELIVERY_TYPES.PICKUP && (
+                                {!isDelivery && (
                                     <div className="ml-6 p-3 bg-muted rounded-md">
                                         <p className="text-sm">Адрес самовывоза: {PICKUP_ADDRESS}</p>
                                     </div>
@@ -198,24 +214,26 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
                                     <Label htmlFor="delivery" className="cursor-pointer">
-                                        Доставка
+                                        Доставка СДЭК
                                     </Label>
                                 </div>
                                 {isDelivery && (
                                     <div className="ml-6 space-y-2">
-                                        <Label htmlFor="address">Адрес доставки *</Label>
-                                        <Input
-                                            id="address"
-                                            value={formData.address}
-                                            onChange={(e) => handleInputChange('address', e.target.value)}
-                                            placeholder="Введите полный адрес доставки"
-                                            required={isDelivery}
-                                        />
+                                        <Label>Выберите пункт выдачи или адрес доставки (СДЭК)</Label>
+                                        <CdekWidget onChoose={handleCdekSelect} />
+                                        {formData.cdekData && (
+                                            <div className="p-3 bg-muted rounded-md">
+                                                <p className="text-sm font-medium">Выбранный адрес:</p>
+                                                <p className="text-sm">{formData.cdekData.address}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </RadioGroup>
                         </CardContent>
                     </div>
+
+                    {/* Комментарий */}
                     <div className="space-y-4">
                         <CardHeader>
                             <CardTitle>Комментарий к заказу</CardTitle>

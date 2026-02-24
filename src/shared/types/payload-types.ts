@@ -298,7 +298,12 @@ export interface Order {
     id?: string | null;
   }[];
   deliveryType: 'pickup' | 'delivery';
-  address?: string | null;
+  cdekData?: {
+    type?: ('pvz' | 'courier') | null;
+    address: string;
+    code?: string | null;
+  };
+  comment?: string | null;
   status: 'prepared' | 'processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled';
   /**
    * Статус обновляется периодически. Актуальное значение можно узнать в ЮКассе
@@ -524,7 +529,14 @@ export interface OrdersSelect<T extends boolean = true> {
         id?: T;
       };
   deliveryType?: T;
-  address?: T;
+  cdekData?:
+    | T
+    | {
+        type?: T;
+        address?: T;
+        code?: T;
+      };
+  comment?: T;
   status?: T;
   paymentStatus?: T;
   paymentId?: T;

@@ -22,8 +22,6 @@ export class OrderServerService extends BaseServerService {
         requestData: IOrderCreateRequest,
         customerEmail?: string,
     ): Promise<{ order: Order; paymentUrl?: string }> {
-        console.log('createOrderWithPayment', customerId, requestData, customerEmail);
-
         // Заново пересчитываем данные заказа: запрашиваем товары, проверяем их актуальные данные и считаем общую сумму
         // Необходимо, чтобы защититься от подмены запроса со стороны клиента
         const preparedData = await this.prepareOrder(customerId, requestData);
@@ -58,8 +56,6 @@ export class OrderServerService extends BaseServerService {
     }
 
     async captureOrderPayment(orderId: number): Promise<IYookassaPaymentResponse> {
-        console.log('captureOrderPayment', orderId);
-
         const order = await this.getOrderById(orderId);
         if (!order || !order.paymentId) {
             throw new Error('Заказ или ID платежа не найдены');
@@ -77,8 +73,6 @@ export class OrderServerService extends BaseServerService {
     }
 
     async cancelOrder(orderId: number, isUserAction = false): Promise<void> {
-        console.log('cancelOrder', orderId, isUserAction);
-
         const order = await this.getOrderById(orderId);
         if (!order || !order.paymentId) {
             throw new Error('Заказ не найден');
@@ -97,8 +91,6 @@ export class OrderServerService extends BaseServerService {
         // Отмена в ЮКассе
         await yookassaService.cancelPayment(order.paymentId);
 
-        console.log('cancelOrder', 'payment canceled');
-
         // Обновление в БД (Статус заказа и статус оплаты)
         await this.updateOrderField(orderId, {
             status: ORDER_STATUS.CANCELLED,
@@ -107,8 +99,6 @@ export class OrderServerService extends BaseServerService {
     }
 
     async processWebhookUpdate(orderId: string, yookassaStatus: string): Promise<void> {
-        console.log('processWebhookUpdate', orderId, yookassaStatus);
-
         const payload = await getPayload({ config: configPromise });
 
         const paymentStatus = yookassaStatus as PaymentStatusType;
@@ -126,8 +116,6 @@ export class OrderServerService extends BaseServerService {
     }
 
     private async createOrderInDb(orderData: IOrderCreatePayloadData): Promise<Order> {
-        console.log('createOrderInDb', orderData);
-
         const url = apiUrl.collection(COLLECTION_SLUGS.ORDERS);
 
         const response = await fetch(url, {
@@ -142,8 +130,6 @@ export class OrderServerService extends BaseServerService {
     }
 
     private async updateOrderField(orderId: number, data: Partial<Order>): Promise<void> {
-        console.log('updateOrderField', orderId, data);
-
         const url = apiUrl.item(COLLECTION_SLUGS.ORDERS, orderId);
 
         const response = await fetch(url, {
@@ -157,9 +143,7 @@ export class OrderServerService extends BaseServerService {
 
     // Считает сумму и делает снэпшоты товаров для заказа
     async prepareOrder(customerId: number, requestData: IOrderCreateRequest): Promise<IOrderCreatePayloadData> {
-        console.log('prepareOrder', customerId, requestData);
-
-        const { items: orderItems, deliveryType, address } = requestData;
+        const { items: orderItems, deliveryType, cdekData, comment } = requestData;
 
         // Получаем данные товаров из БД
         const productIds = orderItems.map((orderItem) => orderItem.id);
@@ -195,15 +179,14 @@ export class OrderServerService extends BaseServerService {
             items: payloadItems,
             total: totalOrderSum,
             deliveryType,
-            address,
+            cdekData,
+            comment,
         };
 
         return orderPayload;
     }
 
     async getOrderById(orderId: number): Promise<Order | null> {
-        console.log('getOrderById', orderId);
-
         const url = apiUrl.item(COLLECTION_SLUGS.ORDERS, orderId);
 
         const response = await fetch(url, {
