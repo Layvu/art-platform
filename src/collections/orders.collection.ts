@@ -138,6 +138,15 @@ export const OrdersCollection: CollectionConfig = {
             },
         },
         {
+            name: 'trackingNumber',
+            type: 'text',
+            label: 'Трек-номер СДЭК',
+            admin: {
+                condition: (data) => data.deliveryType === DELIVERY_TYPES.DELIVERY,
+                description: 'Заполняется после отправки заказа',
+            },
+        },
+        {
             name: 'comment',
             type: 'text',
             label: 'Комментарий к заказу',

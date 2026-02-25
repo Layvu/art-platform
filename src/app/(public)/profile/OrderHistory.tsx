@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { orderClientService } from '@/services/api/client/order-client.service';
-import { getOrderStatusText, ORDER_STATUS } from '@/shared/constants/order.constants';
+import { DELIVERY_TYPES, getOrderStatusText, ORDER_STATUS, PICKUP_ADDRESS } from '@/shared/constants/order.constants';
 import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
 import { useProductSlugs } from '@/shared/hooks/useFetchData';
 import type { Order } from '@/shared/types/payload-types';
@@ -143,15 +143,55 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                         <CardContent>
                             <div className="space-y-2 text-sm">
                                 <p>
-                                    <strong>Дата:</strong> {new Date(order.createdAt).toLocaleDateString('ru-RU')}
+                                    <strong>Дата создания заказа:</strong>{' '}
+                                    {new Date(order.createdAt).toLocaleDateString('ru-RU')}
                                 </p>
+
+                                {/* Способ получения и данные СДЭК */}
                                 <p>
                                     <strong>Способ получения:</strong>{' '}
-                                    {order.deliveryType === 'pickup' ? 'Самовывоз' : 'Доставка'}
+                                    {order.deliveryType === DELIVERY_TYPES.PICKUP ? 'Самовывоз' : 'Доставка СДЭК'}
                                 </p>
-                                <p>
-                                    <strong>Адрес:</strong> {order.address}
-                                </p>
+
+                                {order.deliveryType === DELIVERY_TYPES.PICKUP && (
+                                    <p>
+                                        <strong>Адрес самовывоза:</strong> {PICKUP_ADDRESS}
+                                    </p>
+                                )}
+
+                                {order.deliveryType === DELIVERY_TYPES.DELIVERY && order.cdekData && (
+                                    <>
+                                        <p>
+                                            <strong>Тип доставки:</strong>{' '}
+                                            {order.cdekData.type === 'pvz' ? 'Пункт выдачи' : 'Курьер'}
+                                        </p>
+                                        <p>
+                                            <strong>Адрес доставки:</strong> {order.cdekData.address}
+                                        </p>
+                                    </>
+                                )}
+
+                                {order.trackingNumber && (
+                                    <p>
+                                        <strong>Трек-номер СДЭК:</strong> {/* Пример trackingNumber: 10213627100 */}
+                                        <a
+                                            href={`https://www.cdek.ru/ru/tracking?order_id=${order.trackingNumber}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline font-mono"
+                                        >
+                                            {order.trackingNumber}
+                                        </a>
+                                    </p>
+                                )}
+
+                                {order.comment && (
+                                    <p>
+                                        <strong>Комментарий:</strong> {order.comment}
+                                    </p>
+                                )}
+
+                                {/* Товары */}
                                 <p>
                                     <strong>Товары:</strong>
                                 </p>

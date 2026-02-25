@@ -35,3 +35,5 @@ export const getOrderStatusText = (status: IOrderStatus): string => {
             return status;
     }
 };
+
+export const PICKUP_ADDRESS = 'Екатеринбург, ул. Добролюбова, д. 2Б';

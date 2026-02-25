@@ -6,6 +6,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum_products_category" AS ENUM('shoppers', 'clothes', 'trinkets', 'postcards', 'ceramics', 'stickers', 'knitted');
   CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'author', 'customer');
   CREATE TYPE "public"."enum_orders_delivery_type" AS ENUM('pickup', 'delivery');
+  CREATE TYPE "public"."enum_orders_cdek_data_type" AS ENUM('pvz', 'courier');
   CREATE TYPE "public"."enum_orders_status" AS ENUM('prepared', 'processing', 'assembled', 'sent', 'delivered', 'completed', 'cancelled');
   CREATE TYPE "public"."enum_orders_payment_status" AS ENUM('pending', 'waiting_for_capture', 'succeeded', 'canceled');
   CREATE TABLE "products_gallery" (
@@ -128,7 +129,10 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"order_number" varchar,
   	"customer_id" integer NOT NULL,
   	"delivery_type" "enum_orders_delivery_type" DEFAULT 'pickup' NOT NULL,
-  	"address" varchar,
+  	"cdek_data_type" "enum_orders_cdek_data_type",
+  	"cdek_data_address" varchar,
+  	"cdek_data_code" varchar,
+  	"comment" varchar,
   	"status" "enum_orders_status" DEFAULT 'prepared' NOT NULL,
   	"payment_status" "enum_orders_payment_status" DEFAULT 'pending',
   	"payment_id" varchar,
@@ -319,6 +323,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_products_category";
   DROP TYPE "public"."enum_users_role";
   DROP TYPE "public"."enum_orders_delivery_type";
+  DROP TYPE "public"."enum_orders_cdek_data_type";
   DROP TYPE "public"."enum_orders_status";
   DROP TYPE "public"."enum_orders_payment_status";`)
 }

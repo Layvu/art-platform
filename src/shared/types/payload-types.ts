@@ -303,6 +303,10 @@ export interface Order {
     address: string;
     code?: string | null;
   };
+  /**
+   * Заполняется после отправки заказа
+   */
+  trackingNumber?: string | null;
   comment?: string | null;
   status: 'prepared' | 'processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled';
   /**
@@ -536,6 +540,7 @@ export interface OrdersSelect<T extends boolean = true> {
         address?: T;
         code?: T;
       };
+  trackingNumber?: T;
   comment?: T;
   status?: T;
   paymentStatus?: T;

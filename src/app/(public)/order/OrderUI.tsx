@@ -13,7 +13,7 @@ import { PAGES } from '@/config/public-pages.config';
 import { customerClientService } from '@/services/api/client/customer-client.service';
 import { orderClientService } from '@/services/api/client/order-client.service';
 import { useCartStore } from '@/services/store/cart/store';
-import { DELIVERY_TYPES } from '@/shared/constants/order.constants';
+import { DELIVERY_TYPES, PICKUP_ADDRESS } from '@/shared/constants/order.constants';
 import { isProductData } from '@/shared/guards/product.guard';
 import { useProductsByIds } from '@/shared/hooks/useFetchData';
 import {
@@ -24,8 +24,6 @@ import {
 } from '@/shared/types/order.interface';
 
 import { CdekWidget } from './CdekWidget';
-
-const PICKUP_ADDRESS = 'Екатеринбург, ул. Добролюбова, д. 2Б';
 
 export default function OrderUI({ customer }: OrderUIProps) {
     const router = useRouter();

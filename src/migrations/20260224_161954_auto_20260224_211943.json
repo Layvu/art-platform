@@ -1,5 +1,5 @@
 {
-  "id": "a7af2fc7-f064-4f05-8584-a5b730d4990d",
+  "id": "2b8f5490-1601-4faa-b4a3-45aa7aaa55df",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1292,8 +1292,27 @@
           "notNull": true,
           "default": "'pickup'"
         },
-        "address": {
-          "name": "address",
+        "cdek_data_type": {
+          "name": "cdek_data_type",
+          "type": "enum_orders_cdek_data_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cdek_data_address": {
+          "name": "cdek_data_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cdek_data_code": {
+          "name": "cdek_data_code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "comment": {
+          "name": "comment",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -2395,6 +2414,14 @@
       "values": [
         "pickup",
         "delivery"
+      ]
+    },
+    "public.enum_orders_cdek_data_type": {
+      "name": "enum_orders_cdek_data_type",
+      "schema": "public",
+      "values": [
+        "pvz",
+        "courier"
       ]
     },
     "public.enum_orders_status": {
