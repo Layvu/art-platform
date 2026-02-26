@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -92,9 +92,9 @@ export default function OrderUI({ customer }: OrderUIProps) {
         }));
     };
 
-    const handleCdekSelect = (selected: IOrderCdek) => {
+    const handleCdekSelect = useCallback((selected: IOrderCdek) => {
         setFormData((prev) => ({ ...prev, cdekData: selected }));
-    };
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

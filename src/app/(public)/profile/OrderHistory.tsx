@@ -173,7 +173,8 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
 
                                 {order.trackingNumber && (
                                     <p>
-                                        <strong>Трек-номер СДЭК:</strong> {/* Пример trackingNumber: 10213627100 */}
+                                        <strong>Трек-номер СДЭК:</strong>{' '}
+                                        {/* Для тестирования: trackingNumber: 10213627100 */}
                                         <a
                                             href={`https://www.cdek.ru/ru/tracking?order_id=${order.trackingNumber}`}
                                             target="_blank"

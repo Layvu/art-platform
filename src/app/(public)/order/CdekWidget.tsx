@@ -17,13 +17,15 @@ const EKATERINBURG_COORDS: [number, number] = [60.597636, 56.837435];
 const CDEK_PROXY_API_URL = '/api/cdek';
 const YANDEX_MAPS_API_KEY = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
-export const CdekWidget = ({ onChoose }: CdekWidgetProps) => {
+export const CdekWidget = React.memo(({ onChoose }: CdekWidgetProps) => {
     const widgetRef = useRef<CDEKWidgetInstance | null>(null);
 
     const initializeWidget = useCallback(() => {
-        if (!window.CDEKWidget || !document.getElementById(CONTAINER_ID)) return;
+        console.log('initialize CdekWidget');
 
-        widgetRef.current?.destroy();
+        if (!window.CDEKWidget || !document.getElementById(CONTAINER_ID)) return;
+        if (widgetRef.current) return;
+
         widgetRef.current = new window.CDEKWidget({
             servicePath: CDEK_PROXY_API_URL,
             root: CONTAINER_ID,
@@ -57,7 +59,10 @@ export const CdekWidget = ({ onChoose }: CdekWidgetProps) => {
         if (window.CDEKWidget) {
             initializeWidget();
         }
-        return () => widgetRef.current?.destroy();
+        return () => {
+            widgetRef.current?.destroy();
+            widgetRef.current = null;
+        };
     }, [initializeWidget]);
 
     return (
@@ -70,7 +75,7 @@ export const CdekWidget = ({ onChoose }: CdekWidgetProps) => {
             <div id={CONTAINER_ID} className="absolute inset-0" />
         </div>
     );
-};
+});
 
 // TODO: возможно передавать эти параметры в new window.CDEKWidget
 // Тогда можно будет сразу выбрать нужный тариф и посмотреть цену доставки
