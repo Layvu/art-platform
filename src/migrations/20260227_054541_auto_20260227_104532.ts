@@ -132,6 +132,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"cdek_data_type" "enum_orders_cdek_data_type",
   	"cdek_data_address" varchar,
   	"cdek_data_code" varchar,
+  	"tracking_number" varchar,
   	"comment" varchar,
   	"status" "enum_orders_status" DEFAULT 'prepared' NOT NULL,
   	"payment_status" "enum_orders_payment_status" DEFAULT 'pending',

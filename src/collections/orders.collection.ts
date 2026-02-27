@@ -138,6 +138,29 @@ export const OrdersCollection: CollectionConfig = {
             },
         },
         {
+            name: 'customerDetails',
+            type: 'text',
+            label: 'Данные покупателя',
+            virtual: true,
+            admin: {
+                readOnly: true,
+            },
+            hooks: {
+                afterRead: [
+                    async ({ data, req: { payload } }) => {
+                        if (!data) return null;
+                        const customer = await payload.findByID({
+                            collection: COLLECTION_SLUGS.CUSTOMERS,
+                            id: data.customer,
+                            depth: 0,
+                        });
+
+                        return `${customer.fullName}, ${customer.phone}`;
+                    },
+                ],
+            },
+        },
+        {
             name: 'trackingNumber',
             type: 'text',
             label: 'Трек-номер СДЭК',

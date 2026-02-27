@@ -1,5 +1,5 @@
 {
-  "id": "2b8f5490-1601-4faa-b4a3-45aa7aaa55df",
+  "id": "e1853e82-afa7-4690-8ade-0a5244116353",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1307,6 +1307,12 @@
         },
         "cdek_data_code": {
           "name": "cdek_data_code",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tracking_number": {
+          "name": "tracking_number",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
