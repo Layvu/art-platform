@@ -60,26 +60,6 @@ export default function OrderUI({ customer }: OrderUIProps) {
           }, 0)
         : 0;
 
-    if (isLoading) {
-        return <div>Загрузка товаров...</div>;
-    }
-
-    if (isError || !products) {
-        return <div>Ошибка загрузки товаров</div>;
-    }
-
-    if (checkedItems.length === 0) {
-        return (
-            <div className="max-w-2xl mx-auto p-6">
-                <h1 className="text-2xl font-bold mb-4">Оформление заказа</h1>
-                <p>Нет выбранных товаров для заказа.</p>
-                <Button onClick={() => router.push(PAGES.CART)} className="mt-4">
-                    Вернуться в корзину
-                </Button>
-            </div>
-        );
-    }
-
     const handleInputChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
@@ -155,138 +135,156 @@ export default function OrderUI({ customer }: OrderUIProps) {
 
     return (
         <div className="wrap mx-auto p-6">
-            <form onSubmit={handleSubmit} className="flex gap-10">
-                {/* Данные покупателя */}
-                <Card className="flex flex-col gap-8 flex-1">
-                    <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
+            {isLoading && <div>Загрузка товаров...</div>}
 
-                    <div className="space-y-4">
-                        <CardHeader>
-                            <CardTitle>Личные данные</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-0">
-                            <div className="space-y-2">
-                                <Label htmlFor="fullName">ФИО *</Label>
-                                <Input
-                                    id="fullName"
-                                    value={formData.fullName}
-                                    onChange={(e) => handleInputChange('fullName', e.target.value)}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="phone">Телефон *</Label>
-                                <Input
-                                    id="phone"
-                                    value={formData.phone}
-                                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </CardContent>
-                    </div>
+            {!isLoading && isError && <div>Ошибка загрузки товаров</div>}
 
-                    {/* Способ получения */}
-                    <div className="space-y-4">
-                        <CardHeader>
-                            <CardTitle>Способ получения</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-0">
-                            <RadioGroup
-                                value={formData.deliveryType}
-                                onValueChange={handleDeliveryTypeChange}
-                                className="space-y-3"
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value={DELIVERY_TYPES.PICKUP} id="pickup" />
-                                    <Label htmlFor="pickup" className="cursor-pointer">
-                                        Самовывоз
-                                    </Label>
-                                </div>
-                                {!isDelivery && (
-                                    <div className="ml-6 p-3 bg-muted rounded-md">
-                                        <p className="text-sm">Адрес самовывоза: {PICKUP_ADDRESS}</p>
-                                    </div>
-                                )}
-
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
-                                    <Label htmlFor="delivery" className="cursor-pointer">
-                                        Доставка СДЭК
-                                    </Label>
-                                </div>
-                                {isDelivery && (
-                                    <div className="ml-6 space-y-2">
-                                        <Label>Выберите пункт выдачи или адрес доставки (СДЭК)</Label>
-                                        <CdekWidget onChoose={handleCdekSelect} />
-                                        {formData.cdekData && (
-                                            <div className="p-3 bg-muted rounded-md">
-                                                <p className="text-sm font-medium">Выбранный адрес:</p>
-                                                <p className="text-sm">{formData.cdekData.address}</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </RadioGroup>
-                        </CardContent>
-                    </div>
-
-                    {/* Комментарий */}
-                    <div className="space-y-4">
-                        <CardHeader>
-                            <CardTitle>Комментарий к заказу</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-0">
-                            <div className="space-y-2">
-                                <Input
-                                    id="comment"
-                                    value={formData.comment}
-                                    onChange={(e) => handleInputChange('comment', e.target.value)}
-                                />
-                            </div>
-                        </CardContent>
-                    </div>
-                </Card>
-
-                {/* Товары в заказе */}
-                <Card className="h-fit bg-zinc-100 w-[405px]">
-                    <CardHeader>
-                        <CardTitle>Товары в заказе</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <div className="space-y-3">
-                            {checkedItems.map((item) => {
-                                const productId = isProductData(item.product) ? item.product.id : item.product;
-                                const product = products.find((p) => p.id === productId);
-
-                                return (
-                                    <div
-                                        key={item.id ?? productId}
-                                        className="flex justify-between items-center py-3 border-b"
-                                    >
-                                        <div className="flex-1">
-                                            <p className="font-medium">{product?.title}</p>
-                                            <p className="text-sm text-muted-foreground">Количество: {item.quantity}</p>
-                                        </div>
-                                        <p className="font-medium whitespace-nowrap">
-                                            {product ? (product.price * item.quantity).toFixed(2) : 'N/A'} руб.
-                                        </p>
-                                    </div>
-                                );
-                            })}
-
-                            <div className="flex justify-between items-center pt-3 font-bold text-lg">
-                                <p>Итого:</p>
-                                <p>{total.toFixed(2)} руб.</p>
-                            </div>
-                        </div>
-                    </CardContent>
-
-                    <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
-                        {isSubmitting ? 'Оформление заказа...' : 'Завершить заказ'}
+            {!isLoading && !isError && checkedItems.length === 0 && (
+                <div className="max-w-2xl mx-auto p-6">
+                    <h1 className="text-2xl font-bold mb-4">Оформление заказа</h1>
+                    <p>Нет выбранных товаров для заказа.</p>
+                    <Button onClick={() => router.push(PAGES.CART)} className="mt-4">
+                        Вернуться в корзину
                     </Button>
-                </Card>
-            </form>
+                </div>
+            )}
+
+            {!isLoading && !isError && checkedItems.length > 0 && (
+                <form onSubmit={handleSubmit} className="flex gap-10">
+                    {/* Данные покупателя */}
+                    <Card className="flex flex-col gap-8 flex-1">
+                        <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
+
+                        <div className="space-y-4">
+                            <CardHeader>
+                                <CardTitle>Личные данные</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 p-0">
+                                <div className="space-y-2">
+                                    <Label htmlFor="fullName">ФИО *</Label>
+                                    <Input
+                                        id="fullName"
+                                        value={formData.fullName}
+                                        onChange={(e) => handleInputChange('fullName', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Телефон *</Label>
+                                    <Input
+                                        id="phone"
+                                        value={formData.phone}
+                                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </CardContent>
+                        </div>
+
+                        {/* Способ получения */}
+                        <div className="space-y-4">
+                            <CardHeader>
+                                <CardTitle>Способ получения</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 p-0">
+                                <RadioGroup
+                                    value={formData.deliveryType}
+                                    onValueChange={handleDeliveryTypeChange}
+                                    className="space-y-3"
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value={DELIVERY_TYPES.PICKUP} id="pickup" />
+                                        <Label htmlFor="pickup" className="cursor-pointer">
+                                            Самовывоз
+                                        </Label>
+                                    </div>
+                                    {!isDelivery && (
+                                        <div className="ml-6 p-3 bg-muted rounded-md">
+                                            <p className="text-sm">Адрес самовывоза: {PICKUP_ADDRESS}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
+                                        <Label htmlFor="delivery" className="cursor-pointer">
+                                            Доставка СДЭК
+                                        </Label>
+                                    </div>
+                                    {isDelivery && (
+                                        <div className="ml-6 space-y-2">
+                                            <Label>Выберите пункт выдачи или адрес доставки (СДЭК)</Label>
+                                            <CdekWidget onChoose={handleCdekSelect} />
+                                            {formData.cdekData && (
+                                                <div className="p-3 bg-muted rounded-md">
+                                                    <p className="text-sm font-medium">Выбранный адрес:</p>
+                                                    <p className="text-sm">{formData.cdekData.address}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </RadioGroup>
+                            </CardContent>
+                        </div>
+
+                        {/* Комментарий */}
+                        <div className="space-y-4">
+                            <CardHeader>
+                                <CardTitle>Комментарий к заказу</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4 p-0">
+                                <div className="space-y-2">
+                                    <Input
+                                        id="comment"
+                                        value={formData.comment}
+                                        onChange={(e) => handleInputChange('comment', e.target.value)}
+                                    />
+                                </div>
+                            </CardContent>
+                        </div>
+                    </Card>
+
+                    {/* Товары в заказе */}
+                    <Card className="h-fit bg-zinc-100 w-[405px]">
+                        <CardHeader>
+                            <CardTitle>Товары в заказе</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="space-y-3">
+                                {checkedItems.map((item) => {
+                                    const productId = isProductData(item.product) ? item.product.id : item.product;
+                                    const product = products.find((p) => p.id === productId);
+
+                                    return (
+                                        <div
+                                            key={item.id ?? productId}
+                                            className="flex justify-between items-center py-3 border-b"
+                                        >
+                                            <div className="flex-1">
+                                                <p className="font-medium">{product?.title}</p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Количество: {item.quantity}
+                                                </p>
+                                            </div>
+                                            <p className="font-medium whitespace-nowrap">
+                                                {product ? (product.price * item.quantity).toFixed(2) : 'N/A'} руб.
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+
+                                <div className="flex justify-between items-center pt-3 font-bold text-lg">
+                                    <p>Итого:</p>
+                                    <p>{total.toFixed(2)} руб.</p>
+                                </div>
+                            </div>
+                        </CardContent>
+
+                        <Button type="submit" disabled={isSubmitting} className="w-full" size="lg">
+                            {isSubmitting ? 'Оформление заказа...' : 'Завершить заказ'}
+                        </Button>
+                    </Card>
+                </form>
+            )}
         </div>
     );
 }
