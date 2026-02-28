@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 
 import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
-import type { ICredentials, UserRole } from '@/shared/types/auth.interface';
+import type { ICredentials } from '@/shared/types/auth.interface';
 import type { User } from '@/shared/types/payload-types';
 
 import { apiUrl } from '../api-url-builder';
@@ -69,29 +69,6 @@ export class AuthServerService extends BaseServerService {
     }
 
     // Далее методы для работы с User сущностью
-    async createUser(email: string, password: string, role: UserRole): Promise<User> {
-        const url = apiUrl.collection(COLLECTION_SLUGS.USERS);
-
-        // При создании юзера cookies могут быть пустыми, но access.create в UsersCollection разрешает анонимное создание
-        const response = await fetch(url, {
-            method: HTTP_METHODS.POST,
-            headers: await this.getAuthHeaders(),
-            body: JSON.stringify({ email, password, role }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-
-            const validationMessage = errorData.errors?.[0]?.message;
-            const mainMessage = errorData.message;
-
-            // Выбрасываем наиболее конкретную ошибку
-            throw new Error(validationMessage || mainMessage || 'Failed to create user');
-        }
-
-        const data = await response.json();
-        return data.doc;
-    }
 
     async findUserByEmail(email: string): Promise<User | null> {
         const url = apiUrl.collection(COLLECTION_SLUGS.USERS, {

@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,15 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PAGES } from '@/config/public-pages.config';
 import { customerClientService } from '@/services/api/client/customer-client.service';
-import { useAuthStore } from '@/services/store/auth/store';
 import type { ICustomerCreateInput } from '@/shared/types/customer.interface';
 
 export default function RegisterPage() {
-    const router = useRouter();
-    const checkAuth = useAuthStore((state) => state.checkAuth);
-
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false); // Успешная регистрация
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -42,17 +37,7 @@ export default function RegisterPage() {
                 return;
             }
 
-            // Автоматический логин покупателя
-            const authResult = await customerClientService.authenticate(userData.email, userData.password!);
-
-            if (!authResult.success) {
-                setError(authResult.error || 'Регистрация прошла успешно, но не удалось войти. Попробуйте войти снова');
-                return;
-            }
-
-            await checkAuth(); // Обновляем user в store
-
-            router.replace(PAGES.PROFILE);
+            setSuccess(true);
         } catch (error) {
             console.error(error);
             setError('Произошла ошибка при регистрации');
@@ -60,6 +45,25 @@ export default function RegisterPage() {
             setLoading(false);
         }
     };
+
+    if (success) {
+        return (
+            <div className="max-w-lg mx-auto p-6">
+                <Card>
+                    <CardHeader className="space-y-1">
+                        <CardTitle className="text-2xl text-center">Регистрация успешна</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-center space-y-4">
+                        <p>Мы отправили письмо с подтверждением на вашу электронную почту.</p>
+                        <p>
+                            Пожалуйста, перейдите по ссылке в письме для активации аккаунта перед тем, как войти. Можно
+                            покинуть эту страницу.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-lg mx-auto p-6">

@@ -58,6 +58,49 @@ export class CustomerClientService {
         }
         return { success: true };
     }
+
+    async verifyEmail(token: string): Promise<IOperationResult> {
+        const response = await fetch(apiUrl.auth.verify(token), {
+            method: HTTP_METHODS.POST,
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            return { success: false, error: data.error || 'Ошибка подтверждения почты. Возможно ссылка устарела' };
+        }
+        return { success: true };
+    }
+
+    async requestPasswordReset(email: string): Promise<IOperationResult> {
+        // Payload на этом моменте отправляет письмо
+        const response = await fetch(apiUrl.auth.forgotPassword(), {
+            method: HTTP_METHODS.POST,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+        });
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: 'Ошибка отправки ссылки на изменение пароля. Проверьте правильность email.',
+            };
+        }
+        return { success: true };
+    }
+
+    async resetPassword(token: string, password: string): Promise<IOperationResult> {
+        const response = await fetch(apiUrl.auth.resetPassword(), {
+            method: HTTP_METHODS.POST,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, password }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            return { success: false, error: data.error || 'Ошибка сброса пароля. Ссылка недействительна или устарела' };
+        }
+        return { success: true };
+    }
 }
 
 export const customerClientService = new CustomerClientService();

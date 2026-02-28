@@ -19,24 +19,35 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     try {
         // Обновляем профиль
-        const { password, email, fullName, phone } = body;
+        const { email, fullName, phone, password } = body;
+
+        // Проверяем, действительно ли email изменился
+        if (email && email !== user.email) {
+            // Если пароль не передан, отклоняем запрос
+            if (!password) {
+                return NextResponse.json(
+                    { error: 'Для изменения Email необходимо ввести текущий пароль' },
+                    { status: 400 },
+                );
+            }
+
+            // Пытаемся серверно залогиниться от лица этого юзера, если пароль неверный - loginUser вернет null
+            const isPasswordValid = await authServerService.loginUser(user.email, password);
+            if (!isPasswordValid) {
+                return NextResponse.json({ error: 'Неверный текущий пароль' }, { status: 403 });
+            }
+
+            // Обновляем email в коллекции пользователей
+            const userCredentialsUpdates: ICredentials = { email };
+            await authServerService.updateUserCredentials(user.id, userCredentialsUpdates);
+        }
 
         // Получаем профиль покупателя для обновления
         const customer = await customerServerService.getCustomerByUserId(user.id);
 
         // Обновляем данные покупателя в коллекции customers
-        const customerUpdates = { fullName, phone };
+        const customerUpdates = { fullName, phone, email };
         await customerServerService.updateCustomerProfile(customer.id, customerUpdates);
-
-        // Если есть пароль или email, обновляем запись в коллекции users
-        if (password || email) {
-            const userCredentialsUpdates: ICredentials = {};
-
-            if (email) userCredentialsUpdates.email = email;
-            if (password) userCredentialsUpdates.password = password;
-
-            await authServerService.updateUserCredentials(user.id, userCredentialsUpdates);
-        }
 
         return NextResponse.json({
             success: true,
@@ -47,8 +58,6 @@ export async function PATCH(req: Request) {
         if (error instanceof Error) {
             errorMessage = error.message.toLowerCase();
         }
-
-        console.log('errorMessage', errorMessage);
 
         // Ловим попытку смены email на занятый
         if (errorMessage.includes('unique') || errorMessage.includes('email')) {

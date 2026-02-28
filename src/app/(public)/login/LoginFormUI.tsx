@@ -28,6 +28,12 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
     const [loading, setLoading] = useState(false);
     const [userType, setUserType] = useState<UserRole>(UserType.CUSTOMER);
 
+    // Состояния для email, чтобы использовать их для сброса пароля
+    const [customerEmail, setCustomerEmail] = useState('');
+
+    const [resetLoading, setResetLoading] = useState(false);
+    const [resetMessage, setResetMessage] = useState({ type: '', text: '' });
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
@@ -67,6 +73,34 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
         }
     };
 
+    const handleForgotPassword = async () => {
+        if (!customerEmail) {
+            setResetMessage({
+                type: 'error',
+                text: 'Пожалуйста, введите ваш Email в поле выше для восстановления пароля',
+            });
+            return;
+        }
+
+        setResetLoading(true);
+        setResetMessage({ type: '', text: '' });
+        setError('');
+
+        try {
+            const result = await customerClientService.requestPasswordReset(customerEmail);
+            if (result.success) {
+                setResetMessage({
+                    type: 'success',
+                    text: 'Ссылка для восстановления отправлена на почту. Проверьте входящие и папку "Спам".',
+                });
+            } else {
+                setResetMessage({ type: 'error', text: result.error || 'Ошибка при запросе сброса пароля.' });
+            }
+        } finally {
+            setResetLoading(false);
+        }
+    };
+
     return (
         <div className="max-w-lg mx-auto p-6">
             <Card>
@@ -80,7 +114,11 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                     <Tabs
                         defaultValue="customer"
                         className="w-full"
-                        onValueChange={(value) => setUserType(value as UserRole)}
+                        onValueChange={(value) => {
+                            setUserType(value as UserRole);
+                            setError('');
+                            setResetMessage({ type: '', text: '' });
+                        }}
                     >
                         <TabsList className="grid w-full grid-cols-2 mb-6">
                             <TabsTrigger value="customer">Покупатель</TabsTrigger>
@@ -96,12 +134,24 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                         name="email"
                                         type="email"
                                         placeholder="your@email.com"
+                                        value={customerEmail}
+                                        onChange={(e) => setCustomerEmail(e.target.value)}
                                         required
                                         disabled={loading}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">Пароль</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="password">Пароль</Label>
+                                        <button
+                                            type="button"
+                                            onClick={handleForgotPassword}
+                                            disabled={resetLoading || loading}
+                                            className="text-sm text-primary underline underline-offset-4 disabled:opacity-50"
+                                        >
+                                            {resetLoading ? 'Отправка...' : 'Забыли пароль?'}
+                                        </button>
+                                    </div>
                                     <Input
                                         id="password"
                                         name="password"
@@ -160,6 +210,12 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                         </Alert>
                     )}
 
+                    {resetMessage.text && (
+                        <Alert variant={resetMessage.type === 'error' ? 'destructive' : 'default'} className="mt-4">
+                            <AlertDescription>{resetMessage.text}</AlertDescription>
+                        </Alert>
+                    )}
+
                     {userType === UserType.CUSTOMER && (
                         <div className="mt-4 text-center text-sm">
                             Нет аккаунта?{' '}
@@ -171,7 +227,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
 
                     {userType === UserType.AUTHOR && (
                         <div className="mt-4 text-center text-sm text-muted-foreground">
-                            Аккаунты авторов создаются администратором
+                            Аккаунты авторов создаются администратором. Если вы потеряли доступ, обратитесь в поддержку.
                         </div>
                     )}
                 </CardContent>

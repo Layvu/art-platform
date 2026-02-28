@@ -2,11 +2,13 @@ import type { CollectionConfig } from 'payload';
 
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import { UserType } from '@/shared/types/auth.interface';
+import { generateForgotPasswordEmailHTML, generateVerificationEmailHTML } from '@/shared/utils/email-templates';
 import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
 
 // TODO: удалить после подключения HTTPS
 // Определяем, используется ли HTTPS
 const isHttps = process.env.NEXT_PUBLIC_BASE_URL?.startsWith('https:');
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'; // TODO apiurl
 
 // Коллекция пользователей панели администратора, управляемая через PayloadCMS
 export const UsersCollection: CollectionConfig = {
@@ -20,6 +22,18 @@ export const UsersCollection: CollectionConfig = {
         },
         // Оставляем API ключи для серверных запросов
         tokenExpiration: 7200, // 2 часа
+
+        // Включаем встроенную верификацию email
+        verify: {
+            generateEmailHTML: ({ token }) => generateVerificationEmailHTML(token, baseUrl),
+            generateEmailSubject: () => 'Подтверждение регистрации на Minto',
+        },
+
+        // Сброс пароля
+        forgotPassword: {
+            generateEmailHTML: ({ token } = {}) => generateForgotPasswordEmailHTML(token, baseUrl),
+            generateEmailSubject: () => 'Сброс пароля на Minto',
+        },
     },
     labels: { singular: 'Учётная запись', plural: 'Учётные записи' },
     admin: {

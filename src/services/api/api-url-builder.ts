@@ -60,6 +60,9 @@ export class ApiUrlBuilder {
         login: () => this.collection('users/login'),
         logout: () => this.collection('users/logout'),
         me: () => this.collection('users/me'),
+        verify: (token: string) => this.collection(`users/verify/${token}`),
+        forgotPassword: () => this.collection('users/forgot-password'),
+        resetPassword: () => this.collection('users/reset-password'),
         register: () => this.collection('auth/register'),
     };
 

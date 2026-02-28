@@ -22,15 +22,21 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
 
     // TODO: общий стейт для формы
-    const [email, setEmail] = useState(customerData.email || '');
-    const [password, setPassword] = useState('');
+
+    // Стейты профиля
     const [fullName, setFullName] = useState(customerData.fullName || '');
     const [phone, setPhone] = useState(customerData.phone || '');
     const [addresses] = useState<ICustomerAddress[]>(customerData.addresses || []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    // Стейты кредов
+    const [email, setEmail] = useState(customerData.email || '');
+    const [password, setPassword] = useState('');
+
+    // Обработчик обновления основных данных (без пароля)
+    const handleProfileSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
@@ -38,31 +44,56 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
 
         // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
         // Но в целом данных мало, так что пока просто обновляем всё
-        const updated: ICustomerUpdateInput = {
-            email,
-            fullName,
-            phone,
-            addresses,
-            password,
-        };
-        // Пароль сразу нельзя передавать, так как может занулиться, если не изменился - по умолчанию пустая строка
-        if (password) {
-            updated.password = password;
-        }
+        const updated: ICustomerUpdateInput = { fullName, phone, addresses };
 
         try {
             const result = await customerClientService.updateProfile(updated);
-
             if (result.success) {
-                setSuccess('Профиль обновлен');
-                setPassword('');
-                setLoading(false);
+                setSuccess('Данные успешно обновлены');
             } else {
-                setError(result.error || 'Произошла ошибка при обновлении профиля');
-                console.error(result.error);
+                setError(result.error || 'Ошибка при обновлении профиля');
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Обработчик обновления Email (требует пароль)
+    const handleSecuritySubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        const updated = { email, password };
+
+        try {
+            const result = await customerClientService.updateProfile(updated);
+            if (result.success) {
+                setSuccess('Email успешно изменен.');
+                setPassword('');
+            } else {
+                setError(result.error || 'Ошибка при изменении Email');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handlePasswordReset = async () => {
+        setResetLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const result = await customerClientService.requestPasswordReset(customerData.email);
+            if (result.success) {
+                setSuccess('Ссылка для изменения пароля отправлена на вашу почту. Проверьте входящие или спам.');
+            } else {
+                setError(result.error || 'Ошибка при запросе смены пароля');
+            }
+        } finally {
+            setResetLoading(false);
         }
     };
 
@@ -83,13 +114,13 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                             <TabsTrigger value="security">Параметры входа</TabsTrigger>
                         </TabsList>
 
-                        {/* Вкладка заказов */}
                         <TabsContent value="orders" className="space-y-4">
                             <OrderHistory customerId={customerData.id} />
                         </TabsContent>
 
+                        {/* Основные данные (без Email) */}
                         <TabsContent value="profile" className="space-y-4">
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleProfileSubmit} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="phone">Телефон</Label>
@@ -101,7 +132,6 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                                             placeholder="+7 (XXX) XXX-XX-XX"
                                         />
                                     </div>
-
                                     <div className="space-y-2">
                                         <Label htmlFor="fullName">ФИО</Label>
                                         <Input
@@ -114,39 +144,18 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                                         />
                                     </div>
                                 </div>
-
-                                <Label>Ваши адреса</Label>
-                                {addresses.length > 0 && (
-                                    <div className="space-y-3">
-                                        {addresses.map((address, index) => (
-                                            <Card key={index} className="p-3">
-                                                <div className="space-y-1">
-                                                    <div className="font-semibold text-sm">
-                                                        {address.label || `Адрес ${index + 1}`}
-                                                    </div>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {address.addressLine}
-                                                    </div>
-                                                    <div className="text-sm text-muted-foreground">
-                                                        {address.city}, {address.postalCode}
-                                                    </div>
-                                                </div>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                )}
-
                                 <Button type="submit" disabled={loading} className="w-full">
                                     {loading ? 'Сохранение...' : 'Обновить данные'}
                                 </Button>
                             </form>
                         </TabsContent>
 
+                        {/* Смена Email + cброс пароля */}
                         <TabsContent value="security" className="space-y-4 pb-4">
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleSecuritySubmit} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">Email</Label>
+                                        <Label htmlFor="email">Новый Email</Label>
                                         <Input
                                             id="email"
                                             type="email"
@@ -156,34 +165,54 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                                             required
                                         />
                                     </div>
-
                                     <div className="space-y-2">
-                                        <Label htmlFor="password">Новый пароль</Label>
+                                        <Label htmlFor="password">Текущий пароль (для подтверждения)</Label>
                                         <Input
                                             id="password"
                                             type="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            placeholder="Введите новый пароль"
+                                            placeholder="Введите пароль"
+                                            disabled={email === customerData.email}
+                                            required={email !== customerData.email}
                                         />
                                     </div>
                                 </div>
-
-                                <Button type="submit" disabled={loading} className="w-full">
-                                    {loading ? 'Сохранение...' : 'Обновить данные'}
+                                <Button
+                                    type="submit"
+                                    disabled={loading || email === customerData.email}
+                                    className="w-full"
+                                >
+                                    {loading ? 'Сохранение...' : 'Обновить Email'}
                                 </Button>
                             </form>
+
+                            <div className="mt-8 pt-6 border-t">
+                                <h3 className="text-lg font-medium mb-2">Смена пароля</h3>
+                                <p className="text-sm text-muted-foreground mb-4">
+                                    В целях безопасности смена пароля производится через подтверждение по электронной
+                                    почте. Мы отправим специальную ссылку на ваш текущий email.
+                                </p>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handlePasswordReset}
+                                    disabled={resetLoading}
+                                    className="w-full md:w-auto"
+                                >
+                                    {resetLoading ? 'Отправка...' : 'Отправить ссылку для смены пароля'}
+                                </Button>
+                            </div>
                         </TabsContent>
                     </Tabs>
 
                     {error && (
-                        <Alert variant="destructive">
+                        <Alert variant="destructive" className="mt-4">
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
-
                     {success && (
-                        <Alert>
+                        <Alert className="mt-4">
                             <AlertDescription>{success}</AlertDescription>
                         </Alert>
                     )}

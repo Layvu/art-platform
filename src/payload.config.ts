@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres';
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
 import { en } from '@payloadcms/translations/languages/en';
 import { ru } from '@payloadcms/translations/languages/ru';
@@ -55,6 +56,21 @@ export default buildConfig({
         defaultLocale: 'ru',
         fallback: true,
     },
+
+    email: nodemailerAdapter({
+        // TODO: сменить на служебный адрес тут и в .env
+        defaultFromAddress: process.env.EMAIL_FROM || 'zemskyalexey.writer@mail.ru',
+        defaultFromName: 'MINTO',
+        transportOptions: {
+            host: process.env.EMAIL_HOST,
+            port: Number(process.env.EMAIL_PORT),
+            secure: process.env.EMAIL_SECURE === 'true',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        },
+    }),
 
     db: postgresAdapter({
         pool: {

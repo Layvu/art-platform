@@ -16,8 +16,8 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
     title: {
-        template: '%s - Art Platform',
-        default: 'Art Platform',
+        template: '%s - Minto',
+        default: 'Minto',
     },
     description: 'Веб-платформа для деятелей искусства',
 };
