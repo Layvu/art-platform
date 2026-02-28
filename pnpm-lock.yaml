@@ -15,8 +15,8 @@ importers:
         specifier: 3.56.0
         version: 3.56.0(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))
       '@payloadcms/email-nodemailer':
-        specifier: ^3.78.0
-        version: 3.78.0(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))
+        specifier: 3.56.0
+        version: 3.56.0(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))
       '@payloadcms/graphql':
         specifier: 3.56.0
         version: 3.56.0(graphql@16.11.0)(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))(typescript@5.9.3)
@@ -1382,11 +1382,11 @@ packages:
     peerDependencies:
       payload: 3.56.0
 
-  '@payloadcms/email-nodemailer@3.78.0':
-    resolution: {integrity: sha512-Mi467/0g/7sCCjn3u56Tt45r3ifTHPqmO/BM3Bh0fRm6vcpUzKyWw8UvKjYWW40rBIf7NLo2jR/xuuXmZiwTIw==}
+  '@payloadcms/email-nodemailer@3.56.0':
+    resolution: {integrity: sha512-+pQam4dV3QF6p5mt061SbMiaxlAtCfz04BxFOBNPDhZtUjSa+y6DvD+ABTo/DRHjp4dcE6QXt/3HgR1Sjofi9A==}
     engines: {node: ^18.20.2 || >=20.9.0}
     peerDependencies:
-      payload: 3.78.0
+      payload: 3.56.0
 
   '@payloadcms/graphql@3.56.0':
     resolution: {integrity: sha512-yrwZaOTgfhykqGqofKZisQIt1qpTYQq8J8l3xn1UwCLKbWaJ4uEb29vofXZg3JrTApNIUW2iT1b0cwIeRD5LCQ==}
@@ -3829,12 +3829,12 @@ packages:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
 
-  nodemailer@7.0.10:
-    resolution: {integrity: sha512-Us/Se1WtT0ylXgNFfyFSx4LElllVLJXQjWi2Xz17xWw7amDKO2MLtFnVp1WACy7GkVGs+oBlRopVNUzlrGSw1w==}
+  nodemailer@6.9.16:
+    resolution: {integrity: sha512-psAuZdTIRN08HKVd/E8ObdV6NO7NTBY3KsC30F7M4H1OnmLCUNaS56FpYxyb26zWLSyYF9Ozch9KYHhHegsiOQ==}
     engines: {node: '>=6.0.0'}
 
-  nodemailer@7.0.12:
-    resolution: {integrity: sha512-H+rnK5bX2Pi/6ms3sN4/jRQvYSMltV6vqup/0SFOrxYYY/qoNvhXPlYq3e+Pm9RFJRwrMGbMIwi81M4dxpomhA==}
+  nodemailer@7.0.10:
+    resolution: {integrity: sha512-Us/Se1WtT0ylXgNFfyFSx4LElllVLJXQjWi2Xz17xWw7amDKO2MLtFnVp1WACy7GkVGs+oBlRopVNUzlrGSw1w==}
     engines: {node: '>=6.0.0'}
 
   normalize-path@3.0.0:
@@ -6052,9 +6052,9 @@ snapshots:
       - sql.js
       - sqlite3
 
-  '@payloadcms/email-nodemailer@3.78.0(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))':
+  '@payloadcms/email-nodemailer@3.56.0(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))':
     dependencies:
-      nodemailer: 7.0.12
+      nodemailer: 6.9.16
       payload: 3.56.0(graphql@16.11.0)(typescript@5.9.3)
 
   '@payloadcms/graphql@3.56.0(graphql@16.11.0)(payload@3.56.0(graphql@16.11.0)(typescript@5.9.3))(typescript@5.9.3)':
@@ -8885,9 +8885,9 @@ snapshots:
 
   node-gyp-build@4.8.4: {}
 
-  nodemailer@7.0.10: {}
+  nodemailer@6.9.16: {}
 
-  nodemailer@7.0.12: {}
+  nodemailer@7.0.10: {}
 
   normalize-path@3.0.0: {}
 

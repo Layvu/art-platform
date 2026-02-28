@@ -17,6 +17,8 @@ import { ProductsCollection } from '@/collections/products.collection';
 import { UsersCollection } from '@/collections/users.collection';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
+import { cleanupUnverifiedUsers } from './jobs/cleanupUnverifiedUsers';
+
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
@@ -82,4 +84,16 @@ export default buildConfig({
     },
     cors: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
     csrf: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
+
+    jobs: {
+        addParentToTaskLog: true,
+        tasks: [cleanupUnverifiedUsers],
+        autoRun: [
+            {
+                cron: '* * * * *', // каждую минуту
+                queue: 'cleanup',
+                limit: 5,
+            },
+        ],
+    },
 });
