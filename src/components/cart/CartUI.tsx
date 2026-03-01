@@ -21,7 +21,7 @@ interface ICartUIProps {
 
 export default function CartUI({ isUserAuthorized }: ICartUIProps) {
     const router = useRouter();
-    const { cart } = useCartStore();
+    const { cart, removeItem } = useCartStore();
 
     // берем текущие товары из корзины
     const items = cart?.items ?? [];
@@ -34,13 +34,16 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
     }, [items]);
 
     // фетчим товары по массиву чисел
-    const { data: products, isLoading, isError, error } = useProductsByIds(productsIds);
+    const { data: products, isLoading, isError, error, invalidIds } = useProductsByIds(productsIds);
 
     // лоадинг
     if (isLoading) return <>Loading from ui...</>;
-    if (isError && !error?.message.includes('404 Not Found')) return <>Error: {error?.message}</>;
+    if (isError && !error?.message.includes('404 Not Found')) return <>Error: {error?.message}, id's: {invalidIds}</>;
     if (!products) return <>No products found</>;
 
+    for (let id of invalidIds)   {
+        removeItem(id);
+    }
     // сливаем товары с корзиной
     // было product: number, cтало product: Product
     const itemsWithProducts = items

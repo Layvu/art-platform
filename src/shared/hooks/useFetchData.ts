@@ -43,23 +43,43 @@ export const useFetchProductById = ({ id }: { id: number }) => {
 
 export const useProductsByIds = (ids: number[]) => {
     const queries = useQueries({
-        queries: ids.map((id) => getProductByIdQueryOptions({ id })),
+        queries: ids.map((id) => ({
+            ...getProductByIdQueryOptions({ id }),
+        })),
     });
 
     const isLoading = queries.some((q) => q.isLoading);
-    const isError = queries.some((q) => q.isError);
-    const error = queries.some(q => q.isError) ? queries.find(q => q.isError)?.error : null;
+
+    const realErrorQuery = queries.find(
+        (q) => q.isError && q.error
+    );
+
+    const isError = Boolean(realErrorQuery);
+    const error = realErrorQuery?.error ?? null;
+
+  
     const products = queries
-        .filter((q) => !q.isError && q.data)
         .map((q) => q.data)
         .filter(Boolean) as Product[];
 
+ 
+    const invalidIds: number[] = queries
+        .map((q, index) => {
+            const id = ids[index];
+
+            if (q.isError) return id;
+            if (!q.isLoading && !q.data) return id;
+
+            return null;
+        })
+        .filter((id): id is number => id !== null);
 
     return {
         data: products,
         isLoading,
         isError,
-        error
+        error,
+        invalidIds,
     };
 };
 
