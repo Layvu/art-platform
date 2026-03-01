@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -27,17 +27,18 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
     const items = cart?.items ?? [];
 
     // берем id товаров, парсим их в массив чисел
-    const productsIds = items.map((item) => {
-        if (isProductData(item.product)) return item.product.id;
-        return item.product;
-    });
+    const productsIds = useMemo(() => {
+        return items.map((item) =>
+            isProductData(item.product) ? item.product.id : item.product,
+        );
+    }, [items]);
 
     // фетчим товары по массиву чисел
-    const { data: products, isLoading, isError } = useProductsByIds(productsIds);
+    const { data: products, isLoading, isError, error } = useProductsByIds(productsIds);
 
     // лоадинг
     if (isLoading) return <>Loading from ui...</>;
-    if (isError) return <>Error</>;
+    if (isError && !error?.message.includes('404 Not Found')) return <>Error: {error?.message}</>;
     if (!products) return <>No products found</>;
 
     // сливаем товары с корзиной
