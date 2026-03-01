@@ -2,15 +2,21 @@
 
 import React, { useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { customerClientService } from '@/services/api/client/customer-client.service';
-import type { ICustomerAddress, ICustomerUpdateInput } from '@/shared/types/customer.interface';
+import type { ICustomerUpdateInput } from '@/shared/types/customer.interface';
 import type { Customer } from '@/shared/types/payload-types';
+import { emailSchema, fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
 
 import OrderHistory from './OrderHistory';
 
@@ -18,63 +24,64 @@ interface ProfileUIProps {
     customerData: Customer;
 }
 
+const profileSchema = z.object({
+    fullName: fullNameSchema,
+    phone: phoneSchema,
+});
+
+const securitySchema = z.object({
+    email: emailSchema,
+    // Здесь не проверяем сложность (только наличие), т.к. это ввод старого пароля:
+    password: z.string().min(1, 'Введите текущий пароль для подтверждения'),
+});
+
 export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [resetLoading, setResetLoading] = useState(false);
 
-    // TODO: общий стейт для формы
-
-    // Стейты профиля
-    const [fullName, setFullName] = useState(customerData.fullName || '');
-    const [phone, setPhone] = useState(customerData.phone || '');
-    const [addresses] = useState<ICustomerAddress[]>(customerData.addresses || []);
-
-    // Стейты кредов
-    const [email, setEmail] = useState(customerData.email || '');
-    const [password, setPassword] = useState('');
+    // Формы
+    const profileForm = useForm({
+        resolver: zodResolver(profileSchema),
+        defaultValues: { fullName: customerData.fullName || '', phone: customerData.phone || '' },
+    });
+    const securityForm = useForm({
+        resolver: zodResolver(securitySchema),
+        defaultValues: { email: customerData.email || '', password: '' },
+    });
 
     // Обработчик обновления основных данных (без пароля)
-    const handleProfileSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
         setLoading(true);
         setError('');
         setSuccess('');
 
-        // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
-        // Но в целом данных мало, так что пока просто обновляем всё
-        const updated: ICustomerUpdateInput = { fullName, phone, addresses };
-
         try {
+            // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
+            // Но в целом данных мало, так что пока просто обновляем всё
+            const updated: ICustomerUpdateInput = { ...data, addresses: customerData.addresses };
+
             const result = await customerClientService.updateProfile(updated);
-            if (result.success) {
-                setSuccess('Данные успешно обновлены');
-            } else {
-                setError(result.error || 'Ошибка при обновлении профиля');
-            }
+            if (result.success) setSuccess('Данные успешно обновлены');
+            else setError(result.error || 'Ошибка при обновлении профиля');
         } finally {
             setLoading(false);
         }
     };
 
     // Обработчик обновления Email (требует пароль)
-    const handleSecuritySubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSecuritySubmit = async (data: z.infer<typeof securitySchema>) => {
         setLoading(true);
         setError('');
         setSuccess('');
 
-        const updated = { email, password };
-
         try {
-            const result = await customerClientService.updateProfile(updated);
+            const result = await customerClientService.updateProfile(data);
             if (result.success) {
                 setSuccess('Email успешно изменен.');
-                setPassword('');
-            } else {
-                setError(result.error || 'Ошибка при изменении Email');
-            }
+                securityForm.setValue('password', ''); // Очищаем пароль
+            } else setError(result.error || 'Ошибка при изменении Email');
         } finally {
             setLoading(false);
         }
@@ -106,6 +113,7 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
                     <CardTitle className="text-2xl">Профиль пользователя</CardTitle>
                     <CardDescription>Управление вашими персональными данными и настройками аккаунта</CardDescription>
                 </CardHeader>
+
                 <CardContent>
                     <Tabs defaultValue="orders" className="space-y-4">
                         <TabsList className="grid w-full grid-cols-3">
@@ -120,72 +128,90 @@ export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
 
                         {/* Основные данные (без Email) */}
                         <TabsContent value="profile" className="space-y-4">
-                            <form onSubmit={handleProfileSubmit} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone">Телефон</Label>
-                                        <Input
-                                            id="phone"
-                                            type="text"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            placeholder="+7 (XXX) XXX-XX-XX"
+                            <Form {...profileForm}>
+                                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={profileForm.control}
+                                            name="phone"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Телефон</FormLabel>
+                                                    <FormControl>
+                                                        <PhoneInput {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={profileForm.control}
+                                            name="fullName"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>ФИО</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="fullName">ФИО</Label>
-                                        <Input
-                                            id="fullName"
-                                            type="text"
-                                            value={fullName}
-                                            onChange={(e) => setFullName(e.target.value)}
-                                            placeholder="Иванов Иван Иванович"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-                                <Button type="submit" disabled={loading} className="w-full">
-                                    {loading ? 'Сохранение...' : 'Обновить данные'}
-                                </Button>
-                            </form>
+                                    <Button type="submit" disabled={loading} className="w-full">
+                                        Обновить данные
+                                    </Button>
+                                </form>
+                            </Form>
                         </TabsContent>
 
                         {/* Смена Email + cброс пароля */}
                         <TabsContent value="security" className="space-y-4 pb-4">
-                            <form onSubmit={handleSecuritySubmit} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Новый Email</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="your@email.com"
-                                            required
+                            <Form {...securityForm}>
+                                <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField
+                                            control={securityForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Новый Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={securityForm.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Текущий пароль</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="password"
+                                                            {...field}
+                                                            disabled={
+                                                                securityForm.watch('email') === customerData.email
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password">Текущий пароль (для подтверждения)</Label>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            placeholder="Введите пароль"
-                                            disabled={email === customerData.email}
-                                            required={email !== customerData.email}
-                                        />
-                                    </div>
-                                </div>
-                                <Button
-                                    type="submit"
-                                    disabled={loading || email === customerData.email}
-                                    className="w-full"
-                                >
-                                    {loading ? 'Сохранение...' : 'Обновить Email'}
-                                </Button>
-                            </form>
+                                    <Button
+                                        type="submit"
+                                        disabled={loading || securityForm.watch('email') === customerData.email}
+                                        className="w-full"
+                                    >
+                                        Обновить Email
+                                    </Button>
+                                </form>
+                            </Form>
 
                             <div className="mt-8 pt-6 border-t">
                                 <h3 className="text-lg font-medium mb-2">Смена пароля</h3>
