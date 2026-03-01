@@ -2,53 +2,70 @@
 
 import React, { useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGES } from '@/config/public-pages.config';
 import { authorClientService } from '@/services/api/client/author-client.service';
 import { customerClientService } from '@/services/api/client/customer-client.service';
 import { useAuthStore } from '@/services/store/auth/store';
 import { type UserRole, UserType } from '@/shared/types/auth.interface';
+import { emailSchema } from '@/shared/validations/schemas';
 
 interface LoginFormProps {
     redirectUrl: string;
 }
 
+const loginSchema = z.object({
+    email: emailSchema,
+    password: z.string().min(1, 'Введите пароль'),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+
 export default function LoginForm({ redirectUrl }: LoginFormProps) {
     const router = useRouter();
     const checkAuth = useAuthStore((state) => state.checkAuth);
 
+    const [userType, setUserType] = useState<UserRole>(UserType.CUSTOMER);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [userType, setUserType] = useState<UserRole>(UserType.CUSTOMER);
-
-    // Состояния для email, чтобы использовать их для сброса пароля
-    const [customerEmail, setCustomerEmail] = useState('');
-
     const [resetLoading, setResetLoading] = useState(false);
     const [resetMessage, setResetMessage] = useState({ type: '', text: '' });
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const customerForm = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: '', password: '' },
+    });
+
+    const authorForm = useForm<LoginFormValues>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: '', password: '' },
+    });
+
+    const currentCustomerEmail = customerForm.watch('email');
+
+    const handleLoginSubmit = async (data: LoginFormValues, role: UserRole) => {
         setLoading(true);
         setError('');
+        setResetMessage({ type: '', text: '' });
 
         try {
-            const formData = new FormData(e.currentTarget);
-            const email = formData.get('email') as string;
-            const password = formData.get('password') as string;
+            const { email, password } = data;
 
             let authResult;
-            if (userType === UserType.CUSTOMER) {
+            if (role === UserType.CUSTOMER) {
                 // Аутентификация покупателя через Payload
                 authResult = await customerClientService.authenticate(email, password);
-            } else if (userType === UserType.AUTHOR) {
+            } else if (role === UserType.AUTHOR) {
                 // Аутентификация автора через Payload
                 authResult = await authorClientService.authenticate(email, password);
             } else {
@@ -74,20 +91,26 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
     };
 
     const handleForgotPassword = async () => {
-        if (!customerEmail) {
+        if (!currentCustomerEmail) {
             setResetMessage({
                 type: 'error',
                 text: 'Пожалуйста, введите ваш Email в поле выше для восстановления пароля',
             });
+            // Триггерим ошибку на поле email, если оно пустое
+            customerForm.trigger('email');
             return;
         }
+
+        // Если email введен не валидно по Zod, прерываем отправку
+        const isEmailValid = await customerForm.trigger('email');
+        if (!isEmailValid) return;
 
         setResetLoading(true);
         setResetMessage({ type: '', text: '' });
         setError('');
 
         try {
-            const result = await customerClientService.requestPasswordReset(customerEmail);
+            const result = await customerClientService.requestPasswordReset(currentCustomerEmail);
             if (result.success) {
                 setResetMessage({
                     type: 'success',
@@ -126,81 +149,115 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                         </TabsList>
 
                         <TabsContent value="customer">
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input
-                                        id="email"
+                            <Form {...customerForm}>
+                                <form
+                                    onSubmit={customerForm.handleSubmit((data) =>
+                                        handleLoginSubmit(data, UserType.CUSTOMER),
+                                    )}
+                                    className="space-y-4"
+                                >
+                                    <FormField
+                                        control={customerForm.control}
                                         name="email"
-                                        type="email"
-                                        placeholder="your@email.com"
-                                        value={customerEmail}
-                                        onChange={(e) => setCustomerEmail(e.target.value)}
-                                        required
-                                        disabled={loading}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="your@email.com" {...field} disabled={loading} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="password">Пароль</Label>
-                                        <button
-                                            type="button"
-                                            onClick={handleForgotPassword}
-                                            disabled={resetLoading || loading}
-                                            className="text-sm text-primary underline underline-offset-4 disabled:opacity-50"
-                                        >
-                                            {resetLoading ? 'Отправка...' : 'Забыли пароль?'}
-                                        </button>
-                                    </div>
-                                    <Input
-                                        id="password"
+                                    <FormField
+                                        control={customerForm.control}
                                         name="password"
-                                        type="password"
-                                        placeholder="Ваш пароль"
-                                        required
-                                        disabled={loading}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center justify-between">
+                                                    <FormLabel>Пароль</FormLabel>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleForgotPassword}
+                                                        disabled={resetLoading || loading}
+                                                        className="text-sm text-primary underline underline-offset-4 disabled:opacity-50"
+                                                    >
+                                                        {resetLoading ? 'Отправка...' : 'Забыли пароль?'}
+                                                    </button>
+                                                </div>
+                                                <FormControl>
+                                                    <Input
+                                                        type="password"
+                                                        placeholder="Ваш пароль"
+                                                        {...field}
+                                                        disabled={loading}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
 
-                                <Button type="submit" disabled={loading} className="w-full cursor-pointer">
-                                    {loading ? 'Вход...' : 'Войти как покупатель'}
-                                </Button>
-                            </form>
+                                    <Button type="submit" disabled={loading} className="w-full cursor-pointer">
+                                        {loading ? 'Вход...' : 'Войти как покупатель'}
+                                    </Button>
+                                </form>
+                            </Form>
                         </TabsContent>
 
                         <TabsContent value="author">
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="email-author">Email</Label>
-                                    <Input
-                                        id="email-author"
+                            <Form {...authorForm}>
+                                <form
+                                    onSubmit={authorForm.handleSubmit((data) =>
+                                        handleLoginSubmit(data, UserType.AUTHOR),
+                                    )}
+                                    className="space-y-4"
+                                >
+                                    <FormField
+                                        control={authorForm.control}
                                         name="email"
-                                        type="email"
-                                        placeholder="author@email.com"
-                                        required
-                                        disabled={loading}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="author@email.com"
+                                                        {...field}
+                                                        disabled={loading}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="password-author">Пароль</Label>
-                                    <Input
-                                        id="password-author"
+                                    <FormField
+                                        control={authorForm.control}
                                         name="password"
-                                        type="password"
-                                        placeholder="Пароль"
-                                        required
-                                        disabled={loading}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Пароль</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="password"
+                                                        placeholder="Пароль"
+                                                        {...field}
+                                                        disabled={loading}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
 
-                                <div className="text-sm text-muted-foreground">
-                                    <p>Для входа используйте данные, предоставленные администратором</p>
-                                </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        <p>Для входа используйте данные, предоставленные администратором</p>
+                                    </div>
 
-                                <Button type="submit" disabled={loading} className="w-full cursor-pointer">
-                                    {loading ? 'Вход...' : 'Войти как автор'}
-                                </Button>
-                            </form>
+                                    <Button type="submit" disabled={loading} className="w-full cursor-pointer">
+                                        {loading ? 'Вход...' : 'Войти как автор'}
+                                    </Button>
+                                </form>
+                            </Form>
                         </TabsContent>
                     </Tabs>
 

@@ -8,22 +8,18 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { postForm } from '@/server-actions/post-form';
-
-// TODO: в utils
-export const authorFormSchema = z.object({
-    content: z.string().min(1, 'Поле не может быть пустым'),
-});
+import { authorWelcomeSchema } from '@/shared/validations/schemas';
 
 export function AuthorForm() {
-    const form = useForm<z.infer<typeof authorFormSchema>>({
-        resolver: zodResolver(authorFormSchema),
+    const form = useForm<z.infer<typeof authorWelcomeSchema>>({
+        resolver: zodResolver(authorWelcomeSchema),
         defaultValues: {
             content: '',
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof authorFormSchema>) => {
-        const result = await postForm(data);
+    const onSubmit = async (data: z.infer<typeof authorWelcomeSchema>) => {
+        const result = await postForm({ content: data.content || '' });
 
         if (result.success) {
             form.reset({ content: '' });
@@ -36,7 +32,6 @@ export function AuthorForm() {
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                // className="w-80 space-y-4 border p-4 rounded border-gray-300 mb-10"
                 className="w-full max-w-md p-6 bg-white rounded-xl shadow-md border border-gray-200 space-y-5 mb-10"
             >
                 <div className="text-center">

@@ -2,6 +2,10 @@
 
 import React, { useState } from 'react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,25 +17,26 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { authorClientService } from '@/services/api/client/author-client.service';
 import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
 import type { Author, Product } from '@/shared/types/payload-types';
-import type { IProductFormData } from '@/shared/types/product.type';
+import { productSchema } from '@/shared/validations/schemas';
 
 interface AuthorProfileUIProps {
     authorData: Author;
     products: Product[];
 }
 
-const initialProductForm = {
-    title: '',
-    price: 0,
-    description: '',
-};
+interface ProfileFormValues {
+    name: string;
+    bio: string;
+}
+
+const emptyProduct = { title: '', price: 0, description: '' };
 
 export default function AuthorProfileUI({ authorData, products: initialProducts }: AuthorProfileUIProps) {
     const [error, setError] = useState('');
@@ -44,86 +49,76 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
-    // Author data
-    const [name, setName] = useState(authorData.name || '');
-    const [bio, setBio] = useState(authorData.bio || '');
-
     // Products data
     const [products, setProducts] = useState<Product[]>(initialProducts);
 
-    // Product forms
-    const [createProductForm, setCreateProductForm] = useState<IProductFormData>(initialProductForm);
-    const [editProductForm, setEditProductForm] = useState<IProductFormData>(initialProductForm);
+    // Форма профиля без валидации
+    const profileForm = useForm<ProfileFormValues>({
+        defaultValues: { name: authorData.name || '', bio: authorData.bio || '' },
+    });
 
-    const handleProfileUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
+    // Формы с валидацией
+    const createProductForm = useForm<z.infer<typeof productSchema>>({
+        resolver: zodResolver(productSchema),
+        defaultValues: emptyProduct,
+    });
+    const editProductForm = useForm<z.infer<typeof productSchema>>({
+        resolver: zodResolver(productSchema),
+        defaultValues: emptyProduct,
+    });
+
+    const handleProfileUpdate = async (data: ProfileFormValues) => {
         setLoading(true);
         setError('');
         setSuccess('');
 
         const updated: IAuthorUpdateInput = {
-            name,
-            bio,
+            name: data.name,
+            bio: data.bio,
         };
 
         try {
             const result = await authorClientService.updateProfile(updated);
 
-            if (result.success) {
-                setSuccess('Профиль автора обновлен');
-            } else {
-                setError(result.error || 'Ошибка обновления профиля автора');
-                console.error('Update profile error:', result.error);
-            }
+            if (result.success) setSuccess('Профиль автора обновлен');
+            else setError(result.error || 'Ошибка обновления профиля автора');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCreateProduct = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleCreateProduct = async (data: z.infer<typeof productSchema>) => {
         setLoading(true);
         setError('');
         setSuccess('');
 
         try {
-            const result = await authorClientService.createProduct(createProductForm);
+            const result = await authorClientService.createProduct(data);
 
             if (result.success && result.product) {
                 // Добавляем новый товар в начало списка
                 setProducts([result.product, ...products]);
                 setIsCreateModalOpen(false);
-                setCreateProductForm(initialProductForm);
                 setSuccess('Новый товар успешно создан');
-            } else {
-                setError(result.error || 'Ошибка создания товара');
-                console.error('Create product error:', result.error);
-            }
+            } else setError(result.error || 'Ошибка создания товара');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleUpdateProduct = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleUpdateProduct = async (data: z.infer<typeof productSchema>) => {
         if (!editingProduct) return;
-
         setLoading(true);
         setError('');
         setSuccess('');
 
         try {
-            const result = await authorClientService.updateProduct(editingProduct.id, editProductForm);
-
+            const result = await authorClientService.updateProduct(editingProduct.id, data);
             if (result.success && result.product) {
                 setProducts(products.map((p) => (p.id === editingProduct.id ? result.product! : p)));
                 setEditingProduct(null);
-                setEditProductForm(initialProductForm);
                 setSuccess('Товар успешно обновлен');
-            } else {
-                setError(result.error || 'Ошибка обновления товара');
-                console.error('Update product error:', result.error);
-            }
+            } else setError(result.error || 'Ошибка обновления товара');
         } finally {
             setLoading(false);
         }
@@ -138,60 +133,30 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
 
         try {
             const result = await authorClientService.deleteProduct(productToDelete.id);
-
             if (result.success) {
                 setProducts(products.filter((p) => p.id !== productToDelete.id));
                 setIsDeleteModalOpen(false);
                 setProductToDelete(null);
                 setSuccess('Товар успешно удален');
-            } else {
-                setError(result.error || 'Ошибка удаления товара');
-                console.error('Delete product error:', result.error);
-            }
+            } else setError(result.error || 'Ошибка удаления товара');
         } finally {
             setLoading(false);
         }
     };
 
     // Modals
+    const openCreateModal = () => {
+        createProductForm.reset(emptyProduct);
+        setIsCreateModalOpen(true);
+    };
+
     const openEditModal = (product: Product) => {
-        setEditingProduct(product);
-        setEditProductForm({
+        editProductForm.reset({
             title: product.title,
             price: product.price,
             description: product.description || '',
-            // gallery: product.gallery,
-            // category: product.category || '', // TODO: добавить остальные поля, когда станет известен полный список
         });
-    };
-
-    const openDeleteModal = (product: Product) => {
-        setProductToDelete(product);
-        setIsDeleteModalOpen(true);
-    };
-
-    // Обработчики закрытия модальных окон
-    const handleCreateModalClose = () => {
-        setIsCreateModalOpen(false);
-        setCreateProductForm(initialProductForm);
-    };
-
-    const handleEditModalClose = () => {
-        setEditingProduct(null);
-        // Сброс формы только после того как модалка уже закроется
-    };
-
-    const handleDeleteModalClose = () => {
-        setIsDeleteModalOpen(false);
-        setProductToDelete(null);
-    };
-
-    // Обработчик для onOpenChange
-    const handleDeleteModalOpenChange = (open: boolean) => {
-        if (!open) {
-            setIsDeleteModalOpen(false);
-            setProductToDelete(null);
-        }
+        setEditingProduct(product);
     };
 
     return (
@@ -210,40 +175,45 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                         </TabsList>
 
                         <TabsContent value="profile" className="space-y-4">
-                            <form onSubmit={handleProfileUpdate} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Имя автора</Label>
-                                    <Input
-                                        id="name"
-                                        type="text"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        placeholder="Ваше имя"
-                                        required
+                            <Form {...profileForm}>
+                                <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)} className="space-y-4">
+                                    <FormField
+                                        control={profileForm.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Имя автора</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Ваше имя" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="bio">Биография</Label>
-                                    <Textarea
-                                        id="bio"
-                                        value={bio}
-                                        onChange={(e) => setBio(e.target.value)}
-                                        placeholder="Расскажите о себе..."
-                                        rows={4}
+                                    <FormField
+                                        control={profileForm.control}
+                                        name="bio"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Биография</FormLabel>
+                                                <FormControl>
+                                                    <Textarea placeholder="Расскажите о себе..." rows={4} {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-
-                                <Button type="submit" disabled={loading}>
-                                    {loading ? 'Сохранение...' : 'Обновить профиль'}
-                                </Button>
-                            </form>
+                                    <Button type="submit" disabled={loading}>
+                                        {loading ? 'Сохранение...' : 'Обновить профиль'}
+                                    </Button>
+                                </form>
+                            </Form>
                         </TabsContent>
 
                         <TabsContent value="products" className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-semibold">Мои товары</h3>
-                                <Button onClick={() => setIsCreateModalOpen(true)}>Добавить товар</Button>
+                                <Button onClick={openCreateModal}>Добавить товар</Button>
                             </div>
 
                             {products.length === 0 ? (
@@ -260,11 +230,6 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                                                     <p className="text-sm text-muted-foreground">
                                                         Цена: {product.price} ₽
                                                     </p>
-                                                    {product.category && (
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Категория: {product.category}
-                                                        </p>
-                                                    )}
                                                     {product.description && (
                                                         <p className="text-sm mt-2 text-muted-foreground">
                                                             {product.description}
@@ -282,7 +247,10 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                                                     <Button
                                                         variant="destructive"
                                                         size="sm"
-                                                        onClick={() => openDeleteModal(product)}
+                                                        onClick={() => {
+                                                            setProductToDelete(product);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
                                                     >
                                                         Удалить
                                                     </Button>
@@ -295,142 +263,149 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                         </TabsContent>
                     </Tabs>
 
-                    {/* Модальное окно создания товара */}
-                    <Dialog
-                        open={isCreateModalOpen}
-                        onOpenChange={(open) => {
-                            if (!open) {
-                                setIsCreateModalOpen(false);
-                                // TODO: timeout тут - это не адекватно
-                                setTimeout(() => setCreateProductForm(initialProductForm), 150);
-                            }
-                        }}
-                    >
+                    {/* Модалка: Создать */}
+                    <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Создать новый товар</DialogTitle>
                                 <DialogDescription>Заполните информацию о новом товаре</DialogDescription>
                             </DialogHeader>
-                            <form onSubmit={handleCreateProduct} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Название товара</Label>
-                                    <Input
-                                        id="title"
-                                        value={createProductForm.title}
-                                        onChange={(e) =>
-                                            setCreateProductForm({ ...createProductForm, title: e.target.value })
-                                        }
-                                        placeholder="Введите название товара"
-                                        required
+                            <Form {...createProductForm}>
+                                <form
+                                    onSubmit={createProductForm.handleSubmit(handleCreateProduct)}
+                                    className="space-y-4"
+                                >
+                                    <FormField
+                                        control={createProductForm.control}
+                                        name="title"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Название товара</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="Введите название" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="price">Цена</Label>
-                                    <Input
-                                        id="price"
-                                        type="number"
-                                        value={createProductForm.price}
-                                        onChange={(e) =>
-                                            setCreateProductForm({
-                                                ...createProductForm,
-                                                price: Number(e.target.value),
-                                            })
-                                        }
-                                        placeholder="Введите цену"
-                                        required
+                                    <FormField
+                                        control={createProductForm.control}
+                                        name="price"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Цена</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        placeholder="Введите цену"
+                                                        {...field}
+                                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="description">Описание</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={createProductForm.description || ''}
-                                        onChange={(e) =>
-                                            setCreateProductForm({ ...createProductForm, description: e.target.value })
-                                        }
-                                        placeholder="Опишите товар"
-                                        rows={3}
+                                    <FormField
+                                        control={createProductForm.control}
+                                        name="description"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Описание</FormLabel>
+                                                <FormControl>
+                                                    <Textarea placeholder="Опишите товар" rows={3} {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <DialogFooter>
-                                    <Button type="button" variant="outline" onClick={handleCreateModalClose}>
-                                        Отмена
-                                    </Button>
-                                    <Button type="submit" disabled={loading}>
-                                        {loading ? 'Создание...' : 'Создать товар'}
-                                    </Button>
-                                </DialogFooter>
-                            </form>
+                                    <DialogFooter>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => setIsCreateModalOpen(false)}
+                                        >
+                                            Отмена
+                                        </Button>
+                                        <Button type="submit" disabled={loading}>
+                                            {loading ? 'Создание...' : 'Создать товар'}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
                         </DialogContent>
                     </Dialog>
 
-                    {/* Модальное окно редактирования товара */}
-                    <Dialog
-                        open={!!editingProduct}
-                        onOpenChange={(open) => {
-                            if (!open) {
-                                // дождались закрытия модалки — теперь сбрасываем форму
-                                setTimeout(() => {
-                                    setEditProductForm(initialProductForm);
-                                }, 150); // 150ms соответствует анимации закрытия Dialog
-                                handleEditModalClose();
-                            }
-                        }}
-                    >
+                    {/* Модалка: Редактировать */}
+                    <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Редактировать товар</DialogTitle>
                                 <DialogDescription>Внесите изменения в информацию о товаре</DialogDescription>
                             </DialogHeader>
-                            <form onSubmit={handleUpdateProduct} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-title">Название товара</Label>
-                                    <Input
-                                        id="edit-title"
-                                        value={editProductForm.title}
-                                        onChange={(e) =>
-                                            setEditProductForm({ ...editProductForm, title: e.target.value })
-                                        }
-                                        required
+                            <Form {...editProductForm}>
+                                <form
+                                    onSubmit={editProductForm.handleSubmit(handleUpdateProduct)}
+                                    className="space-y-4"
+                                >
+                                    <FormField
+                                        control={editProductForm.control}
+                                        name="title"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Название товара</FormLabel>
+                                                <FormControl>
+                                                    <Input {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-price">Цена</Label>
-                                    <Input
-                                        id="edit-price"
-                                        type="number"
-                                        value={editProductForm.price}
-                                        onChange={(e) =>
-                                            setEditProductForm({ ...editProductForm, price: Number(e.target.value) })
-                                        }
-                                        required
+                                    <FormField
+                                        control={editProductForm.control}
+                                        name="price"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Цена</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        {...field}
+                                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-description">Описание</Label>
-                                    <Textarea
-                                        id="edit-description"
-                                        value={editProductForm.description || ''}
-                                        onChange={(e) =>
-                                            setEditProductForm({ ...editProductForm, description: e.target.value })
-                                        }
-                                        rows={3}
+                                    <FormField
+                                        control={editProductForm.control}
+                                        name="description"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Описание</FormLabel>
+                                                <FormControl>
+                                                    <Textarea rows={3} {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
                                     />
-                                </div>
-                                <DialogFooter>
-                                    <Button type="button" variant="outline" onClick={handleEditModalClose}>
-                                        Отмена
-                                    </Button>
-                                    <Button type="submit" disabled={loading}>
-                                        {loading ? 'Сохранение...' : 'Сохранить изменения'}
-                                    </Button>
-                                </DialogFooter>
-                            </form>
+                                    <DialogFooter>
+                                        <Button type="button" variant="outline" onClick={() => setEditingProduct(null)}>
+                                            Отмена
+                                        </Button>
+                                        <Button type="submit" disabled={loading}>
+                                            {loading ? 'Сохранение...' : 'Сохранить изменения'}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </Form>
                         </DialogContent>
                     </Dialog>
 
-                    {/* Модальное окно подтверждения удаления */}
-                    <Dialog open={isDeleteModalOpen} onOpenChange={handleDeleteModalOpenChange}>
+                    {/* Модалка: Удалить */}
+                    <Dialog open={isDeleteModalOpen} onOpenChange={(open) => !open && setIsDeleteModalOpen(false)}>
                         <DialogContent>
                             <DialogHeader>
                                 <DialogTitle>Подтверждение удаления</DialogTitle>
@@ -440,7 +415,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                                 </DialogDescription>
                             </DialogHeader>
                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={handleDeleteModalClose}>
+                                <Button type="button" variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
                                     Отмена
                                 </Button>
                                 <Button
@@ -455,12 +430,12 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                         </DialogContent>
                     </Dialog>
 
+                    {/* Алерт ошибок и успеха */}
                     {error && (
                         <Alert variant="destructive" className="mt-4">
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
-
                     {success && (
                         <Alert className="mt-4">
                             <AlertDescription>{success}</AlertDescription>
