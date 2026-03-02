@@ -4,11 +4,12 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 
 import type { PaginatedResponse } from '@/services/api/server/payload-data.service';
 
-import type { Author, Product } from '../types/payload-types';
+import type { Author, Category, Product } from '../types/payload-types';
 import type { QueryParams } from '../types/query-params.type';
 import {
     getAuthorQueryOptions,
     getAuthorsQueryOptions,
+    getCategoriesQueryOptions,
     getProductByIdQueryOptions,
     getProductQueryOptions,
     getProductSlugQueryOptions,
@@ -33,6 +34,15 @@ export const useFetchAuthors = (queryParams: QueryParams) => {
     });
 };
 
+export const useFetchCategories = (queryParams?: QueryParams) => {
+    return useQuery<PaginatedResponse<Category>>({
+        ...getCategoriesQueryOptions({ ...queryParams }),
+        placeholderData: (previousData) => {
+            return previousData;
+        },
+    });
+};
+
 export const useFetchProduct = ({ slug }: { slug: string }) => {
     return useQuery<Product | null>(getProductQueryOptions({ slug }));
 };
@@ -50,19 +60,13 @@ export const useProductsByIds = (ids: number[]) => {
 
     const isLoading = queries.some((q) => q.isLoading);
 
-    const realErrorQuery = queries.find(
-        (q) => q.isError && q.error
-    );
+    const realErrorQuery = queries.find((q) => q.isError && q.error);
 
     const isError = Boolean(realErrorQuery);
     const error = realErrorQuery?.error ?? null;
 
-  
-    const products = queries
-        .map((q) => q.data)
-        .filter(Boolean) as Product[];
+    const products = queries.map((q) => q.data).filter(Boolean) as Product[];
 
- 
     const invalidIds: number[] = queries
         .map((q, index) => {
             const id = ids[index];

@@ -8,6 +8,7 @@ export const COLLECTION_SLUGS = {
     MEDIA: 'media',
     CARTS: 'carts',
     ORDERS: 'orders',
+    CATEGORIES: 'categories',
 } as const;
 
 export const HTTP_METHODS = {

@@ -190,11 +190,18 @@ export const ProductsCollection: CollectionConfig = {
             ],
         },
         //{ name: 'quantity', type: 'number' },
+        // {
+        //     name: 'category',
+        //     type: 'select',
+        //     label: 'Категория',
+        //     options: [...PRODUCT_CATEGORIES.map(({ value, label }) => ({ value, label }))],
+        //     required: false,
+        // },
         {
             name: 'category',
-            type: 'select',
+            type: 'relationship',
+            relationTo: COLLECTION_SLUGS.CATEGORIES,
             label: 'Категория',
-            options: [...PRODUCT_CATEGORIES.map(({ value, label }) => ({ value, label }))],
             required: false,
         },
         {

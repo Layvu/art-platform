@@ -1,11 +1,10 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
+import ProductsUI from '@/components/products/ProductsUI';
 import { toQueryParams } from '@/services/api/utils';
 import type { ProductsQueryParams } from '@/shared/types/query-params.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
-import { getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
-
-import ProductsUI from '../../../components/products/ProductsUI';
+import { getCategoriesQueryOptions, getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<ProductsQueryParams> }) {
     // Получаем параметры из поисковой строки
@@ -20,6 +19,8 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     await queryClient.prefetchQuery(
         getProductsQueryOptions({ ...queryParams, page: queryParams?.page ? queryParams.page + 1 : 1 }),
     );
+
+    await queryClient.prefetchQuery(getCategoriesQueryOptions({}));
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

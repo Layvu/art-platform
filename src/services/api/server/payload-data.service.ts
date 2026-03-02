@@ -1,5 +1,5 @@
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
-import type { Author, Product } from '@/shared/types/payload-types';
+import type { Author, Category, Product } from '@/shared/types/payload-types';
 import type { QueryParams } from '@/shared/types/query-params.type';
 
 import { apiUrl } from '../api-url-builder';
@@ -102,7 +102,7 @@ export class PayloadDataService {
     }
 
     async getAuthors(params?: QueryParams): Promise<PaginatedResponse<Author>> {
-        return this.getCollection(COLLECTION_SLUGS.AUTHORS, { ...params, depth: 1 }); // depth=1 подтянет категории
+        return this.getCollection(COLLECTION_SLUGS.AUTHORS, { ...params, depth: 1 });
     }
 
     async getProductBySlug(slug: string): Promise<Product | null> {
@@ -125,6 +125,10 @@ export class PayloadDataService {
 
     async getProductById(id: number): Promise<Product> {
         return this.getItem(COLLECTION_SLUGS.PRODUCTS, id);
+    }
+
+    async getCategories(params: QueryParams): Promise<PaginatedResponse<Category>> {
+        return this.getCollection(COLLECTION_SLUGS.CATEGORIES, { ...params, depth: 1 });
     }
 }
 

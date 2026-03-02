@@ -1,7 +1,7 @@
 ﻿import { type MigrateDownArgs, type MigrateUpArgs, sql } from '@payloadcms/db-postgres';
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
-  await db.execute(sql`
+    await db.execute(sql`
    CREATE TYPE "public"."_locales" AS ENUM('ru', 'en');
   CREATE TYPE "public"."enum_products_category" AS ENUM('shoppers', 'clothes', 'trinkets', 'postcards', 'ceramics', 'stickers', 'knitted');
   CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'author', 'customer');
@@ -296,11 +296,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_preferences_rels_path_idx" ON "payload_preferences_rels" USING btree ("path");
   CREATE INDEX "payload_preferences_rels_users_id_idx" ON "payload_preferences_rels" USING btree ("users_id");
   CREATE INDEX "payload_migrations_updated_at_idx" ON "payload_migrations" USING btree ("updated_at");
-  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`)
+  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`);
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
-  await db.execute(sql`
+    await db.execute(sql`
    DROP TABLE "products_gallery" CASCADE;
   DROP TABLE "products" CASCADE;
   DROP TABLE "authors_product_categories" CASCADE;
@@ -326,5 +326,5 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_orders_delivery_type";
   DROP TYPE "public"."enum_orders_cdek_data_type";
   DROP TYPE "public"."enum_orders_status";
-  DROP TYPE "public"."enum_orders_payment_status";`)
+  DROP TYPE "public"."enum_orders_payment_status";`);
 }

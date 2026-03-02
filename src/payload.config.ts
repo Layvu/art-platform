@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 
 import { AuthorsCollection } from '@/collections/authors.collection';
 import { CartsCollection } from '@/collections/carts.collection';
+import { CategoriesCollection } from '@/collections/categories.collection';
 import { CustomersCollection } from '@/collections/customers.collection';
 import { FormsCollection } from '@/collections/forms.collection';
 import { MediaCollection } from '@/collections/media.collection';
@@ -38,6 +39,7 @@ export default buildConfig({
         CustomersCollection,
         OrdersCollection,
         MediaCollection,
+        CategoriesCollection,
     ],
 
     i18n: {

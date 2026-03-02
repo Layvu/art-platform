@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { is } from 'zod/v4/locales';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { URL_SEPARATOR } from '@/shared/constants/constants';
 import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
+import { useFetchCategories } from '@/shared/hooks/useFetchData';
 
 import { Checkbox } from '../ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
@@ -22,6 +24,9 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     const [newCategories, setNewCategories] = useState<string[]>(
         category ? category.split(URL_SEPARATOR).filter(Boolean) : [],
     );
+
+    const { data, isError, error, isPlaceholderData, isFetching } = useFetchCategories();
+    const categories = data?.docs || [];
 
     const onSaveClick = () => {
         onCategoryChange(
@@ -52,7 +57,9 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                         <CommandEmpty>Такой категории нет.</CommandEmpty>
                         <CommandGroup>
                             <ScrollArea className="h-46 w-full">
-                                {PRODUCT_CATEGORIES.map((category) => {
+                                {isError && error && <span>{error.message}</span>}
+                                {isFetching && <span>Loading...</span>}
+                                {categories.map((category) => {
                                     const isChecked = newCategories.includes(category.value);
 
                                     const toggle = () => {

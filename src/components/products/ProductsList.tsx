@@ -20,7 +20,7 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
     const params = toQueryParams(initialParams);
 
     const { data, isError, error, isPlaceholderData, isFetching } = useFetchProducts(params);
-    const products = data?.docs; // TODO: Это печально, по хорошему нужно вынести метод и типизировать
+    const products = data?.docs;
 
     if (isError) {
         return <div>Error: {error.message}</div>;

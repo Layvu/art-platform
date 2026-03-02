@@ -1,6 +1,5 @@
-import { authServerService } from '@/services/api/server/auth-server.service';
-
 import CartUI from '@/components/cart/CartUI';
+import { authServerService } from '@/services/api/server/auth-server.service';
 
 export default async function CartPage() {
     // Получаем текущего пользователя через серверный метод

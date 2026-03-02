@@ -28,9 +28,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
 
     // берем id товаров, парсим их в массив чисел
     const productsIds = useMemo(() => {
-        return items.map((item) =>
-            isProductData(item.product) ? item.product.id : item.product,
-        );
+        return items.map((item) => (isProductData(item.product) ? item.product.id : item.product));
     }, [items]);
 
     // фетчим товары по массиву чисел
@@ -38,10 +36,15 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
 
     // лоадинг
     if (isLoading) return <>Loading from ui...</>;
-    if (isError && !error?.message.includes('404 Not Found')) return <>Error: {error?.message}, id's: {invalidIds}</>;
+    if (isError && !error?.message.includes('404 Not Found'))
+        return (
+            <>
+                Error: {error?.message}, id's: {invalidIds}
+            </>
+        );
     if (!products) return <>No products found</>;
 
-    for (let id of invalidIds)   {
+    for (let id of invalidIds) {
         removeItem(id);
     }
     // сливаем товары с корзиной

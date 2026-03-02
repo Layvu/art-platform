@@ -40,7 +40,7 @@ export const getProductByIdQueryOptions = ({ id }: { id: number }) => {
         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
         queryFn: () => payloadDataService.getProductById(id),
         staleTime: 1000 * 60, // минута,
-        retry: (failureCount: number, error: any) => {
+        retry: (failureCount: number, error: Error) => {
             // не ретраю 404
             if (error.message.includes('404 Not Found')) {
                 return false;
@@ -66,6 +66,15 @@ export const getProductSlugQueryOptions = ({ id }: { id: number }) => {
         staleTime: 1000 * 60, // минута,
     };
 };
+
+export const getCategoriesQueryOptions = (queryParams: QueryParams) => {
+    return {
+        queryKey: [COLLECTION_SLUGS.CATEGORIES, queryParams],
+        queryFn: () => payloadDataService.getCategories(queryParams),
+        staleTime: 1000 * 60, // минута,
+    };
+};
+
 // export const getMediaQueryOptions = ({ id }: { id: number }) => {
 //     return {
 //         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],

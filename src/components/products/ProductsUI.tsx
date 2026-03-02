@@ -18,7 +18,7 @@ export default function ProductsUI({
     showAuthorFilter?: boolean;
 }) {
     const updateQueryParams = useUpdateQueryParams<ProductsQueryParams>();
-    console.log(initialParams);
+
     return (
         <div className="wrap">
             <ProductFiltersBar

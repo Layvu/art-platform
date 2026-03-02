@@ -1,8 +1,6 @@
 import { URL_SEPARATOR } from '@/shared/constants/constants';
 import type { AuthorsQueryParams, ProductsQueryParams, QueryParams } from '@/shared/types/query-params.type';
 
-// TODO: объединить мб в одну функцию
-
 // ProductsQueryParams -> QueryParams
 export function toQueryParams(params: ProductsQueryParams): QueryParams {
     const { page, sort, limit, search, authors, category, tags, priceFrom, priceTo } = params;
@@ -14,7 +12,7 @@ export function toQueryParams(params: ProductsQueryParams): QueryParams {
     }
     if (category) {
         const categories = category.split(URL_SEPARATOR).filter(Boolean);
-        where.category = categories.length > 1 ? { in: categories } : { equals: categories[0] };
+        where['category.value'] = categories.length > 1 ? { in: categories } : { equals: categories[0] };
     }
     if (authors) {
         const authorsArray = authors.split(URL_SEPARATOR).map((a) => a.trim());
