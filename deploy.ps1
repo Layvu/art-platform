@@ -64,3 +64,9 @@ Write-Host "DONE!" -ForegroundColor Green
 
 # .env
 # nano /var/app/.env
+
+# email
+# nano /etc/postfix/main.cf
+
+# DKIM
+# nano /etc/opendkim/keys/vm-13380e01.na4u.ru
