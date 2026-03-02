@@ -10,11 +10,12 @@ export async function sendEmail({ to, subject, text }: ISendEmailProps) {
     const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: Number(process.env.EMAIL_PORT),
-        secure: process.env.EMAIL_SECURE === 'true',
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+        secure: false,
+        tls: {
+            rejectUnauthorized: false,
         },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
     });
 
     try {
