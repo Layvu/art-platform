@@ -40,6 +40,13 @@ export const getProductByIdQueryOptions = ({ id }: { id: number }) => {
         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
         queryFn: () => payloadDataService.getProductById(id),
         staleTime: 1000 * 60, // минута,
+        retry: (failureCount: number, error: any) => {
+            // не ретраю 404
+            if (error.message.includes('404 Not Found')) {
+                return false;
+            }
+            return failureCount < 2;
+        },
     };
 };
 
