@@ -22,23 +22,23 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { authorClientService } from '@/services/api/client/author-client.service';
-import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
-import type { Author, Product } from '@/shared/types/payload-types';
+import type {
+    AuthorProfileFormValues,
+    AuthorProfileUIProps,
+    IAuthorUpdateInput,
+} from '@/shared/types/author.interface';
+import type { Product } from '@/shared/types/payload-types';
 import { productSchema } from '@/shared/validations/schemas';
 
-interface AuthorProfileUIProps {
-    authorData: Author;
-    products: Product[];
-}
-
-interface ProfileFormValues {
-    name: string;
-    bio: string;
-}
+import AuthorInvoiceManager from './AuthorInvoiceManager';
 
 const emptyProduct = { title: '', price: 0, description: '' };
 
-export default function AuthorProfileUI({ authorData, products: initialProducts }: AuthorProfileUIProps) {
+export default function AuthorProfileUI({
+    authorData,
+    products: initialProducts,
+    latestInvoice,
+}: AuthorProfileUIProps) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
     const [products, setProducts] = useState<Product[]>(initialProducts);
 
     // Форма профиля без валидации
-    const profileForm = useForm<ProfileFormValues>({
+    const profileForm = useForm<AuthorProfileFormValues>({
         defaultValues: { name: authorData.name || '', bio: authorData.bio || '' },
     });
 
@@ -67,7 +67,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
         defaultValues: emptyProduct,
     });
 
-    const handleProfileUpdate = async (data: ProfileFormValues) => {
+    const handleProfileUpdate = async (data: AuthorProfileFormValues) => {
         setLoading(true);
         setError('');
         setSuccess('');
@@ -169,12 +169,14 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
 
                 <CardContent>
                     <Tabs defaultValue="profile" className="space-y-4">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
+                            {/* TODO: вынести в компоненты каждый таб как накладные */}
                             <TabsTrigger value="profile">Профиль</TabsTrigger>
                             <TabsTrigger value="products">Мои товары ({products.length})</TabsTrigger>
+                            <TabsTrigger value="invoices">Накладные</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="profile" className="space-y-4">
+                        <TabsContent value="profile">
                             <Form {...profileForm}>
                                 <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)} className="space-y-4">
                                     <FormField
@@ -210,7 +212,7 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                             </Form>
                         </TabsContent>
 
-                        <TabsContent value="products" className="space-y-4">
+                        <TabsContent value="products">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-semibold">Мои товары</h3>
                                 <Button onClick={openCreateModal}>Добавить товар</Button>
@@ -260,6 +262,14 @@ export default function AuthorProfileUI({ authorData, products: initialProducts 
                                     ))}
                                 </div>
                             )}
+                        </TabsContent>
+
+                        <TabsContent value="invoices">
+                            <AuthorInvoiceManager
+                                authorId={authorData.id}
+                                products={products}
+                                latestInvoice={latestInvoice}
+                            />
                         </TabsContent>
                     </Tabs>
 

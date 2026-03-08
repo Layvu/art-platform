@@ -29,8 +29,9 @@ export default async function ProfilePage() {
             }
 
             const products = await authorServerService.getAuthorProducts(author.id);
+            const latestInvoice = await authorServerService.getAuthorLatestInvoice(author.id);
 
-            return <AuthorProfileUI authorData={author} products={products || []} />;
+            return <AuthorProfileUI authorData={author} products={products || []} latestInvoice={latestInvoice} />;
         } catch (error) {
             console.error('Error loading author data:', error);
         }

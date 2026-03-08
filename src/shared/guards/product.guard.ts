@@ -1,6 +1,6 @@
 import type { Product } from '../types/payload-types';
 
-// TODO: может просто тип создать и сделать его type of?
+// TODO: может просто проверять typeof object === 'object', тк поля меняются в процессе разработки?
 export const isProductData = (object: unknown): object is Product => {
     return (
         typeof object === 'object' &&

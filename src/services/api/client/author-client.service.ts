@@ -1,7 +1,14 @@
-import { HTTP_METHODS } from '@/shared/constants/constants';
+import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
+import { isProductData } from '@/shared/guards/product.guard';
 import type { IOperationResult, IProductResult } from '@/shared/types/api.interface';
 import { UserType } from '@/shared/types/auth.interface';
 import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
+import type {
+    IInvoiceCreatePayloadData,
+    IInvoiceItems,
+    IInvoiceResult,
+    IInvoiceUpdatePayloadData,
+} from '@/shared/types/invoice.interface';
 import type { IProductFormData } from '@/shared/types/product.type';
 
 import { apiUrl } from '../api-url-builder';
@@ -59,6 +66,55 @@ export class AuthorClientService {
         if (!response.ok) return { success: false, error: data.message };
 
         return { success: true, product: data.product };
+    }
+
+    async saveInvoice(authorId: number, items: IInvoiceItems): Promise<IInvoiceResult> {
+        const url = apiUrl.collection(COLLECTION_SLUGS.INVOICES);
+
+        const invoiceData: IInvoiceCreatePayloadData = {
+            author: authorId,
+            items: items.map((item, index) => ({
+                orderNumber: index + 1,
+                product: isProductData(item.product) ? item.product.id : item.product,
+                quantity: item.quantity,
+                condition: item.condition,
+            })),
+        };
+
+        const response = await fetch(url, {
+            method: HTTP_METHODS.POST,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(invoiceData),
+        });
+
+        const data = await response.json();
+        if (!response.ok) return { success: false, error: data.message || 'Ошибка сохранения накладной' };
+
+        return { success: true, invoice: data.doc };
+    }
+
+    async updateInvoice(invoiceId: number, items: IInvoiceItems): Promise<IInvoiceResult> {
+        const url = apiUrl.item(COLLECTION_SLUGS.INVOICES, invoiceId);
+
+        const invoiceData: IInvoiceUpdatePayloadData = {
+            items: items.map((item) => ({
+                orderNumber: item.orderNumber,
+                product: isProductData(item.product) ? item.product.id : item.product,
+                quantity: item.quantity,
+                condition: item.condition,
+            })),
+        };
+
+        const response = await fetch(url, {
+            method: HTTP_METHODS.PATCH,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(invoiceData),
+        });
+
+        const data = await response.json();
+        if (!response.ok) return { success: false, error: data.message || 'Ошибка обновления накладной' };
+
+        return { success: true, invoice: data.doc };
     }
 
     async updateProduct(productId: number, productData: IProductFormData): Promise<IProductResult> {

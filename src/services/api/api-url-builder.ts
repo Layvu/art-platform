@@ -66,12 +66,11 @@ export class ApiUrlBuilder {
         register: () => this.collection('auth/register'),
     };
 
-    // Customer Routes (Кастомные эндпоинты)
+    // Кастомные эндпоинты:
     public customer = {
         profileUpdate: () => this.buildUrl(this.baseUrl, '/api/customer/profile/update'),
     };
 
-    // Author Routes (Кастомные эндпоинты)
     public author = {
         profileUpdate: () => this.buildUrl(this.baseUrl, '/api/author/profile/update'),
         // Если товары автора получаются через кастомный эндпоинт:
@@ -81,10 +80,13 @@ export class ApiUrlBuilder {
         },
     };
 
-    // Order Routes (Кастомные эндпоинты)
     public order = {
         create: () => this.buildUrl(this.baseUrl, '/api/orders/create'),
         cancel: (id: number) => this.buildUrl(this.baseUrl, `/api/orders/${id}/cancel`),
+    };
+
+    public invoice = {
+        export: (id: number) => this.buildUrl(this.baseUrl, `/api/invoices/${id}/export`),
     };
 
     public yookassa = {

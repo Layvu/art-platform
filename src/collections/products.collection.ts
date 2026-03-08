@@ -3,7 +3,6 @@ import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
-import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 import { isAdmin, isAuthor, isCreateOperation, isCustomer } from '@/shared/utils/payload';
 
 export const ProductsCollection: CollectionConfig = {
@@ -144,6 +143,15 @@ export const ProductsCollection: CollectionConfig = {
     },
 
     fields: [
+        {
+            name: 'article1C',
+            type: 'text',
+            label: 'Артикул 1С',
+            defaultValue: '000001', // TODO: удалить дефолт, когда 1С будет передавать артикулы
+            admin: {
+                readOnly: true,
+            },
+        },
         {
             name: 'title',
             type: 'text',

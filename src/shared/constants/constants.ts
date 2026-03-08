@@ -9,6 +9,7 @@ export const COLLECTION_SLUGS = {
     CARTS: 'carts',
     ORDERS: 'orders',
     CATEGORIES: 'categories',
+    INVOICES: 'invoices',
 } as const;
 
 export const HTTP_METHODS = {

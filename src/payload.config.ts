@@ -18,6 +18,7 @@ import { ProductsCollection } from '@/collections/products.collection';
 import { UsersCollection } from '@/collections/users.collection';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
+import { InvoicesCollection } from './collections/invoices.collection';
 import { cleanupUnverifiedUsers } from './jobs/cleanupUnverifiedUsers';
 
 const filename = fileURLToPath(import.meta.url);
@@ -40,6 +41,7 @@ export default buildConfig({
         OrdersCollection,
         MediaCollection,
         CategoriesCollection,
+        InvoicesCollection,
     ],
 
     i18n: {
@@ -67,7 +69,15 @@ export default buildConfig({
         transportOptions: {
             host: process.env.EMAIL_HOST,
             port: Number(process.env.EMAIL_PORT),
-            secure: false,
+            secure: process.env.EMAIL_SECURE === 'true', // для локального тестирования используем личную почту
+            ...(process.env.EMAIL_USER && process.env.EMAIL_PASS
+                ? {
+                      auth: {
+                          user: process.env.EMAIL_USER,
+                          pass: process.env.EMAIL_PASS,
+                      },
+                  }
+                : {}),
             tls: {
                 rejectUnauthorized: false,
             },

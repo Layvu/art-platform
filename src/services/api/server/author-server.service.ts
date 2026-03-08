@@ -1,6 +1,6 @@
 import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
 import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
-import type { Author, Product } from '@/shared/types/payload-types';
+import type { Author, Invoice, Product } from '@/shared/types/payload-types';
 import type { IProductCreateInput, IProductUpdateInput } from '@/shared/types/product.type';
 
 import { apiUrl } from '../api-url-builder';
@@ -45,6 +45,27 @@ export class AuthorServerService extends BaseServerService {
 
         const data = await response.json();
         return data.docs || [];
+    }
+
+    async getAuthorLatestInvoice(authorId: number): Promise<Invoice | null> {
+        const url = apiUrl.collection(COLLECTION_SLUGS.INVOICES, {
+            where: { author: { equals: authorId } },
+            limit: 1,
+            depth: 1, // Чтобы подтянулись данные товаров
+        });
+
+        const response = await fetch(url, {
+            headers: await this.getAuthHeaders(),
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            console.error('Failed to get invoice data');
+            return null;
+        }
+
+        const data = await response.json();
+        return data.docs[0] || null;
     }
 
     async createAuthorProduct(productData: IProductCreateInput): Promise<Product> {

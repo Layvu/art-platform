@@ -14,15 +14,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { customerClientService } from '@/services/api/client/customer-client.service';
-import type { ICustomerUpdateInput } from '@/shared/types/customer.interface';
-import type { Customer } from '@/shared/types/payload-types';
+import type { CustomerProfileUIProps, ICustomerUpdateInput } from '@/shared/types/customer.interface';
 import { emailSchema, fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
 
 import OrderHistory from './OrderHistory';
-
-interface ProfileUIProps {
-    customerData: Customer;
-}
 
 const profileSchema = z.object({
     fullName: fullNameSchema,
@@ -35,7 +30,7 @@ const securitySchema = z.object({
     password: z.string().min(1, 'Введите текущий пароль для подтверждения'),
 });
 
-export default function CustomerProfileUI({ customerData }: ProfileUIProps) {
+export default function CustomerProfileUI({ customerData }: CustomerProfileUIProps) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
