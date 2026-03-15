@@ -127,8 +127,8 @@ function createDocumentTemplate(items: IInvoiceItem[]) {
                                         createCell(prod.title),
                                         createCell(item.quantity),
                                         createCell(item.condition),
-                                        createCell(prod.price),
-                                        createCell(prod.price),
+                                        createCell(prod.price ?? 0),
+                                        createCell(prod.price ?? 0),
                                     ],
                                 });
                             }),

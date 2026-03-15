@@ -3,6 +3,7 @@ import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
+import { isAuthorData } from '@/shared/guards/author.guard';
 import { isAdmin, isAuthor, isCreateOperation, isCustomer } from '@/shared/utils/payload';
 
 export const ProductsCollection: CollectionConfig = {
@@ -72,7 +73,7 @@ export const ProductsCollection: CollectionConfig = {
                     // product.author может быть объектом или ID
                     // ^ TODO: странно это, пофиксить мб
 
-                    const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
+                    const productAuthorId = isAuthorData(product.author) ? product.author.id : product.author;
                     const hasAccess = productAuthorId === author.id;
 
                     return hasAccess;
@@ -130,7 +131,7 @@ export const ProductsCollection: CollectionConfig = {
 
                     if (!product) return false;
 
-                    const productAuthorId = typeof product.author === 'object' ? product.author.id : product.author;
+                    const productAuthorId = isAuthorData(product.author) ? product.author.id : product.author;
                     return productAuthorId === author.id;
                 } catch (error) {
                     console.error('Error: product not found', error);
@@ -173,17 +174,11 @@ export const ProductsCollection: CollectionConfig = {
             name: 'price',
             type: 'number',
             label: 'Цена',
-            required: true,
         },
         {
             name: 'description',
             type: 'textarea',
             label: 'Описание',
-        },
-        {
-            name: 'characteristics',
-            type: 'textarea',
-            label: 'Характеристики',
         },
         {
             name: 'gallery',
@@ -197,14 +192,12 @@ export const ProductsCollection: CollectionConfig = {
                 },
             ],
         },
-        //{ name: 'quantity', type: 'number' },
-        // {
-        //     name: 'category',
-        //     type: 'select',
-        //     label: 'Категория',
-        //     options: [...PRODUCT_CATEGORIES.map(({ value, label }) => ({ value, label }))],
-        //     required: false,
-        // },
+        {
+            name: 'quantity',
+            type: 'number',
+            label: 'Количество на складе',
+            defaultValue: 0,
+        },
         {
             name: 'category',
             type: 'relationship',

@@ -32,6 +32,7 @@ export class AuthorServerService extends BaseServerService {
         const url = apiUrl.collection(COLLECTION_SLUGS.PRODUCTS, {
             where: { author: { equals: authorId } },
             depth: 1, // depth=1 чтобы подтянуть связи (категории и т.д.)
+            limit: 1000, // Отключаем пагинацию для профиля
         });
 
         const response = await fetch(url, {
@@ -71,7 +72,6 @@ export class AuthorServerService extends BaseServerService {
     async createAuthorProduct(productData: IProductCreateInput): Promise<Product> {
         const url = apiUrl.collection(COLLECTION_SLUGS.PRODUCTS);
 
-        // Запрос на кастомный эндпоинт
         const response = await fetch(url, {
             method: HTTP_METHODS.POST,
             headers: await this.getAuthHeaders(),

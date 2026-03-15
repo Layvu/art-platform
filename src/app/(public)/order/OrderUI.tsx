@@ -92,7 +92,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
         ? checkedItems.reduce((sum, item) => {
               const productId = isProductData(item.product) ? item.product.id : item.product;
               const product = products.find((p) => p.id === productId);
-              return product ? sum + item.quantity * product.price : sum;
+              return product ? sum + item.quantity * (product.price ?? 0) : sum;
           }, 0)
         : 0;
 
@@ -287,7 +287,10 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                                     </p>
                                                 </div>
                                                 <p className="font-medium whitespace-nowrap">
-                                                    {product ? (product.price * item.quantity).toFixed(2) : 'N/A'} руб.
+                                                    {product
+                                                        ? ((product.price ?? 0) * item.quantity).toFixed(2)
+                                                        : 'N/A'}{' '}
+                                                    руб.
                                                 </p>
                                             </div>
                                         );

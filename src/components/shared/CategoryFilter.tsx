@@ -3,12 +3,10 @@
 import React, { useState } from 'react';
 
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { is } from 'zod/v4/locales';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { URL_SEPARATOR } from '@/shared/constants/constants';
-import { PRODUCT_CATEGORIES } from '@/shared/constants/products.constants';
 import { useFetchCategories } from '@/shared/hooks/useFetchData';
 
 import { Checkbox } from '../ui/checkbox';

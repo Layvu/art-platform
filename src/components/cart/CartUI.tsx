@@ -61,7 +61,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
     const checkedItems = itemsWithProducts.filter((item) => item.checked);
 
     // итоговая цена
-    const total = checkedItems.reduce((sum, item) => sum + item.quantity * item.product.price, 0);
+    const total = checkedItems.reduce((sum, item) => sum + item.quantity * (item.product.price ?? 0), 0);
     const itemsCount = checkedItems.reduce((sum, item) => sum + item.quantity, 0);
 
     const handleCheckout = () => {
