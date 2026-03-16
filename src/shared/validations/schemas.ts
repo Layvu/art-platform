@@ -19,10 +19,23 @@ export const fullNameSchema = z
     .min(2, 'Имя должно содержать минимум 2 символа')
     .max(100, 'Слишком длинное имя');
 
+const mediaSchema = z
+    .object({
+        id: z.number(),
+    })
+    .catchall(z.any());
+
 export const productSchema = z.object({
     title: z.string().min(1, 'Введите название товара'),
-    price: z.number({ error: 'Введите корректную цену' }).min(0, 'Цена не может быть отрицательной'),
-    description: z.string().optional(),
+    description: z.string().optional().nullable(),
+    category: z.union([z.number(), z.string()]).optional().nullable(),
+    gallery: z.array(
+        z.object({
+            id: z.string().nullable().optional(),
+            // Может быть id (number) при создании или объектом Media при редактировании
+            image: z.union([z.number(), mediaSchema]).nullable().optional(),
+        }),
+    ),
 });
 
 // TODO: Пока не валидируем строго, тк не знаем всех полей

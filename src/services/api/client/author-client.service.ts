@@ -1,6 +1,6 @@
 import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
 import { isProductData } from '@/shared/guards/product.guard';
-import type { IOperationResult, IProductResult } from '@/shared/types/api.interface';
+import type { IMediaResult, IOperationResult, IProductResult } from '@/shared/types/api.interface';
 import { UserType } from '@/shared/types/auth.interface';
 import type { IAuthorUpdateInput } from '@/shared/types/author.interface';
 import type {
@@ -139,6 +139,21 @@ export class AuthorClientService {
         if (!response.ok) return { success: false, error: data.message || 'Ошибка удаления товара' };
 
         return { success: true };
+    }
+
+    async uploadMedia(file: File): Promise<IMediaResult> {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(apiUrl.collection(COLLECTION_SLUGS.MEDIA), {
+            method: HTTP_METHODS.POST,
+            body: formData,
+        });
+
+        const data = await response.json();
+        if (!response.ok) return { success: false, error: data.message || 'Ошибка загрузки изображения' };
+
+        return { success: true, media: data.doc };
     }
 }
 

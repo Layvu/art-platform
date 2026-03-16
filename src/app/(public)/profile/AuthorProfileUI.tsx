@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { useForm, type UseFormReturn } from 'react-hook-form';
 
+import AuthorInvoiceManager from '@/components/profile/author/AuthorInvoiceManager';
+import { AuthorProductCard } from '@/components/profile/author/AuthorProductCard';
+import { AuthorProductModal } from '@/components/profile/author/AuthorProductModal';
+import AvatarUploader from '@/components/profile/author/AvatarUploader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,17 +24,46 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { authorClientService } from '@/services/api/client/author-client.service';
+import { isImageData } from '@/shared/guards/image.guard';
 import type {
     AuthorProfileFormValues,
     AuthorProfileUIProps,
+    IAuthorAvatar,
     IAuthorUpdateInput,
 } from '@/shared/types/author.interface';
 import type { Product } from '@/shared/types/payload-types';
-import { productSchema } from '@/shared/validations/schemas';
+import type { IProductFormData, ProductFormValues } from '@/shared/types/product.type';
 
-import AuthorInvoiceManager from './AuthorInvoiceManager';
+// Подготовка данных к отправке на сервер
+const mapFormDataToPayload = (
+    data: ProductFormValues,
+    currentPrice: number,
+    currentQuantity: number,
+): IProductFormData => ({
+    ...data,
+    price: currentPrice,
+    category: data.category ? Number(data.category) : null,
+    quantity: currentQuantity,
+    gallery: data.gallery.map((item) => {
+        let imageId;
+        if (typeof item.image === 'number') {
+            imageId = item.image;
+        } else if (isImageData(item.image)) {
+            imageId = item.image.id;
+        }
+        return {
+            id: item.id || null,
+            image: imageId,
+        };
+    }),
+});
 
-const emptyProduct = { title: '', price: 0, description: '' };
+const extractAvatarId = (avatar: IAuthorAvatar): IAuthorAvatar => {
+    if (!avatar) return null;
+    if (typeof avatar === 'number' || typeof avatar === 'string') return avatar;
+    if (isImageData(avatar)) return avatar.id;
+    return null;
+};
 
 export default function AuthorProfileUI({
     authorData,
@@ -44,9 +75,9 @@ export default function AuthorProfileUI({
     const [loading, setLoading] = useState(false);
 
     // Modals
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [modalProduct, setModalProduct] = useState<Product | null>(null);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
     // Products data
@@ -54,71 +85,64 @@ export default function AuthorProfileUI({
 
     // Форма профиля без валидации
     const profileForm = useForm<AuthorProfileFormValues>({
-        defaultValues: { name: authorData.name || '', bio: authorData.bio || '' },
+        defaultValues: {
+            name: authorData.name || '',
+            bio: authorData.bio || '',
+            avatar: authorData.avatar || null,
+        },
     });
 
-    // Формы с валидацией
-    const createProductForm = useForm<z.infer<typeof productSchema>>({
-        resolver: zodResolver(productSchema),
-        defaultValues: emptyProduct,
-    });
-    const editProductForm = useForm<z.infer<typeof productSchema>>({
-        resolver: zodResolver(productSchema),
-        defaultValues: emptyProduct,
-    });
+    const resetAlerts = () => {
+        setError('');
+        setSuccess('');
+    };
 
     const handleProfileUpdate = async (data: AuthorProfileFormValues) => {
         setLoading(true);
-        setError('');
-        setSuccess('');
+        resetAlerts();
 
-        const updated: IAuthorUpdateInput = {
+        const updatedData: IAuthorUpdateInput = {
             name: data.name,
             bio: data.bio,
+            avatar: extractAvatarId(data.avatar),
         };
 
         try {
-            const result = await authorClientService.updateProfile(updated);
+            const result = await authorClientService.updateProfile(updatedData);
 
-            if (result.success) setSuccess('Профиль автора обновлен');
-            else setError(result.error || 'Ошибка обновления профиля автора');
+            if (result.success) {
+                setSuccess('Профиль автора обновлен');
+            } else {
+                setError(result.error || 'Ошибка обновления профиля автора');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const handleCreateProduct = async (data: z.infer<typeof productSchema>) => {
+    const handleProductSubmit = async (data: ProductFormValues) => {
         setLoading(true);
-        setError('');
-        setSuccess('');
+        resetAlerts();
 
         try {
-            const result = await authorClientService.createProduct(data);
+            const payloadData = mapFormDataToPayload(data, modalProduct?.price ?? 0, modalProduct?.quantity ?? 0);
+            const isCreateMode = !modalProduct;
+
+            const result = isCreateMode
+                ? await authorClientService.createProduct(payloadData)
+                : await authorClientService.updateProduct(modalProduct.id, payloadData);
 
             if (result.success && result.product) {
-                // Добавляем новый товар в начало списка
-                setProducts([result.product, ...products]);
-                setIsCreateModalOpen(false);
-                setSuccess('Новый товар успешно создан');
-            } else setError(result.error || 'Ошибка создания товара');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleUpdateProduct = async (data: z.infer<typeof productSchema>) => {
-        if (!editingProduct) return;
-        setLoading(true);
-        setError('');
-        setSuccess('');
-
-        try {
-            const result = await authorClientService.updateProduct(editingProduct.id, data);
-            if (result.success && result.product) {
-                setProducts(products.map((p) => (p.id === editingProduct.id ? result.product! : p)));
-                setEditingProduct(null);
-                setSuccess('Товар успешно обновлен');
-            } else setError(result.error || 'Ошибка обновления товара');
+                if (isCreateMode) {
+                    setProducts([result.product, ...products]);
+                    setSuccess('Товар успешно создан');
+                } else {
+                    setProducts(products.map((p) => (p.id === modalProduct.id ? result.product! : p)));
+                    setSuccess('Товар успешно обновлён');
+                }
+            } else {
+                setError(result.error || 'Ошибка сохранения товара');
+            }
         } finally {
             setLoading(false);
         }
@@ -128,17 +152,19 @@ export default function AuthorProfileUI({
         if (!productToDelete) return;
 
         setLoading(true);
-        setError('');
-        setSuccess('');
+        resetAlerts();
 
         try {
             const result = await authorClientService.deleteProduct(productToDelete.id);
+
             if (result.success) {
                 setProducts(products.filter((p) => p.id !== productToDelete.id));
                 setIsDeleteModalOpen(false);
                 setProductToDelete(null);
                 setSuccess('Товар успешно удален');
-            } else setError(result.error || 'Ошибка удаления товара');
+            } else {
+                setError(result.error || 'Ошибка удаления товара');
+            }
         } finally {
             setLoading(false);
         }
@@ -146,17 +172,18 @@ export default function AuthorProfileUI({
 
     // Modals
     const openCreateModal = () => {
-        createProductForm.reset(emptyProduct);
-        setIsCreateModalOpen(true);
+        setModalProduct(null);
+        setIsProductModalOpen(true);
     };
 
     const openEditModal = (product: Product) => {
-        editProductForm.reset({
-            title: product.title,
-            price: product.price,
-            description: product.description || '',
-        });
-        setEditingProduct(product);
+        setModalProduct(product);
+        setIsProductModalOpen(true);
+    };
+
+    const openDeleteModal = (product: Product) => {
+        setProductToDelete(product);
+        setIsDeleteModalOpen(true);
     };
 
     return (
@@ -170,98 +197,22 @@ export default function AuthorProfileUI({
                 <CardContent>
                     <Tabs defaultValue="profile" className="space-y-4">
                         <TabsList className="grid w-full grid-cols-3">
-                            {/* TODO: вынести в компоненты каждый таб как накладные */}
                             <TabsTrigger value="profile">Профиль</TabsTrigger>
                             <TabsTrigger value="products">Мои товары ({products.length})</TabsTrigger>
                             <TabsTrigger value="invoices">Накладные</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="profile">
-                            <Form {...profileForm}>
-                                <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)} className="space-y-4">
-                                    <FormField
-                                        control={profileForm.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Имя автора</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ваше имя" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={profileForm.control}
-                                        name="bio"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Биография</FormLabel>
-                                                <FormControl>
-                                                    <Textarea placeholder="Расскажите о себе..." rows={4} {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <Button type="submit" disabled={loading}>
-                                        {loading ? 'Сохранение...' : 'Обновить профиль'}
-                                    </Button>
-                                </form>
-                            </Form>
+                            <ProfileTab form={profileForm} onSubmit={handleProfileUpdate} loading={loading} />
                         </TabsContent>
 
                         <TabsContent value="products">
-                            <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-semibold">Мои товары</h3>
-                                <Button onClick={openCreateModal}>Добавить товар</Button>
-                            </div>
-
-                            {products.length === 0 ? (
-                                <Card className="p-6 text-center">
-                                    <p className="text-muted-foreground">У вас пока нет товаров</p>
-                                </Card>
-                            ) : (
-                                <div className="grid gap-4">
-                                    {products.map((product) => (
-                                        <Card key={product.id} className="p-4">
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <h4 className="font-semibold text-lg">{product.title}</h4>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Цена: {product.price} ₽
-                                                    </p>
-                                                    {product.description && (
-                                                        <p className="text-sm mt-2 text-muted-foreground">
-                                                            {product.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className="flex gap-2 ml-4">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => openEditModal(product)}
-                                                    >
-                                                        Редактировать
-                                                    </Button>
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            setProductToDelete(product);
-                                                            setIsDeleteModalOpen(true);
-                                                        }}
-                                                    >
-                                                        Удалить
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            )}
+                            <ProductsTab
+                                products={products}
+                                onAdd={openCreateModal}
+                                onEdit={openEditModal}
+                                onDelete={openDeleteModal}
+                            />
                         </TabsContent>
 
                         <TabsContent value="invoices">
@@ -273,174 +224,21 @@ export default function AuthorProfileUI({
                         </TabsContent>
                     </Tabs>
 
-                    {/* Модалка: Создать */}
-                    <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Создать новый товар</DialogTitle>
-                                <DialogDescription>Заполните информацию о новом товаре</DialogDescription>
-                            </DialogHeader>
-                            <Form {...createProductForm}>
-                                <form
-                                    onSubmit={createProductForm.handleSubmit(handleCreateProduct)}
-                                    className="space-y-4"
-                                >
-                                    <FormField
-                                        control={createProductForm.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Название товара</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Введите название" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={createProductForm.control}
-                                        name="price"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Цена</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="Введите цену"
-                                                        {...field}
-                                                        onChange={(e) => field.onChange(Number(e.target.value))}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={createProductForm.control}
-                                        name="description"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Описание</FormLabel>
-                                                <FormControl>
-                                                    <Textarea placeholder="Опишите товар" rows={3} {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <DialogFooter>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setIsCreateModalOpen(false)}
-                                        >
-                                            Отмена
-                                        </Button>
-                                        <Button type="submit" disabled={loading}>
-                                            {loading ? 'Создание...' : 'Создать товар'}
-                                        </Button>
-                                    </DialogFooter>
-                                </form>
-                            </Form>
-                        </DialogContent>
-                    </Dialog>
+                    <AuthorProductModal
+                        open={isProductModalOpen}
+                        onOpenChange={setIsProductModalOpen}
+                        product={modalProduct}
+                        onSubmit={handleProductSubmit}
+                    />
 
-                    {/* Модалка: Редактировать */}
-                    <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Редактировать товар</DialogTitle>
-                                <DialogDescription>Внесите изменения в информацию о товаре</DialogDescription>
-                            </DialogHeader>
-                            <Form {...editProductForm}>
-                                <form
-                                    onSubmit={editProductForm.handleSubmit(handleUpdateProduct)}
-                                    className="space-y-4"
-                                >
-                                    <FormField
-                                        control={editProductForm.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Название товара</FormLabel>
-                                                <FormControl>
-                                                    <Input {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={editProductForm.control}
-                                        name="price"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Цена</FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="number"
-                                                        {...field}
-                                                        onChange={(e) => field.onChange(Number(e.target.value))}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={editProductForm.control}
-                                        name="description"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Описание</FormLabel>
-                                                <FormControl>
-                                                    <Textarea rows={3} {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <DialogFooter>
-                                        <Button type="button" variant="outline" onClick={() => setEditingProduct(null)}>
-                                            Отмена
-                                        </Button>
-                                        <Button type="submit" disabled={loading}>
-                                            {loading ? 'Сохранение...' : 'Сохранить изменения'}
-                                        </Button>
-                                    </DialogFooter>
-                                </form>
-                            </Form>
-                        </DialogContent>
-                    </Dialog>
+                    <DeleteProductDialog
+                        isOpen={isDeleteModalOpen}
+                        productTitle={productToDelete?.title}
+                        loading={loading}
+                        onClose={() => setIsDeleteModalOpen(false)}
+                        onConfirm={handleDeleteProduct}
+                    />
 
-                    {/* Модалка: Удалить */}
-                    <Dialog open={isDeleteModalOpen} onOpenChange={(open) => !open && setIsDeleteModalOpen(false)}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Подтверждение удаления</DialogTitle>
-                                <DialogDescription>
-                                    Вы уверены, что хотите удалить товар "{productToDelete?.title}"? Это действие нельзя
-                                    отменить.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
-                                    Отмена
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    onClick={handleDeleteProduct}
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Удаление...' : 'Удалить'}
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-
-                    {/* Алерт ошибок и успеха */}
                     {error && (
                         <Alert variant="destructive" className="mt-4">
                             <AlertDescription>{error}</AlertDescription>
@@ -454,5 +252,138 @@ export default function AuthorProfileUI({
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+// Локальные компоненты UI
+// TODO: перенести в отдельные файлы если можно переиспользовать
+
+function ProfileTab({
+    form,
+    loading,
+    onSubmit,
+}: {
+    form: UseFormReturn<AuthorProfileFormValues>;
+    loading: boolean;
+    onSubmit: (data: AuthorProfileFormValues) => void;
+}) {
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                    control={form.control}
+                    name="avatar"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Фотография профиля</FormLabel>
+                            <FormControl>
+                                <AvatarUploader value={field.value} onChange={field.onChange} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Имя автора</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ваше имя" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Биография</FormLabel>
+                            <FormControl>
+                                <Textarea placeholder="Расскажите о себе..." rows={4} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <Button type="submit" disabled={loading}>
+                    {loading ? 'Сохранение...' : 'Обновить профиль'}
+                </Button>
+            </form>
+        </Form>
+    );
+}
+
+function ProductsTab({
+    products,
+    onAdd,
+    onEdit,
+    onDelete,
+}: {
+    products: Product[];
+    onAdd: () => void;
+    onEdit: (product: Product) => void;
+    onDelete: (product: Product) => void;
+}) {
+    return (
+        <>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Мои товары</h3>
+                <Button onClick={onAdd}>Добавить товар</Button>
+            </div>
+
+            {products.length === 0 ? (
+                <Card className="p-6 text-center">
+                    <p className="text-muted-foreground">У вас пока нет товаров</p>
+                </Card>
+            ) : (
+                <div className="grid gap-4">
+                    {products.map((product) => (
+                        <AuthorProductCard key={product.id} product={product} onEdit={onEdit} onDelete={onDelete} />
+                    ))}
+                </div>
+            )}
+        </>
+    );
+}
+
+function DeleteProductDialog({
+    isOpen,
+    productTitle,
+    loading,
+    onClose,
+    onConfirm,
+}: {
+    isOpen: boolean;
+    productTitle?: string;
+    loading: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+}) {
+    return (
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Подтверждение удаления</DialogTitle>
+                    <DialogDescription>
+                        Вы уверены, что хотите удалить товар "{productTitle}"? Это действие нельзя отменить.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button type="button" variant="outline" onClick={onClose}>
+                        Отмена
+                    </Button>
+                    <Button type="button" variant="destructive" onClick={onConfirm} disabled={loading}>
+                        {loading ? 'Удаление...' : 'Удалить'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }

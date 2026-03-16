@@ -161,6 +161,11 @@ export class OrderServerService extends BaseServerService {
             }
 
             const productPrice = product.price;
+
+            if (productPrice === null || productPrice === undefined) {
+                throw new Error(`У товара "${product.title}" (ID: ${product.id}) не указана цена`);
+            }
+
             totalOrderSum += productPrice * orderItem.quantity;
 
             payloadItems.push({

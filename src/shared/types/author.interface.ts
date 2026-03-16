@@ -5,10 +5,12 @@ export type IAuthorUpdateInput = Omit<
     'id' | 'slug' | 'user' | 'products_count' | 'product_categories' | 'createdAt' | 'updatedAt'
 >;
 export type IAuthorProductCategory = Exclude<Author['product_categories'], undefined | null>[number];
+export type IAuthorAvatar = IAuthorUpdateInput['avatar'];
 
 export interface AuthorProfileFormValues {
     name: string;
     bio: string;
+    avatar?: IAuthorAvatar;
 }
 
 export interface AuthorProfileUIProps {
