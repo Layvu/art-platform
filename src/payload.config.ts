@@ -5,6 +5,7 @@ import { en } from '@payloadcms/translations/languages/en';
 import { ru } from '@payloadcms/translations/languages/ru';
 import path from 'path';
 import { buildConfig } from 'payload';
+import sharp from 'sharp';
 import { fileURLToPath } from 'url';
 
 import { AuthorsCollection } from '@/collections/authors.collection';
@@ -99,6 +100,10 @@ export default buildConfig({
     },
     cors: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
     csrf: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
+    graphQL: {
+        disable: true,
+    },
+    sharp,
 
     jobs: {
         addParentToTaskLog: true,

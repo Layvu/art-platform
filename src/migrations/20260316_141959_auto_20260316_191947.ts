@@ -1,14 +1,14 @@
 ﻿import { type MigrateDownArgs, type MigrateUpArgs, sql } from '@payloadcms/db-postgres';
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
-    await db.execute(sql`
+  await db.execute(sql`
    CREATE TYPE "public"."_locales" AS ENUM('ru', 'en');
-  CREATE TYPE "public"."enum_products_category" AS ENUM('shoppers', 'clothes', 'trinkets', 'postcards', 'ceramics', 'stickers', 'knitted');
   CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'author', 'customer');
   CREATE TYPE "public"."enum_orders_delivery_type" AS ENUM('pickup', 'delivery');
   CREATE TYPE "public"."enum_orders_cdek_data_type" AS ENUM('pvz', 'courier');
   CREATE TYPE "public"."enum_orders_status" AS ENUM('prepared', 'processing', 'assembled', 'sent', 'delivered', 'completed', 'cancelled');
   CREATE TYPE "public"."enum_orders_payment_status" AS ENUM('pending', 'waiting_for_capture', 'succeeded', 'canceled');
+  CREATE TYPE "public"."enum_invoices_items_condition" AS ENUM('Рќ', 'РЎ', 'Рџ');
   CREATE TYPE "public"."enum_payload_jobs_log_task_slug" AS ENUM('inline', 'cleanupUnverifiedUsers');
   CREATE TYPE "public"."enum_payload_jobs_log_state" AS ENUM('failed', 'succeeded');
   CREATE TYPE "public"."enum_payload_jobs_log_parent_task_slug" AS ENUM('inline', 'cleanupUnverifiedUsers');
@@ -22,12 +22,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   CREATE TABLE "products" (
   	"id" serial PRIMARY KEY NOT NULL,
+  	"article1c" varchar DEFAULT '000001',
   	"title" varchar NOT NULL,
   	"slug" varchar NOT NULL,
-  	"price" numeric NOT NULL,
+  	"price" numeric,
   	"description" varchar,
-  	"characteristics" varchar,
-  	"category" "enum_products_category",
+  	"quantity" numeric DEFAULT 0,
+  	"category_id" integer,
   	"author_id" integer NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -176,6 +177,31 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"sizes_medium_filename" varchar
   );
   
+  CREATE TABLE "categories" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"label" varchar NOT NULL,
+  	"value" varchar NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  );
+  
+  CREATE TABLE "invoices_items" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"order_number" numeric NOT NULL,
+  	"product_id" integer NOT NULL,
+  	"quantity" numeric NOT NULL,
+  	"condition" "enum_invoices_items_condition" DEFAULT 'Рќ' NOT NULL
+  );
+  
+  CREATE TABLE "invoices" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"author_id" integer NOT NULL,
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
+  );
+  
   CREATE TABLE "payload_jobs_log" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
@@ -228,6 +254,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"customers_id" integer,
   	"orders_id" integer,
   	"media_id" integer,
+  	"categories_id" integer,
+  	"invoices_id" integer,
   	"payload_jobs_id" integer
   );
   
@@ -264,6 +292,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   ALTER TABLE "products_gallery" ADD CONSTRAINT "products_gallery_image_id_media_id_fk" FOREIGN KEY ("image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "products_gallery" ADD CONSTRAINT "products_gallery_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "products" ADD CONSTRAINT "products_category_id_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "products" ADD CONSTRAINT "products_author_id_authors_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."authors"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "authors_product_categories" ADD CONSTRAINT "authors_product_categories_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."authors"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "authors" ADD CONSTRAINT "authors_avatar_id_media_id_fk" FOREIGN KEY ("avatar_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
@@ -277,6 +306,9 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "customers" ADD CONSTRAINT "customers_cart_id_carts_id_fk" FOREIGN KEY ("cart_id") REFERENCES "public"."carts"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "orders_items" ADD CONSTRAINT "orders_items_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "invoices_items" ADD CONSTRAINT "invoices_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "invoices_items" ADD CONSTRAINT "invoices_items_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."invoices"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "invoices" ADD CONSTRAINT "invoices_author_id_authors_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."authors"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "payload_jobs_log" ADD CONSTRAINT "payload_jobs_log_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."payload_jobs"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."payload_locked_documents"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_products_fk" FOREIGN KEY ("products_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;
@@ -287,6 +319,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_customers_fk" FOREIGN KEY ("customers_id") REFERENCES "public"."customers"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_orders_fk" FOREIGN KEY ("orders_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_categories_fk" FOREIGN KEY ("categories_id") REFERENCES "public"."categories"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_invoices_fk" FOREIGN KEY ("invoices_id") REFERENCES "public"."invoices"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_payload_jobs_fk" FOREIGN KEY ("payload_jobs_id") REFERENCES "public"."payload_jobs"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_preferences_rels" ADD CONSTRAINT "payload_preferences_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."payload_preferences"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_preferences_rels" ADD CONSTRAINT "payload_preferences_rels_users_fk" FOREIGN KEY ("users_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
@@ -294,6 +328,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "products_gallery_parent_id_idx" ON "products_gallery" USING btree ("_parent_id");
   CREATE INDEX "products_gallery_image_idx" ON "products_gallery" USING btree ("image_id");
   CREATE UNIQUE INDEX "products_slug_idx" ON "products" USING btree ("slug");
+  CREATE INDEX "products_category_idx" ON "products" USING btree ("category_id");
   CREATE INDEX "products_author_idx" ON "products" USING btree ("author_id");
   CREATE INDEX "authors_product_categories_order_idx" ON "authors_product_categories" USING btree ("_order");
   CREATE INDEX "authors_product_categories_parent_id_idx" ON "authors_product_categories" USING btree ("_parent_id");
@@ -322,6 +357,16 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE UNIQUE INDEX "media_filename_idx" ON "media" USING btree ("filename");
   CREATE INDEX "media_sizes_thumbnail_sizes_thumbnail_filename_idx" ON "media" USING btree ("sizes_thumbnail_filename");
   CREATE INDEX "media_sizes_medium_sizes_medium_filename_idx" ON "media" USING btree ("sizes_medium_filename");
+  CREATE UNIQUE INDEX "categories_label_idx" ON "categories" USING btree ("label");
+  CREATE UNIQUE INDEX "categories_value_idx" ON "categories" USING btree ("value");
+  CREATE INDEX "categories_updated_at_idx" ON "categories" USING btree ("updated_at");
+  CREATE INDEX "categories_created_at_idx" ON "categories" USING btree ("created_at");
+  CREATE INDEX "invoices_items_order_idx" ON "invoices_items" USING btree ("_order");
+  CREATE INDEX "invoices_items_parent_id_idx" ON "invoices_items" USING btree ("_parent_id");
+  CREATE INDEX "invoices_items_product_idx" ON "invoices_items" USING btree ("product_id");
+  CREATE INDEX "invoices_author_idx" ON "invoices" USING btree ("author_id");
+  CREATE INDEX "invoices_updated_at_idx" ON "invoices" USING btree ("updated_at");
+  CREATE INDEX "invoices_created_at_idx" ON "invoices" USING btree ("created_at");
   CREATE INDEX "payload_jobs_log_order_idx" ON "payload_jobs_log" USING btree ("_order");
   CREATE INDEX "payload_jobs_log_parent_id_idx" ON "payload_jobs_log" USING btree ("_parent_id");
   CREATE INDEX "payload_jobs_completed_at_idx" ON "payload_jobs" USING btree ("completed_at");
@@ -347,6 +392,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_customers_id_idx" ON "payload_locked_documents_rels" USING btree ("customers_id");
   CREATE INDEX "payload_locked_documents_rels_orders_id_idx" ON "payload_locked_documents_rels" USING btree ("orders_id");
   CREATE INDEX "payload_locked_documents_rels_media_id_idx" ON "payload_locked_documents_rels" USING btree ("media_id");
+  CREATE INDEX "payload_locked_documents_rels_categories_id_idx" ON "payload_locked_documents_rels" USING btree ("categories_id");
+  CREATE INDEX "payload_locked_documents_rels_invoices_id_idx" ON "payload_locked_documents_rels" USING btree ("invoices_id");
   CREATE INDEX "payload_locked_documents_rels_payload_jobs_id_idx" ON "payload_locked_documents_rels" USING btree ("payload_jobs_id");
   CREATE INDEX "payload_preferences_key_idx" ON "payload_preferences" USING btree ("key");
   CREATE INDEX "payload_preferences_updated_at_idx" ON "payload_preferences" USING btree ("updated_at");
@@ -356,11 +403,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_preferences_rels_path_idx" ON "payload_preferences_rels" USING btree ("path");
   CREATE INDEX "payload_preferences_rels_users_id_idx" ON "payload_preferences_rels" USING btree ("users_id");
   CREATE INDEX "payload_migrations_updated_at_idx" ON "payload_migrations" USING btree ("updated_at");
-  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`);
+  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`)
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
-    await db.execute(sql`
+  await db.execute(sql`
    DROP TABLE "products_gallery" CASCADE;
   DROP TABLE "products" CASCADE;
   DROP TABLE "authors_product_categories" CASCADE;
@@ -375,6 +422,9 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "orders_items" CASCADE;
   DROP TABLE "orders" CASCADE;
   DROP TABLE "media" CASCADE;
+  DROP TABLE "categories" CASCADE;
+  DROP TABLE "invoices_items" CASCADE;
+  DROP TABLE "invoices" CASCADE;
   DROP TABLE "payload_jobs_log" CASCADE;
   DROP TABLE "payload_jobs" CASCADE;
   DROP TABLE "payload_locked_documents" CASCADE;
@@ -384,14 +434,14 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "payload_migrations" CASCADE;
   DROP TABLE "payload_jobs_stats" CASCADE;
   DROP TYPE "public"."_locales";
-  DROP TYPE "public"."enum_products_category";
   DROP TYPE "public"."enum_users_role";
   DROP TYPE "public"."enum_orders_delivery_type";
   DROP TYPE "public"."enum_orders_cdek_data_type";
   DROP TYPE "public"."enum_orders_status";
   DROP TYPE "public"."enum_orders_payment_status";
+  DROP TYPE "public"."enum_invoices_items_condition";
   DROP TYPE "public"."enum_payload_jobs_log_task_slug";
   DROP TYPE "public"."enum_payload_jobs_log_state";
   DROP TYPE "public"."enum_payload_jobs_log_parent_task_slug";
-  DROP TYPE "public"."enum_payload_jobs_task_slug";`);
+  DROP TYPE "public"."enum_payload_jobs_task_slug";`)
 }

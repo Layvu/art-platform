@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 
 # Конфиг
 $SshHost = "80.87.102.60"
-$SshUser = "root"
+$SshUser = "artuser"
 $ArchiveName = "deploy.tar.gz"
 
 Write-Host "STARTING DEPLOY..." -ForegroundColor Green
@@ -36,7 +36,7 @@ tar -czf $ArchiveName .next public src package.json pnpm-lock.yaml next.config.t
 # Отправка архива на ВМ
 # Загружаем файл в /root/deploy.tar.gz
 Write-Host "Uploading..." -ForegroundColor Cyan
-scp $ArchiveName "$($SshUser)@$($SshHost):/$($SshUser)/$ArchiveName"
+scp $ArchiveName "$($SshUser)@$($SshHost):/var/app/$ArchiveName"
 
 Write-Host "DONE!" -ForegroundColor Green
 
@@ -70,3 +70,7 @@ Write-Host "DONE!" -ForegroundColor Green
 
 # DKIM
 # nano /etc/opendkim/keys/vm-13380e01.na4u.ru
+
+# User для работы с проектом на ВМ (Для PM2, pnpm, npx, nginx, certbot, ufw, systemctl)
+# Если нужно выполнить какую-то команду в проекте, всегда переключаться на artuser
+# su - artuser
