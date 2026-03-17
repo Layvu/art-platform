@@ -14,7 +14,7 @@ export function Header() {
                 <Image src="/logo.svg" alt="Art Logo" width={86} height={40} priority />
             </Link>
             <Menu />
-            <span style={{ fontSize: '6px' }}>v 1.0.0</span>
+            <span style={{ fontSize: '6px' }}>v 1.0.1</span>
         </header>
     );
 }

@@ -1,7 +1,7 @@
 ﻿import { type MigrateDownArgs, type MigrateUpArgs, sql } from '@payloadcms/db-postgres';
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
-  await db.execute(sql`
+    await db.execute(sql`
    CREATE TYPE "public"."enum_invoices_items_condition" AS ENUM('Рќ', 'РЎ', 'Рџ');
   CREATE TABLE "categories" (
   	"id" serial PRIMARY KEY NOT NULL,
@@ -52,11 +52,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_categories_id_idx" ON "payload_locked_documents_rels" USING btree ("categories_id");
   CREATE INDEX "payload_locked_documents_rels_invoices_id_idx" ON "payload_locked_documents_rels" USING btree ("invoices_id");
   ALTER TABLE "products" DROP COLUMN "category";
-  DROP TYPE "public"."enum_products_category";`)
+  DROP TYPE "public"."enum_products_category";`);
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
-  await db.execute(sql`
+    await db.execute(sql`
    CREATE TYPE "public"."enum_products_category" AS ENUM('shoppers', 'clothes', 'trinkets', 'postcards', 'ceramics', 'stickers', 'knitted');
   ALTER TABLE "categories" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "invoices_items" DISABLE ROW LEVEL SECURITY;
@@ -78,5 +78,5 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   ALTER TABLE "products" DROP COLUMN "category_id";
   ALTER TABLE "payload_locked_documents_rels" DROP COLUMN "categories_id";
   ALTER TABLE "payload_locked_documents_rels" DROP COLUMN "invoices_id";
-  DROP TYPE "public"."enum_invoices_items_condition";`)
+  DROP TYPE "public"."enum_invoices_items_condition";`);
 }

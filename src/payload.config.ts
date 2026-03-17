@@ -94,6 +94,9 @@ export default buildConfig({
     typescript: {
         outputFile: path.resolve(dirname, 'shared/types/payload-types.ts'),
     },
+    graphQL: {
+        disable: true,
+    },
     cors: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
     csrf: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
 
