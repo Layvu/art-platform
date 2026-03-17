@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 
 import { useAuthStore } from '@/services/store/auth/store';
 
+import CartButton from './CartButton';
 import type { IMenuItem } from './menu.data';
 
-interface IMenuItemProps {
+export interface IMenuItemProps {
     menuItem: IMenuItem;
     isActive: boolean;
 }
@@ -36,8 +37,12 @@ export function MenuItem({ menuItem, isActive }: IMenuItemProps) {
         );
     }
 
+    if (menuItem.name === 'Корзина') {
+        return <CartButton menuItem={menuItem} isActive={isActive} />;
+    }
+
     return (
-        <Link href={menuItem.href} className={`${isActive ? 'text-red' : 'text-black'} hover:underline`}>
+        <Link href={menuItem.href} className={`${isActive ? 'text-red' : 'text-zinc-900'} hover:underline`}>
             {menuItem.name}
         </Link>
     );
