@@ -100,9 +100,6 @@ export default buildConfig({
     },
     cors: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
     csrf: [process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'].filter(Boolean),
-    graphQL: {
-        disable: true,
-    },
     sharp,
 
     jobs: {

@@ -1,6 +1,4 @@
 {
-  "id": "218b5009-7d9a-4d8d-a3ae-29b7225998c5",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2012,6 +2010,53 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.payload_kv": {
+      "name": "payload_kv",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "payload_kv_key_idx": {
+          "name": "payload_kv_key_idx",
+          "columns": [
+            {
+              "expression": "key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.payload_jobs_log": {
       "name": "payload_jobs_log",
       "schema": "",
@@ -2557,12 +2602,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "payload_jobs_id": {
-          "name": "payload_jobs_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -2760,21 +2799,6 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "payload_locked_documents_rels_payload_jobs_id_idx": {
-          "name": "payload_locked_documents_rels_payload_jobs_id_idx",
-          "columns": [
-            {
-              "expression": "payload_jobs_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
         }
       },
       "foreignKeys": {
@@ -2914,19 +2938,6 @@
           "tableTo": "invoices",
           "columnsFrom": [
             "invoices_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_payload_jobs_fk": {
-          "name": "payload_locked_documents_rels_payload_jobs_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "payload_jobs",
-          "columnsFrom": [
-            "payload_jobs_id"
           ],
           "columnsTo": [
             "id"
@@ -3385,5 +3396,7 @@
     "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "3458c8f0-7d2c-4b2e-9802-1f875dcccbbc",
+  "prevId": "00000000-0000-0000-0000-000000000000"
 }

@@ -74,3 +74,8 @@ Write-Host "DONE!" -ForegroundColor Green
 # User для работы с проектом на ВМ (Для PM2, pnpm, npx, nginx, certbot, ufw, systemctl)
 # Если нужно выполнить какую-то команду в проекте, всегда переключаться на artuser
 # su - artuser
+
+# Выключение ВМ, если CPU > 90% в течении 30 мин
+# bash /usr/local/bin/check_highcpu.sh
+# Логи:
+# journalctl -xe | grep "High CPU"
