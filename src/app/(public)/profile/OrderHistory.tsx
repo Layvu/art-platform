@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { Timer } from '@/components/shared/Timer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
@@ -23,6 +24,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
     const router = useRouter();
 
     const [orders, setOrders] = useState<Order[]>([]);
+    const [isPaymentExpired, setIsPaymentExpired] = useState(false);
     const [loading, setLoading] = useState(true);
 
     // Собираем все уникальные productId из всех заказов
@@ -233,8 +235,17 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                                 </Button>
                             )}
 
-                            {showPayLink && (
-                                <div className="mt-4">
+                            {showPayLink && !isPaymentExpired && (
+                                <div className="mt-4 space-y-2">
+                                    <p className="text-sm">По истечению времени оплата будет автоматически отменена:</p>
+                                    <p className="text-sm">
+                                        <Timer
+                                            startTime={order.createdAt}
+                                            durationMinutes={10}
+                                            expiredText="Время на оплату истекло"
+                                            onExpire={() => setIsPaymentExpired(true)}
+                                        />
+                                    </p>
                                     <a
                                         href={paymentLink}
                                         target="_blank"

@@ -5,7 +5,7 @@ import { PAGES } from '@/config/public-pages.config';
 import { COLLECTION_SLUGS, HTTP_METHODS } from '@/shared/constants/constants';
 import { ORDER_STATUS } from '@/shared/constants/order.constants';
 import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
-import type { IOrderCreatePayloadData, IOrderCreateRequest } from '@/shared/types/order.interface';
+import type { IOrderCreatePayloadData, IOrderCreateRequest, IOrderItems } from '@/shared/types/order.interface';
 import type { Order } from '@/shared/types/payload-types';
 import type { IYookassaPaymentResponse, PaymentStatusType } from '@/shared/types/yookassa.interface';
 import { isOrderFinished, isOrderInDelivery } from '@/shared/utils/orders.utils';
@@ -15,6 +15,13 @@ import { apiUrl } from '../api-url-builder';
 import { BaseServerService } from './base-server.service';
 import { payloadDataService } from './payload-data.service';
 import { yookassaService } from './yookassa.service';
+
+export const STOCK_ADJUSTMENT = {
+    DECREMENT: 'decrement',
+    INCREMENT: 'increment',
+} as const;
+
+type StockAdjustmentType = (typeof STOCK_ADJUSTMENT)[keyof typeof STOCK_ADJUSTMENT];
 
 export class OrderServerService extends BaseServerService {
     async createOrderWithPayment(
@@ -28,6 +35,9 @@ export class OrderServerService extends BaseServerService {
 
         // Создание в БД (Status: Prepared, Payment: Pending)
         const newOrder = await this.createOrderInDb(preparedData);
+
+        // Уменьшаем количество товара в наличии сразу при оформлении
+        await this.adjustStock(preparedData.items, STOCK_ADJUSTMENT.DECREMENT);
 
         // Создание платежа в ЮКассе
         const payment = await yookassaService.createPayment({
@@ -77,6 +87,7 @@ export class OrderServerService extends BaseServerService {
         if (!order || !order.paymentId) {
             throw new Error('Заказ не найден');
         }
+        if (order.paymentStatus === PAYMENT_STATUS.CANCELED) return;
 
         // Проверяем статус заказа
         if (isUserAction) {
@@ -96,12 +107,22 @@ export class OrderServerService extends BaseServerService {
             status: ORDER_STATUS.CANCELLED,
             paymentStatus: PAYMENT_STATUS.CANCELED,
         });
+
+        // Возврат товаров на склад
+        await this.adjustStock(order.items, STOCK_ADJUSTMENT.INCREMENT);
     }
 
     async processWebhookUpdate(orderId: string, yookassaStatus: string): Promise<void> {
         const payload = await getPayload({ config: configPromise });
 
         const paymentStatus = yookassaStatus as PaymentStatusType;
+
+        const order = await payload.findByID({
+            collection: COLLECTION_SLUGS.ORDERS,
+            id: orderId,
+        });
+
+        if (order.paymentStatus === paymentStatus) return;
 
         // Здесь мы меняем только paymentStatus, а хук коллекции Orders обновит статус заказа (Status)
         // Источник правды - PaymentStatus
@@ -113,6 +134,11 @@ export class OrderServerService extends BaseServerService {
                 paymentStatus: paymentStatus,
             },
         });
+
+        // Если пришла отмена от ЮКассы и заказ не был отменен до этого - возвращаем на склад
+        if (paymentStatus === PAYMENT_STATUS.CANCELED && order.paymentStatus !== PAYMENT_STATUS.CANCELED) {
+            await this.adjustStock(order.items, STOCK_ADJUSTMENT.INCREMENT);
+        }
     }
 
     private async createOrderInDb(orderData: IOrderCreatePayloadData): Promise<Order> {
@@ -162,8 +188,9 @@ export class OrderServerService extends BaseServerService {
 
             const productPrice = product.price;
 
-            if (productPrice === null || productPrice === undefined) {
-                throw new Error(`У товара "${product.title}" (ID: ${product.id}) не указана цена`);
+            // Блокируем заказ товаров с нулевой или неуказанной ценой
+            if (productPrice === null || productPrice === undefined || productPrice === 0) {
+                throw new Error(`У товара "${product.title}" не указана цена`);
             }
 
             totalOrderSum += productPrice * orderItem.quantity;
@@ -205,6 +232,31 @@ export class OrderServerService extends BaseServerService {
         const data = await response.json();
 
         return data;
+    }
+
+    async adjustStock(items: IOrderItems, type: StockAdjustmentType): Promise<void> {
+        const payload = await getPayload({ config: configPromise });
+
+        for (const item of items) {
+            const productId = item.productSnapshot.productId;
+
+            const product = await payload.findByID({
+                collection: COLLECTION_SLUGS.PRODUCTS,
+                id: productId,
+                overrideAccess: true, // для cancelExpiredOrders
+            });
+
+            const currentQuantity = product.quantity || 0;
+            const adjustment = type === STOCK_ADJUSTMENT.DECREMENT ? -item.quantity : item.quantity;
+            const newQuantity = Math.max(0, currentQuantity + adjustment);
+
+            await payload.update({
+                collection: COLLECTION_SLUGS.PRODUCTS,
+                id: productId,
+                data: { quantity: newQuantity },
+                overrideAccess: true,
+            });
+        }
     }
 }
 

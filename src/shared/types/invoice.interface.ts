@@ -16,3 +16,9 @@ export interface AuthorInvoiceManagerProps {
     products: Product[];
     latestInvoice: Invoice | null;
 }
+
+export const INVOICE_ITEM_CONDITION = {
+    NEW: 'Н',
+    OLD: 'С',
+    REVALUATION: 'П',
+} as const;

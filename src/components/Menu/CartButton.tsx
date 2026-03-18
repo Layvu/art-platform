@@ -16,9 +16,7 @@ export default function CartButton({ menuItem, isActive }: IMenuItemProps) {
     const itemsCount = cart?.items?.length ?? 0;
 
     return (
-        <Link
-            href={menuItem.href}
-        >
+        <Link href={menuItem.href}>
             <div className="p-2 relative w-fit cursor-pointer">
                 <ShoppingBasket size={24} className={`${isActive ? 'text-orange-400' : 'text-zinc-900'}`} />
 

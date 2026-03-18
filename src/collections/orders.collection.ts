@@ -181,6 +181,7 @@ export const OrdersCollection: CollectionConfig = {
             // Единственное редактируемое поле
             name: 'status',
             type: 'select',
+            index: true,
             label: 'Статус заказа',
             options: [
                 { value: ORDER_STATUS.PREPARED, label: 'Ожидает оплаты' },

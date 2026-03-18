@@ -41,8 +41,10 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
     const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
+    const isAvailable = price && price > 0;
 
     const images = gallery?.map((galleryItem) => galleryItem.image).filter((image) => isImageData(image)) || [];
+
     return (
         <div className="wrap mt-8 grid grid-cols-12 gap-x-10 h-[617px] overflow-hidden mb-20">
             <div className="col-span-7">
@@ -52,6 +54,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
             <div className="col-span-5 ">
                 <div className="flex flex-col gap-8 mb-26">
                     <h2 className=" font-semibold text-[32px] leading-10 ">{title}</h2>
+
                     {productInCart ? (
                         <div className="flex w-full gap-1 items-center justify-center bg-linear-to-l from-orange-400 to-orange-500 text-white rounded">
                             <Button className="p-0" onClick={() => decrease(id)} variant="empty">
@@ -63,11 +66,17 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                             </Button>
                         </div>
                     ) : (
-                        <Button className="w-full rounded" variant="default" onClick={() => addItem(id)}>
-                            {price} ₽
+                        <Button
+                            className="w-full rounded cursor-pointer"
+                            variant="default"
+                            onClick={() => addItem(id)}
+                            disabled={!isAvailable}
+                        >
+                            {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
                         </Button>
                     )}
                 </div>
+
                 <div className="flex flex-col gap-10">
                     {description && (
                         <div className="flex flex-col gap-3">

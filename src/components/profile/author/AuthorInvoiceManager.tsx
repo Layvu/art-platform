@@ -12,19 +12,37 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiUrl } from '@/services/api/api-url-builder';
 import { authorClientService } from '@/services/api/client/author-client.service';
-import type { AuthorInvoiceManagerProps, IInvoiceItemKey, IInvoiceItems } from '@/shared/types/invoice.interface';
+import {
+    type AuthorInvoiceManagerProps,
+    type IInvoiceItemKey,
+    type IInvoiceItems,
+    INVOICE_ITEM_CONDITION,
+} from '@/shared/types/invoice.interface';
 import type { Product } from '@/shared/types/payload-types';
+
+const INVOICE_FIELDS = {
+    QUANTITY: 'quantity',
+    PRICE: 'price',
+    CONDITION: 'condition',
+} as const;
+
+const CONDITION_LABELS = {
+    [INVOICE_ITEM_CONDITION.NEW]: 'Новый (Н)',
+    [INVOICE_ITEM_CONDITION.OLD]: 'Старый (С)',
+    [INVOICE_ITEM_CONDITION.REVALUATION]: 'Переоценка (П)',
+};
 
 export default function AuthorInvoiceManager({ authorId, products, latestInvoice }: AuthorInvoiceManagerProps) {
     const router = useRouter();
 
     // Если есть последняя накладная, загружаем её товары, иначе пустой массив
     const [invoiceItems, setInvoiceItems] = useState<IInvoiceItems>(
-        latestInvoice?.items.map((invoice) => ({
-            orderNumber: invoice.orderNumber,
-            product: invoice.product,
-            quantity: invoice.quantity,
-            condition: invoice.condition,
+        latestInvoice?.items.map((item) => ({
+            orderNumber: item.orderNumber,
+            product: item.product,
+            quantity: item.quantity,
+            price: item.price ?? (item.product as Product).price ?? 0,
+            condition: item.condition,
         })) || [],
     );
 
@@ -35,7 +53,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
     const [success, setSuccess] = useState('');
 
     const filteredProductsByTitleAndArticle = useMemo(() => {
-        if (searchQuery.trim() === '') return [];
+        if (!searchQuery.trim()) return [];
         const query = searchQuery.toLowerCase();
         return products.filter(
             (p) => p.title.toLowerCase().includes(query) || (p.article1C && p.article1C.toLowerCase().includes(query)),
@@ -54,13 +72,19 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
             return;
         }
 
+        // TODO: enum и const статусов НСП
+        const price = product.price || 0;
+        // Если цена есть, значит старый
+        const condition = price > 0 ? INVOICE_ITEM_CONDITION.OLD : INVOICE_ITEM_CONDITION.NEW;
+
         setInvoiceItems((prev) => [
             ...prev,
             {
                 orderNumber: prev.length + 1,
                 product,
-                quantity: 1,
-                condition: 'Н', // По умолчанию всегда Новый
+                quantity: 0,
+                condition,
+                price,
             },
         ]);
 
@@ -75,7 +99,23 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
 
     const handleItemChange = (productId: number, field: IInvoiceItemKey, value: string | number) => {
         setInvoiceItems((prev) =>
-            prev.map((item) => ((item.product as Product).id === productId ? { ...item, [field]: value } : item)),
+            prev.map((item) => {
+                const product = item.product as Product;
+                if (product.id === productId) {
+                    const updatedItem = { ...item, [field]: value };
+
+                    if (field === INVOICE_FIELDS.CONDITION) {
+                        if (value === INVOICE_ITEM_CONDITION.REVALUATION) {
+                            updatedItem.quantity = product.quantity || 0;
+                        } else if (value === INVOICE_ITEM_CONDITION.OLD) {
+                            updatedItem.price = product.price || 0;
+                        }
+                    }
+
+                    return updatedItem;
+                }
+                return item;
+            }),
         );
         clearMessages();
     };
@@ -122,8 +162,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
     const handleStartNew = () => {
         setInvoiceItems([]);
         setSavedInvoiceId(null);
-        setSuccess('');
-        setError('');
+        clearMessages();
     };
 
     const handleDownload = () => {
@@ -149,41 +188,76 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                 <TableBody>
                     {invoiceItems.map((item, index) => {
                         const product = item.product as Product;
+                        const hasInitialPrice = (product.price ?? 0) > 0;
+
+                        // Логика блокировок
+                        const isPriceDisabled = item.condition === INVOICE_ITEM_CONDITION.OLD;
+                        const isQuantityDisabled = item.condition === INVOICE_ITEM_CONDITION.REVALUATION;
+
+                        // Формирование списка доступных условий
+                        const conditionsToShow = Object.values(INVOICE_ITEM_CONDITION).filter((cond) => {
+                            if (!hasInitialPrice) {
+                                return cond === INVOICE_ITEM_CONDITION.NEW;
+                            } else {
+                                return cond !== INVOICE_ITEM_CONDITION.NEW;
+                            }
+                        });
+
                         return (
                             <TableRow key={product.id}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>{product.article1C || '000001'}</TableCell>
                                 <TableCell className="font-medium">{product.title}</TableCell>
+
                                 <TableCell>
                                     <Input
                                         type="number"
-                                        min={1}
+                                        min={0}
                                         value={item.quantity}
+                                        disabled={isQuantityDisabled}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value, 10);
-                                            handleItemChange(product.id, 'quantity', isNaN(val) || val < 1 ? 1 : val);
+                                            handleItemChange(product.id, INVOICE_FIELDS.QUANTITY, val);
                                         }}
-                                        className="w-20"
+                                        className={`w-20 ${isQuantityDisabled ? 'bg-muted cursor-not-allowed' : ''}`}
                                     />
                                 </TableCell>
+
                                 <TableCell>
                                     <Select
                                         value={item.condition}
-                                        onValueChange={(val: 'Н' | 'С' | 'П') =>
-                                            handleItemChange(product.id, 'condition', val)
+                                        disabled={!hasInitialPrice}
+                                        onValueChange={(val) =>
+                                            handleItemChange(product.id, INVOICE_FIELDS.CONDITION, val)
                                         }
                                     >
                                         <SelectTrigger>
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Н">Новый (Н)</SelectItem>
-                                            <SelectItem value="С">Старый (С)</SelectItem>
-                                            <SelectItem value="П">Переоценка (П)</SelectItem>
+                                            {conditionsToShow.map((condition) => (
+                                                <SelectItem key={condition} value={condition}>
+                                                    {CONDITION_LABELS[condition]}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
-                                <TableCell>{product.price} ₽</TableCell>
+
+                                <TableCell>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={item.price ?? 0}
+                                        disabled={isPriceDisabled}
+                                        onChange={(e) => {
+                                            const val = parseFloat(e.target.value);
+                                            handleItemChange(product.id, INVOICE_FIELDS.PRICE, val);
+                                        }}
+                                        className={`w-24 ${isPriceDisabled ? 'bg-muted cursor-not-allowed' : ''}`}
+                                    />
+                                </TableCell>
+
                                 <TableCell>
                                     <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(product.id)}>
                                         <Trash2 className="w-4 h-4 text-destructive" />
@@ -241,11 +315,6 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                         ))}
                     </div>
                 )}
-                {searchQuery && filteredProductsByTitleAndArticle.length === 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-md p-3 text-center text-sm text-muted-foreground">
-                        Ничего не найдено
-                    </div>
-                )}
             </div>
 
             {invoiceItems.length > 0 ? (
@@ -274,17 +343,11 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                 <Button variant="default" onClick={handleSaveInvoice} disabled={invoiceItems.length === 0 || loading}>
                     {loading ? 'Сохранение...' : savedInvoiceId ? 'Обновить накладную' : 'Сохранить накладную'}
                 </Button>
-
                 <Button variant="secondary" onClick={handleDownload} disabled={!savedInvoiceId}>
                     <Download className="w-4 h-4 mr-2" />
                     Скачать Word (.docx)
                 </Button>
             </div>
-            {!savedInvoiceId && invoiceItems.length > 0 && (
-                <p className="text-xs text-right text-muted-foreground mt-2">
-                    *Для скачивания документа необходимо сначала сохранить накладную
-                </p>
-            )}
         </div>
     );
 }

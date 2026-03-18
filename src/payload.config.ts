@@ -20,6 +20,7 @@ import { UsersCollection } from '@/collections/users.collection';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
 import { InvoicesCollection } from './collections/invoices.collection';
+import { cancelExpiredOrders } from './jobs/cancelExpiredOrders';
 import { cleanupUnverifiedUsers } from './jobs/cleanupUnverifiedUsers';
 
 const filename = fileURLToPath(import.meta.url);
@@ -104,7 +105,7 @@ export default buildConfig({
 
     jobs: {
         addParentToTaskLog: true,
-        tasks: [cleanupUnverifiedUsers],
+        tasks: [cleanupUnverifiedUsers, cancelExpiredOrders],
         autoRun: [
             {
                 cron: '* * * * *', // каждую минуту

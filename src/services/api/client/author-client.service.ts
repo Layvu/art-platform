@@ -77,6 +77,7 @@ export class AuthorClientService {
                 orderNumber: index + 1,
                 product: isProductData(item.product) ? item.product.id : item.product,
                 quantity: item.quantity,
+                price: item.price,
                 condition: item.condition,
             })),
         };
@@ -101,6 +102,7 @@ export class AuthorClientService {
                 orderNumber: item.orderNumber,
                 product: isProductData(item.product) ? item.product.id : item.product,
                 quantity: item.quantity,
+                price: item.price,
                 condition: item.condition,
             })),
         };

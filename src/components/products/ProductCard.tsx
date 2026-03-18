@@ -29,6 +29,8 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
 
     const mainImage = gallery && isImageData(gallery[0]?.image) ? gallery[0].image : '';
 
+    const isAvailable = price && price > 0;
+
     return (
         <Card className="max-w-[294px]">
             <CardHeader className="flex flex-1 aspect-square relative items-center">
@@ -38,8 +40,6 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                         src={mainImage.url || ''}
                         width={262}
                         height={262}
-                        // fill
-
                         className="object-contain flex-1 "
                         priority
                     />
@@ -71,9 +71,6 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                     </CardDescription>
                 </div>
                 <CardAction className="w-full">
-                    {/* <Button variant="outline" asChild>
-                        <Link href={PAGES.PRODUCT(slug)}>Подробнее</Link>
-                    </Button> */}
                     {productInCart ? (
                         <div className="flex w-full gap-1 items-center justify-center bg-linear-to-l from-orange-400 to-orange-500 text-white rounded">
                             <Button className="p-0" onClick={() => decrease(id)} variant="empty">
@@ -85,8 +82,13 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                             </Button>
                         </div>
                     ) : (
-                        <Button className="w-full rounded" variant="default" onClick={() => addItem(id)}>
-                            {price} ₽
+                        <Button
+                            className="w-full rounded"
+                            variant="default"
+                            onClick={() => addItem(id)}
+                            disabled={!isAvailable}
+                        >
+                            {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
                         </Button>
                     )}
                 </CardAction>
