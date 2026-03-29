@@ -8,14 +8,10 @@ export interface IMenuItem {
 }
 
 export const MENU: IMenuItem[] = [
-    {
-        href: PAGES.HOME,
-        name: 'Главная',
-    },
-    {
-        href: PAGES.ABOUT,
-        name: 'О нас',
-    },
+    // {
+    //     href: PAGES.HOME,
+    //     name: 'Главная',
+    // },
     {
         href: PAGES.PRODUCTS,
         name: 'Товары',
@@ -25,27 +21,31 @@ export const MENU: IMenuItem[] = [
         name: 'Авторы',
     },
     {
-        href: PAGES.CART,
-        name: 'Корзина',
+        href: PAGES.ABOUT,
+        name: 'О нас',
     },
-    {
-        href: PAGES.LOGIN,
-        name: 'Вход',
-        guestOnly: true,
-    },
-    {
-        href: PAGES.REGISTER,
-        name: 'Регистрация',
-        guestOnly: true,
-    },
-    {
-        href: PAGES.PROFILE,
-        name: 'Личный кабинет',
-        requiresAuth: true,
-    },
-    {
-        href: '#',
-        name: 'Выход',
-        requiresAuth: true,
-    },
+    // {
+    //     href: PAGES.CART,
+    //     name: 'Корзина',
+    // },
+    // {
+    //     href: PAGES.LOGIN,
+    //     name: 'Вход',
+    //     guestOnly: true,
+    // },
+    // {
+    //     href: PAGES.REGISTER,
+    //     name: 'Регистрация',
+    //     guestOnly: true,
+    // },
+    // {
+    //     href: PAGES.PROFILE,
+    //     name: 'Личный кабинет',
+    //     requiresAuth: true,
+    // },
+    // {
+    //     href: '#',
+    //     name: 'Выход',
+    //     requiresAuth: true,
+    // },
 ];

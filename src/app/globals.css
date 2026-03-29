@@ -43,9 +43,15 @@
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
+
+    --color-my-accent: var(--my-accent);
+    --color-my-secondary-background: var(--my-secondary-background);
 }
 
 :root {
+    --my-accent: #01959D;
+    --my-secondary-background: #EAF8F9;
+
     --radius: 0.625rem;
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);

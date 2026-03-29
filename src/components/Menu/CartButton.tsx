@@ -9,16 +9,16 @@ import { useCartStore } from '@/services/store/cart/store';
 
 import { Badge } from '../ui/badge';
 
-import type { IMenuItemProps } from './MenuItem';
+import { PAGES } from '@/config/public-pages.config';
 
-export default function CartButton({ menuItem, isActive }: IMenuItemProps) {
+export default function CartButton({ isActive }: {isActive: boolean}) {
     const { cart } = useCartStore();
     const itemsCount = cart?.items?.length ?? 0;
-
+    const href= PAGES.CART;
     return (
-        <Link href={menuItem.href}>
+        <Link href={href}>
             <div className="p-2 relative w-fit cursor-pointer">
-                <ShoppingBasket size={24} className={`${isActive ? 'text-orange-400' : 'text-zinc-900'}`} />
+                <ShoppingBasket strokeWidth={1.5} size={24} className={`${isActive && 'text-my-accent'}`} />
 
                 {itemsCount > 0 && (
                     <Badge
