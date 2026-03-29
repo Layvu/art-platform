@@ -13,937 +13,938 @@
  * via the `definition` "supportedTimezones".
  */
 export type SupportedTimezones =
-    | 'Pacific/Midway'
-    | 'Pacific/Niue'
-    | 'Pacific/Honolulu'
-    | 'Pacific/Rarotonga'
-    | 'America/Anchorage'
-    | 'Pacific/Gambier'
-    | 'America/Los_Angeles'
-    | 'America/Tijuana'
-    | 'America/Denver'
-    | 'America/Phoenix'
-    | 'America/Chicago'
-    | 'America/Guatemala'
-    | 'America/New_York'
-    | 'America/Bogota'
-    | 'America/Caracas'
-    | 'America/Santiago'
-    | 'America/Buenos_Aires'
-    | 'America/Sao_Paulo'
-    | 'Atlantic/South_Georgia'
-    | 'Atlantic/Azores'
-    | 'Atlantic/Cape_Verde'
-    | 'Europe/London'
-    | 'Europe/Berlin'
-    | 'Africa/Lagos'
-    | 'Europe/Athens'
-    | 'Africa/Cairo'
-    | 'Europe/Moscow'
-    | 'Asia/Riyadh'
-    | 'Asia/Dubai'
-    | 'Asia/Baku'
-    | 'Asia/Karachi'
-    | 'Asia/Tashkent'
-    | 'Asia/Calcutta'
-    | 'Asia/Dhaka'
-    | 'Asia/Almaty'
-    | 'Asia/Jakarta'
-    | 'Asia/Bangkok'
-    | 'Asia/Shanghai'
-    | 'Asia/Singapore'
-    | 'Asia/Tokyo'
-    | 'Asia/Seoul'
-    | 'Australia/Brisbane'
-    | 'Australia/Sydney'
-    | 'Pacific/Guam'
-    | 'Pacific/Noumea'
-    | 'Pacific/Auckland'
-    | 'Pacific/Fiji';
+  | 'Pacific/Midway'
+  | 'Pacific/Niue'
+  | 'Pacific/Honolulu'
+  | 'Pacific/Rarotonga'
+  | 'America/Anchorage'
+  | 'Pacific/Gambier'
+  | 'America/Los_Angeles'
+  | 'America/Tijuana'
+  | 'America/Denver'
+  | 'America/Phoenix'
+  | 'America/Chicago'
+  | 'America/Guatemala'
+  | 'America/New_York'
+  | 'America/Bogota'
+  | 'America/Caracas'
+  | 'America/Santiago'
+  | 'America/Buenos_Aires'
+  | 'America/Sao_Paulo'
+  | 'Atlantic/South_Georgia'
+  | 'Atlantic/Azores'
+  | 'Atlantic/Cape_Verde'
+  | 'Europe/London'
+  | 'Europe/Berlin'
+  | 'Africa/Lagos'
+  | 'Europe/Athens'
+  | 'Africa/Cairo'
+  | 'Europe/Moscow'
+  | 'Asia/Riyadh'
+  | 'Asia/Dubai'
+  | 'Asia/Baku'
+  | 'Asia/Karachi'
+  | 'Asia/Tashkent'
+  | 'Asia/Calcutta'
+  | 'Asia/Dhaka'
+  | 'Asia/Almaty'
+  | 'Asia/Jakarta'
+  | 'Asia/Bangkok'
+  | 'Asia/Shanghai'
+  | 'Asia/Singapore'
+  | 'Asia/Tokyo'
+  | 'Asia/Seoul'
+  | 'Australia/Brisbane'
+  | 'Australia/Sydney'
+  | 'Pacific/Guam'
+  | 'Pacific/Noumea'
+  | 'Pacific/Auckland'
+  | 'Pacific/Fiji';
 
 export interface Config {
-    auth: {
-        users: UserAuthOperations;
+  auth: {
+    users: UserAuthOperations;
+  };
+  blocks: {};
+  collections: {
+    products: Product;
+    authors: Author;
+    users: User;
+    forms: Form;
+    carts: Cart;
+    customers: Customer;
+    orders: Order;
+    media: Media;
+    categories: Category;
+    invoices: Invoice;
+    'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
+    'payload-locked-documents': PayloadLockedDocument;
+    'payload-preferences': PayloadPreference;
+    'payload-migrations': PayloadMigration;
+  };
+  collectionsJoins: {};
+  collectionsSelect: {
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
+    forms: FormsSelect<false> | FormsSelect<true>;
+    carts: CartsSelect<false> | CartsSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    invoices: InvoicesSelect<false> | InvoicesSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
+    'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
+    'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
+    'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
+  };
+  db: {
+    defaultIDType: number;
+  };
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('ru' | 'en') | ('ru' | 'en')[];
+  globals: {
+    'payload-jobs-stats': PayloadJobsStat;
+  };
+  globalsSelect: {
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
+  };
+  locale: 'ru' | 'en';
+  user: User;
+  jobs: {
+    tasks: {
+      cleanupUnverifiedUsers: TaskCleanupUnverifiedUsers;
+      cancelExpiredOrders: TaskCancelExpiredOrders;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
     };
-    blocks: {};
-    collections: {
-        products: Product;
-        authors: Author;
-        users: User;
-        forms: Form;
-        carts: Cart;
-        customers: Customer;
-        orders: Order;
-        media: Media;
-        categories: Category;
-        invoices: Invoice;
-        'payload-kv': PayloadKv;
-        'payload-jobs': PayloadJob;
-        'payload-locked-documents': PayloadLockedDocument;
-        'payload-preferences': PayloadPreference;
-        'payload-migrations': PayloadMigration;
-    };
-    collectionsJoins: {};
-    collectionsSelect: {
-        products: ProductsSelect<false> | ProductsSelect<true>;
-        authors: AuthorsSelect<false> | AuthorsSelect<true>;
-        users: UsersSelect<false> | UsersSelect<true>;
-        forms: FormsSelect<false> | FormsSelect<true>;
-        carts: CartsSelect<false> | CartsSelect<true>;
-        customers: CustomersSelect<false> | CustomersSelect<true>;
-        orders: OrdersSelect<false> | OrdersSelect<true>;
-        media: MediaSelect<false> | MediaSelect<true>;
-        categories: CategoriesSelect<false> | CategoriesSelect<true>;
-        invoices: InvoicesSelect<false> | InvoicesSelect<true>;
-        'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-        'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
-        'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
-        'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
-        'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
-    };
-    db: {
-        defaultIDType: number;
-    };
-    fallbackLocale: ('false' | 'none' | 'null') | false | null | ('ru' | 'en') | ('ru' | 'en')[];
-    globals: {
-        'payload-jobs-stats': PayloadJobsStat;
-    };
-    globalsSelect: {
-        'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
-    };
-    locale: 'ru' | 'en';
-    user: User;
-    jobs: {
-        tasks: {
-            cleanupUnverifiedUsers: TaskCleanupUnverifiedUsers;
-            cancelExpiredOrders: TaskCancelExpiredOrders;
-            inline: {
-                input: unknown;
-                output: unknown;
-            };
-        };
-        workflows: unknown;
-    };
+    workflows: unknown;
+  };
 }
 export interface UserAuthOperations {
-    forgotPassword: {
-        email: string;
-        password: string;
-    };
-    login: {
-        email: string;
-        password: string;
-    };
-    registerFirstUser: {
-        email: string;
-        password: string;
-    };
-    unlock: {
-        email: string;
-        password: string;
-    };
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
-    id: number;
-    article1C?: string | null;
-    title: string;
-    slug: string;
-    price?: number | null;
-    description?: string | null;
-    gallery?:
-        | {
-              image?: (number | null) | Media;
-              id?: string | null;
-          }[]
-        | null;
-    quantity?: number | null;
-    category?: (number | null) | Category;
-    author: number | Author;
-    createdAt: string;
-    updatedAt: string;
+  id: number;
+  article1C?: string | null;
+  title: string;
+  slug: string;
+  price?: number | null;
+  description?: string | null;
+  gallery?:
+    | {
+        image?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  quantity?: number | null;
+  category?: (number | null) | Category;
+  author: number | Author;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-    id: number;
-    createdAt: string;
-    updatedAt: string;
-    url?: string | null;
-    thumbnailURL?: string | null;
-    filename?: string | null;
-    mimeType?: string | null;
-    filesize?: number | null;
-    width?: number | null;
-    height?: number | null;
-    focalX?: number | null;
-    focalY?: number | null;
-    sizes?: {
-        thumbnail?: {
-            url?: string | null;
-            width?: number | null;
-            height?: number | null;
-            mimeType?: string | null;
-            filesize?: number | null;
-            filename?: string | null;
-        };
-        medium?: {
-            url?: string | null;
-            width?: number | null;
-            height?: number | null;
-            mimeType?: string | null;
-            filesize?: number | null;
-            filename?: string | null;
-        };
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
     };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
-    id: number;
-    label: string;
-    value: string;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  label: string;
+  value: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors".
  */
 export interface Author {
-    id: number;
-    name?: string | null;
-    slug?: string | null;
-    bio?: string | null;
-    avatar?: (number | null) | Media;
-    products_count?: number | null;
-    product_categories?:
-        | {
-              category?: string | null;
-              id?: string | null;
-          }[]
-        | null;
-    user?: (number | null) | User;
-    createdAt: string;
-    updatedAt: string;
+  id: number;
+  name?: string | null;
+  slug?: string | null;
+  bio?: string | null;
+  avatar?: (number | null) | Media;
+  products_count?: number | null;
+  product_categories?:
+    | {
+        category?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  user?: (number | null) | User;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-    id: number;
-    role?: ('admin' | 'author' | 'customer') | null;
-    createdAt: string;
-    updatedAt: string;
-    email: string;
-    resetPasswordToken?: string | null;
-    resetPasswordExpiration?: string | null;
-    salt?: string | null;
-    hash?: string | null;
-    _verified?: boolean | null;
-    _verificationToken?: string | null;
-    loginAttempts?: number | null;
-    lockUntil?: string | null;
-    sessions?:
-        | {
-              id: string;
-              createdAt?: string | null;
-              expiresAt: string;
-          }[]
-        | null;
-    password?: string | null;
-    collection: 'users';
+  id: number;
+  role?: ('admin' | 'author' | 'customer') | null;
+  createdAt: string;
+  updatedAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
 export interface Form {
-    id: number;
-    content: string;
-    createdAt: string;
-    updatedAt: string;
+  id: number;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts".
  */
 export interface Cart {
-    id: number;
-    owner: number | Customer;
-    items?:
-        | {
-              product: number | Product;
-              quantity: number;
-              checked?: boolean | null;
-              id?: string | null;
-          }[]
-        | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  owner: number | Customer;
+  items?:
+    | {
+        product: number | Product;
+        quantity: number;
+        checked?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customers".
  */
 export interface Customer {
-    id: number;
-    email: string;
-    user: number | User;
-    fullName?: string | null;
-    phone?: string | null;
-    addresses?:
-        | {
-              label?: string | null;
-              addressLine: string;
-              city: string;
-              postalCode: string;
-              id?: string | null;
-          }[]
-        | null;
-    cart?: (number | null) | Cart;
-    createdAt: string;
-    updatedAt: string;
+  id: number;
+  email: string;
+  user: number | User;
+  fullName?: string | null;
+  phone?: string | null;
+  addresses?:
+    | {
+        label?: string | null;
+        addressLine: string;
+        city: string;
+        postalCode: string;
+        id?: string | null;
+      }[]
+    | null;
+  cart?: (number | null) | Cart;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders".
  */
 export interface Order {
-    id: number;
-    orderNumber?: string | null;
-    customer: number | Customer;
-    items: {
-        productSnapshot: {
-            productId: number;
-            title: string;
-            price: number;
-        };
-        quantity: number;
-        id?: string | null;
-    }[];
-    deliveryType: 'pickup' | 'delivery';
-    cdekData?: {
-        type?: ('pvz' | 'courier') | null;
-        address: string;
-        code?: string | null;
+  id: number;
+  orderNumber?: string | null;
+  customer: number | Customer;
+  items: {
+    productSnapshot: {
+      productId: number;
+      title: string;
+      price: number;
     };
-    customerDetails?: string | null;
-    /**
-     * Заполняется после отправки заказа
-     */
-    trackingNumber?: string | null;
-    comment?: string | null;
-    status: 'prepared' | 'processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled';
-    /**
-     * Статус обновляется периодически. Актуальное значение можно узнать в ЮКассе
-     */
-    paymentStatus?: ('pending' | 'waiting_for_capture' | 'succeeded' | 'canceled') | null;
-    paymentId?: string | null;
-    paymentLink?: string | null;
-    total: number;
-    createdAt: string;
-    updatedAt: string;
+    quantity: number;
+    id?: string | null;
+  }[];
+  deliveryType: 'pickup' | 'delivery';
+  cdekData?: {
+    type?: ('pvz' | 'courier') | null;
+    address: string;
+    code?: string | null;
+  };
+  customerDetails?: string | null;
+  /**
+   * Заполняется после отправки заказа
+   */
+  trackingNumber?: string | null;
+  comment?: string | null;
+  status: 'prepared' | 'processing' | 'assembled' | 'sent' | 'delivered' | 'completed' | 'cancelled';
+  /**
+   * Статус обновляется периодически. Актуальное значение можно узнать в ЮКассе
+   */
+  paymentStatus?: ('pending' | 'waiting_for_capture' | 'succeeded' | 'canceled') | null;
+  paymentId?: string | null;
+  paymentLink?: string | null;
+  total: number;
+  createdAt: string;
+  updatedAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoices".
  */
 export interface Invoice {
-    id: number;
-    /**
-     * При установке галочки цена и количество товаров будут отображены на сайте
-     */
-    isConfirmed?: boolean | null;
-    author: number | Author;
-    items: {
-        orderNumber: number;
-        product: number | Product;
-        quantity: number;
-        price: number;
-        condition: 'Н' | 'С' | 'П';
-        id?: string | null;
-    }[];
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  /**
+   * При установке галочки цена и количество товаров будут отображены на сайте
+   */
+  isConfirmed?: boolean | null;
+  author: number | Author;
+  items: {
+    orderNumber: number;
+    product: number | Product;
+    quantity: number;
+    price: number;
+    condition: 'Н' | 'С' | 'П';
+    id?: string | null;
+  }[];
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-    id: number;
-    key: string;
-    data:
-        | {
-              [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-    id: number;
-    /**
-     * Input data provided to the job
-     */
-    input?:
-        | {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'cleanupUnverifiedUsers' | 'cancelExpiredOrders';
+        taskID: string;
+        input?:
+          | {
               [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    taskStatus?:
-        | {
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
               [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    completedAt?: string | null;
-    totalTried?: number | null;
-    /**
-     * If hasError is true this job will not be retried
-     */
-    hasError?: boolean | null;
-    /**
-     * If hasError is true, this is the error that caused it
-     */
-    error?:
-        | {
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
               [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    /**
-     * Task execution log
-     */
-    log?:
-        | {
-              executedAt: string;
-              completedAt: string;
-              taskSlug: 'inline' | 'cleanupUnverifiedUsers' | 'cancelExpiredOrders';
-              taskID: string;
-              input?:
-                  | {
-                        [k: string]: unknown;
-                    }
-                  | unknown[]
-                  | string
-                  | number
-                  | boolean
-                  | null;
-              output?:
-                  | {
-                        [k: string]: unknown;
-                    }
-                  | unknown[]
-                  | string
-                  | number
-                  | boolean
-                  | null;
-              state: 'failed' | 'succeeded';
-              error?:
-                  | {
-                        [k: string]: unknown;
-                    }
-                  | unknown[]
-                  | string
-                  | number
-                  | boolean
-                  | null;
-              parent?: {
-                  taskSlug?: ('inline' | 'cleanupUnverifiedUsers' | 'cancelExpiredOrders') | null;
-                  taskID?: string | null;
-              };
-              id?: string | null;
-          }[]
-        | null;
-    taskSlug?: ('inline' | 'cleanupUnverifiedUsers' | 'cancelExpiredOrders') | null;
-    queue?: string | null;
-    waitUntil?: string | null;
-    processing?: boolean | null;
-    meta?:
-        | {
-              [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    updatedAt: string;
-    createdAt: string;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        parent?: {
+          taskSlug?: ('inline' | 'cleanupUnverifiedUsers' | 'cancelExpiredOrders') | null;
+          taskID?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'cleanupUnverifiedUsers' | 'cancelExpiredOrders') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-    id: number;
-    document?:
-        | ({
-              relationTo: 'products';
-              value: number | Product;
-          } | null)
-        | ({
-              relationTo: 'authors';
-              value: number | Author;
-          } | null)
-        | ({
-              relationTo: 'users';
-              value: number | User;
-          } | null)
-        | ({
-              relationTo: 'forms';
-              value: number | Form;
-          } | null)
-        | ({
-              relationTo: 'carts';
-              value: number | Cart;
-          } | null)
-        | ({
-              relationTo: 'customers';
-              value: number | Customer;
-          } | null)
-        | ({
-              relationTo: 'orders';
-              value: number | Order;
-          } | null)
-        | ({
-              relationTo: 'media';
-              value: number | Media;
-          } | null)
-        | ({
-              relationTo: 'categories';
-              value: number | Category;
-          } | null)
-        | ({
-              relationTo: 'invoices';
-              value: number | Invoice;
-          } | null);
-    globalSlug?: string | null;
-    user: {
+  id: number;
+  document?:
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'authors';
+        value: number | Author;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
-    };
-    updatedAt: string;
-    createdAt: string;
+      } | null)
+    | ({
+        relationTo: 'forms';
+        value: number | Form;
+      } | null)
+    | ({
+        relationTo: 'carts';
+        value: number | Cart;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'invoices';
+        value: number | Invoice;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-    id: number;
-    user: {
-        relationTo: 'users';
-        value: number | User;
-    };
-    key?: string | null;
-    value?:
-        | {
-              [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-    id: number;
-    name?: string | null;
-    batch?: number | null;
-    updatedAt: string;
-    createdAt: string;
+  id: number;
+  name?: string | null;
+  batch?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-    article1C?: T;
-    title?: T;
-    slug?: T;
-    price?: T;
-    description?: T;
-    gallery?:
-        | T
-        | {
-              image?: T;
-              id?: T;
-          };
-    quantity?: T;
-    category?: T;
-    author?: T;
-    createdAt?: T;
-    updatedAt?: T;
+  article1C?: T;
+  title?: T;
+  slug?: T;
+  price?: T;
+  description?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  quantity?: T;
+  category?: T;
+  author?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "authors_select".
  */
 export interface AuthorsSelect<T extends boolean = true> {
-    name?: T;
-    slug?: T;
-    bio?: T;
-    avatar?: T;
-    products_count?: T;
-    product_categories?:
-        | T
-        | {
-              category?: T;
-              id?: T;
-          };
-    user?: T;
-    createdAt?: T;
-    updatedAt?: T;
+  name?: T;
+  slug?: T;
+  bio?: T;
+  avatar?: T;
+  products_count?: T;
+  product_categories?:
+    | T
+    | {
+        category?: T;
+        id?: T;
+      };
+  user?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-    role?: T;
-    createdAt?: T;
-    updatedAt?: T;
-    email?: T;
-    resetPasswordToken?: T;
-    resetPasswordExpiration?: T;
-    salt?: T;
-    hash?: T;
-    _verified?: T;
-    _verificationToken?: T;
-    loginAttempts?: T;
-    lockUntil?: T;
-    sessions?:
-        | T
-        | {
-              id?: T;
-              createdAt?: T;
-              expiresAt?: T;
-          };
+  role?: T;
+  createdAt?: T;
+  updatedAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  _verified?: T;
+  _verificationToken?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
-    content?: T;
-    createdAt?: T;
-    updatedAt?: T;
+  content?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "carts_select".
  */
 export interface CartsSelect<T extends boolean = true> {
-    owner?: T;
-    items?:
-        | T
-        | {
-              product?: T;
-              quantity?: T;
-              checked?: T;
-              id?: T;
-          };
-    updatedAt?: T;
-    createdAt?: T;
+  owner?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        quantity?: T;
+        checked?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "customers_select".
  */
 export interface CustomersSelect<T extends boolean = true> {
-    email?: T;
-    user?: T;
-    fullName?: T;
-    phone?: T;
-    addresses?:
-        | T
-        | {
-              label?: T;
-              addressLine?: T;
-              city?: T;
-              postalCode?: T;
-              id?: T;
-          };
-    cart?: T;
-    createdAt?: T;
-    updatedAt?: T;
+  email?: T;
+  user?: T;
+  fullName?: T;
+  phone?: T;
+  addresses?:
+    | T
+    | {
+        label?: T;
+        addressLine?: T;
+        city?: T;
+        postalCode?: T;
+        id?: T;
+      };
+  cart?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orders_select".
  */
 export interface OrdersSelect<T extends boolean = true> {
-    orderNumber?: T;
-    customer?: T;
-    items?:
-        | T
-        | {
-              productSnapshot?:
-                  | T
-                  | {
-                        productId?: T;
-                        title?: T;
-                        price?: T;
-                    };
-              quantity?: T;
-              id?: T;
-          };
-    deliveryType?: T;
-    cdekData?:
-        | T
-        | {
-              type?: T;
-              address?: T;
-              code?: T;
-          };
-    customerDetails?: T;
-    trackingNumber?: T;
-    comment?: T;
-    status?: T;
-    paymentStatus?: T;
-    paymentId?: T;
-    paymentLink?: T;
-    total?: T;
-    createdAt?: T;
-    updatedAt?: T;
+  orderNumber?: T;
+  customer?: T;
+  items?:
+    | T
+    | {
+        productSnapshot?:
+          | T
+          | {
+              productId?: T;
+              title?: T;
+              price?: T;
+            };
+        quantity?: T;
+        id?: T;
+      };
+  deliveryType?: T;
+  cdekData?:
+    | T
+    | {
+        type?: T;
+        address?: T;
+        code?: T;
+      };
+  customerDetails?: T;
+  trackingNumber?: T;
+  comment?: T;
+  status?: T;
+  paymentStatus?: T;
+  paymentId?: T;
+  paymentLink?: T;
+  total?: T;
+  createdAt?: T;
+  updatedAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-    createdAt?: T;
-    updatedAt?: T;
-    url?: T;
-    thumbnailURL?: T;
-    filename?: T;
-    mimeType?: T;
-    filesize?: T;
-    width?: T;
-    height?: T;
-    focalX?: T;
-    focalY?: T;
-    sizes?:
-        | T
-        | {
-              thumbnail?:
-                  | T
-                  | {
-                        url?: T;
-                        width?: T;
-                        height?: T;
-                        mimeType?: T;
-                        filesize?: T;
-                        filename?: T;
-                    };
-              medium?:
-                  | T
-                  | {
-                        url?: T;
-                        width?: T;
-                        height?: T;
-                        mimeType?: T;
-                        filesize?: T;
-                        filename?: T;
-                    };
-          };
+  createdAt?: T;
+  updatedAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
-    label?: T;
-    value?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  label?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "invoices_select".
  */
 export interface InvoicesSelect<T extends boolean = true> {
-    isConfirmed?: T;
-    author?: T;
-    items?:
-        | T
-        | {
-              orderNumber?: T;
-              product?: T;
-              quantity?: T;
-              price?: T;
-              condition?: T;
-              id?: T;
-          };
-    updatedAt?: T;
-    createdAt?: T;
+  isConfirmed?: T;
+  author?: T;
+  items?:
+    | T
+    | {
+        orderNumber?: T;
+        product?: T;
+        quantity?: T;
+        price?: T;
+        condition?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
-    key?: T;
-    data?: T;
+  key?: T;
+  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
-    input?: T;
-    taskStatus?: T;
-    completedAt?: T;
-    totalTried?: T;
-    hasError?: T;
-    error?: T;
-    log?:
-        | T
-        | {
-              executedAt?: T;
-              completedAt?: T;
+  input?: T;
+  taskStatus?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        parent?:
+          | T
+          | {
               taskSlug?: T;
               taskID?: T;
-              input?: T;
-              output?: T;
-              state?: T;
-              error?: T;
-              parent?:
-                  | T
-                  | {
-                        taskSlug?: T;
-                        taskID?: T;
-                    };
-              id?: T;
-          };
-    taskSlug?: T;
-    queue?: T;
-    waitUntil?: T;
-    processing?: T;
-    meta?: T;
-    updatedAt?: T;
-    createdAt?: T;
+            };
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processing?: T;
+  meta?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
-    document?: T;
-    globalSlug?: T;
-    user?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  document?: T;
+  globalSlug?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-preferences_select".
  */
 export interface PayloadPreferencesSelect<T extends boolean = true> {
-    user?: T;
-    key?: T;
-    value?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  user?: T;
+  key?: T;
+  value?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-migrations_select".
  */
 export interface PayloadMigrationsSelect<T extends boolean = true> {
-    name?: T;
-    batch?: T;
-    updatedAt?: T;
-    createdAt?: T;
+  name?: T;
+  batch?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
 export interface PayloadJobsStat {
-    id: number;
-    stats?:
-        | {
-              [k: string]: unknown;
-          }
-        | unknown[]
-        | string
-        | number
-        | boolean
-        | null;
-    updatedAt?: string | null;
-    createdAt?: string | null;
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats_select".
  */
 export interface PayloadJobsStatsSelect<T extends boolean = true> {
-    stats?: T;
-    updatedAt?: T;
-    createdAt?: T;
-    globalType?: T;
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCleanupUnverifiedUsers".
  */
 export interface TaskCleanupUnverifiedUsers {
-    input?: unknown;
-    output: {
-        deletedUsersCount: number;
-        deletedCustomersCount: number;
-    };
+  input?: unknown;
+  output: {
+    deletedUsersCount: number;
+    deletedCustomersCount: number;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskCancelExpiredOrders".
  */
 export interface TaskCancelExpiredOrders {
-    input?: unknown;
-    output?: unknown;
+  input?: unknown;
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
-    [k: string]: unknown;
+  [k: string]: unknown;
 }
 
+
 declare module 'payload' {
-    export interface GeneratedTypes extends Config {}
+  export interface GeneratedTypes extends Config {}
 }
