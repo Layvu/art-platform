@@ -3,6 +3,14 @@
 @import 'slick-carousel/slick/slick.css';
 @import 'slick-carousel/slick/slick-theme.css';
 
+@font-face {
+    font-family: 'Wix Madefor Display';
+    src: url('../styles/fonts/WixMadeforDisplay-VariableFont_wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
