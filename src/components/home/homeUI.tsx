@@ -28,7 +28,7 @@ export default function HomeUI() {
                         <Link href="/products">Показать все</Link>
                     </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-6 md:grid-cols-9 lg:grid-cols-12 ">
                     {products?.docs?.map((product) => (
                         <ProductCard key={product.id} {...product} />
                     ))}

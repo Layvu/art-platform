@@ -9,7 +9,7 @@
     font-weight: 100 900;
     font-style: normal;
     font-display: swap;
-  }
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -56,6 +56,7 @@
     --color-my-primary: var(--my-primary);
     --color-my-secondary: var(--my-secondary);
     --color-my-disabled: var(--my-disabled);
+    --color-my-tertriary: var(--my-tertriary);
 
     --color-my-secondary-background: var(--my-secondary-background);
     --color-my-accent-hover: var(--my-accent-hover);
@@ -71,20 +72,21 @@
 
 :root {
     --my-primary: #111827;
-    --my-secondary: #4B5563;
-    --my-accent: #01959D;
-    --my-disabled: #9CA3AF;
+    --my-secondary: #4b5563;
+    --my-accent: #01959d;
+    --my-disabled: #9ca3af;
+    --my-tertriary: #6b7280;
+    
+    --my-accent-hover: #01959d;
+    --my-secondary-background: #eaf8f9;
 
-    --my-accent-hover: #01959D;
-    --my-secondary-background: #EAF8F9;
+    --my-button-primary-default: #01aab3;
+    --my-button-primary-hover: #01959D;
+    --my-button-primary-disabled: #d1d5db;
 
-    --my-button-primary-default: #01AAB3;
-    --my-button-primary-hover: #01AAB3;
-    --my-button-primary-disabled: #D1D5DB;
-
-    --my-button-secondary-default: #EAF8F9;
-    --my-button-secondary-hover: #EAF8F9;
-    --my-button-secondary-disabled: #F3F4F6;
+    --my-button-secondary-default: #eaf8f9;
+    --my-button-secondary-hover: #eaf8f9;
+    --my-button-secondary-disabled: #f3f4f6;
 
     --radius: 0.625rem;
     --card: oklch(1 0 0);

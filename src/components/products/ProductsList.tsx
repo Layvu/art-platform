@@ -9,6 +9,7 @@ import type { ProductsQueryParams } from '@/shared/types/query-params.type';
 import { Button } from '../ui/button';
 
 import ProductCard from './ProductCard';
+import { cn } from '@/shared/utils/tailwind';
 
 type ProductListProps = {
     initialParams: ProductsQueryParams;
@@ -37,7 +38,7 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
 
     return (
         <>
-            <div className={`card-list ${isPlaceholderData && 'opacity-50'}`}>
+            <div className={cn('grid grid-cols-12 gap-6 auto-rows-fr', isPlaceholderData && 'opacity-50')}>
                 {products?.map((product) => (
                     <ProductCard key={product.id} {...product} />
                 ))}
