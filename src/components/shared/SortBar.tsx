@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { ArrowDownUp, ChevronDownIcon, ChevronUpIcon, X } from 'lucide-react';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -15,6 +15,16 @@ type SortBarProps<T extends string> = {
 export default function SortBar<T extends string>({ sort, options, onSortChange }: SortBarProps<T>) {
     const [open, setOpen] = React.useState(false);
 
+    const isActive = !!sort;
+
+    const onResetClick = (e: React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onSortChange(undefined);
+        setOpen(false);
+    };
+
+    console.log(sort);
     return (
         <Select
             value={sort ?? 'default'}
@@ -23,16 +33,22 @@ export default function SortBar<T extends string>({ sort, options, onSortChange 
             onOpenChange={setOpen}
         >
             <SelectTrigger>
-                <Button variant="secondary">
+                <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
+                    <ArrowDownUp />
                     <SelectValue placeholder="По умолчанию" />
-                    {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                      {isActive && (
+                        <Button variant="default" size="icon" className="rounded-full w-6 h-6" onPointerDown={onResetClick}>
+                            <X />
+                        </Button>
+                    )}
+                    {/* {open ? <ChevronUpIcon /> : <ChevronDownIcon />} */}
                 </Button>
             </SelectTrigger>
 
             <SelectContent>
                 {/* <SelectItem value="default">По умолчанию</SelectItem> */}
                 {options.map((s) => (
-                    <SelectItem key={s.value} value={s.value}>
+                    <SelectItem key={s.value} value={s.value} className=''>
                         {s.label}
                     </SelectItem>
                 ))}

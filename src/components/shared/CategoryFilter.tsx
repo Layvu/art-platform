@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -26,6 +26,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     const { data, isError, error, isPlaceholderData, isFetching } = useFetchCategories();
     const categories = data?.docs || [];
 
+    const isActive = !!category;
     const onSaveClick = () => {
         onCategoryChange(
             newCategories?.length ? newCategories.join(URL_SEPARATOR) : undefined, // чтобы убрать параметр из URL
@@ -33,7 +34,8 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
         setOpen(false);
     };
 
-    const onResetClick = () => {
+    const onResetClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setNewCategories([]);
         onCategoryChange(undefined);
         setOpen(false);
@@ -42,10 +44,14 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="secondary">
-                    Категория:
-                    {/* {currentCategories.length ? 'есть' : 'нет'}  */}
-                    {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
+                    Категория
+                    {/* {open ? <ChevronUpIcon /> : <ChevronDownIcon />} */}
+                    {isActive && (
+                        <Button variant="default" size="icon" className="rounded-full w-6 h-6" onClick={onResetClick}>
+                            <X />
+                        </Button>
+                    )}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start" side="bottom" avoidCollisions={false}>
@@ -94,16 +100,16 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                     </CommandList>
                 </Command>
                 <div className="mt-4 flex gap-5">
-                    <Button onClick={onSaveClick} className="flex-1" disabled={!newCategories.length}>
-                        Применить
-                    </Button>
                     <Button
                         onClick={onResetClick}
                         className="flex-1"
-                        variant="outline"
+                        variant="secondary"
                         disabled={!newCategories.length}
                     >
-                        Сбросить все
+                        Сбросить
+                    </Button>
+                    <Button onClick={onSaveClick} className="flex-1" disabled={!newCategories.length}>
+                        Применить
                     </Button>
                 </div>
             </PopoverContent>

@@ -36,7 +36,7 @@ export function Header() {
         }
     };
     return (
-        <header className="flex items-center justify-between p-4 wrap">
+        <header className="flex items-center justify-between py-4 mb-8 wrap">
             <Link href={PAGES.HOME} className="flex items-center gap-2">
                 <Image src="/logo.svg" alt="Minto Logo" width={80} height={40} priority />
             </Link>

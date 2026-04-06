@@ -12,6 +12,7 @@ interface FiltersBarShellProps {
     onSearchChange: (value: string) => void;
     searchPlaceholder?: string;
     children: ReactNode;
+    sortBar?: ReactNode;
 }
 
 export function FiltersBarShell({
@@ -19,6 +20,7 @@ export function FiltersBarShell({
     onSearchChange,
     searchPlaceholder = 'Поиск',
     children,
+    sortBar,
 }: FiltersBarShellProps) {
     const [searchValue, setSearchValue] = useState(search || '');
 
@@ -33,10 +35,10 @@ export function FiltersBarShell({
     };
 
     return (
-        <div className="flex items-start gap-6 mb-9">
+        <div className="flex items-start gap-3 mb-6">
+            <div className="flex gap-3">{children}</div>
             <SearchBar value={searchValue} onChange={handleSearchChange} placeholder={searchPlaceholder} />
-
-            <div className="flex gap-2">{children}</div>
+            <div className="">{sortBar}</div>
         </div>
     );
 }

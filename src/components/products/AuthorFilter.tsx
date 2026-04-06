@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 import { Label } from '@radix-ui/react-label';
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -31,13 +31,16 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
     const authors = data?.docs;
     const filteredAuthors = authors?.filter((author) => author.name?.toLowerCase().includes(search.toLowerCase()));
 
+    const isActive = !!initialAuthor;
+
     const onSaveClick = () => {
         if (!selectedAuthor) return;
         onAuthorChange(selectedAuthor);
         setOpen(false);
     };
 
-    const onResetClick = () => {
+    const onResetClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setSelectedAuthor(undefined);
         onAuthorChange(undefined);
         setOpen(false);
@@ -46,9 +49,14 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="secondary">
+            <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
                     Автор
-                    {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                    {isActive && (
+                        <Button variant="default" size="icon" className="rounded-full w-6 h-6" onClick={onResetClick}>
+                            <X />
+                        </Button>
+                    )}
+                    {/* {open ? <ChevronUpIcon /> : <ChevronDownIcon />} */}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
@@ -106,11 +114,11 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
                     </CommandList>
                 </Command>
                 <div className="mt-4 flex gap-5">
+                    <Button onClick={onResetClick} className="flex-1" variant="secondary" disabled={!selectedAuthor}>
+                        Сбросить
+                    </Button>
                     <Button disabled={!selectedAuthor} type="submit" className="flex-1" onClick={onSaveClick}>
                         Применить
-                    </Button>
-                    <Button onClick={onResetClick} className="flex-1" variant="outline" disabled={!selectedAuthor}>
-                        Сбросить все
                     </Button>
                 </div>
             </PopoverContent>

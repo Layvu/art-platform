@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 import { Label } from '@radix-ui/react-label';
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { ChevronDownIcon, ChevronUpIcon, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -23,12 +23,15 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
     const [priceFromValue, setPriceFromValue] = useState(priceFrom);
     const [priceToValue, setPriceToValue] = useState(priceTo);
 
+    const isActive = priceFrom || priceTo;
+
     const onSaveClick = () => {
         onPriceChange(priceFromValue, priceToValue);
         setOpen(false);
     };
 
-    const onResetClick = () => {
+    const onResetClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         setPriceFromValue(undefined);
         setPriceToValue(undefined);
         onPriceChange(undefined, undefined);
@@ -38,9 +41,14 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="secondary">
+                <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
                     Цена
-                    {open ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                    {isActive && (
+                        <Button variant="default" size="icon" className="rounded-full w-6 h-6" onClick={onResetClick}>
+                            <X />
+                        </Button>
+                    )}
+                    {/* {open ? <ChevronUpIcon /> : <ChevronDownIcon />} */}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 p-4" align="start">
@@ -52,6 +60,7 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
                             value={priceFromValue}
                             onChange={(e) => setPriceFromValue(Number(e.target.value))}
                         />
+
                         <Input
                             type="number"
                             placeholder="до"
@@ -59,7 +68,7 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
                             onChange={(e) => setPriceToValue(Number(e.target.value))}
                         />
                     </div>
-                    <RadioGroup
+                    {/* <RadioGroup
                         value={priceToValue?.toString()}
                         onValueChange={(price) => setPriceToValue(Number(price))}
                     >
@@ -75,23 +84,23 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
                             <RadioGroupItem value="1000" id="r3" />
                             <Label htmlFor="r3">До 1000 Р</Label>
                         </div>
-                    </RadioGroup>
+                    </RadioGroup> */}
 
                     <div className="flex gap-5">
+                        <Button
+                            onClick={onResetClick}
+                            className="flex-1"
+                            variant="secondary"
+                            disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
+                        >
+                            Сбросить
+                        </Button>
                         <Button
                             className="flex-1"
                             onClick={onSaveClick}
                             disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
                         >
                             Применить
-                        </Button>
-                        <Button
-                            onClick={onResetClick}
-                            className="flex-1"
-                            variant="outline"
-                            disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
-                        >
-                            Сбросить все
                         </Button>
                     </div>
                 </div>

@@ -12,20 +12,25 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    'bg-gradient-to-l from-orange-400 to-orange-500 text-primary-foreground hover:bg-primary/90 hover:from-orange-500 hover:to-orange-500',
+                    'bg-my-button-primary-default text-white hover:bg-button-primary-hover disabled:my-button-primary-disabled',
                 destructive:
                     'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
                 outline: 'border-2 border-orange-400 text-orange-400 [&:active]:bg-orange-50 hover:text-orange-500',
-                secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+                //secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+                secondary: 'bg-my-button-secondary-default text-my-accent hover:my-button-secondary-hover disabled:my-button-secondary-disabled',
+
                 ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
                 empty: '',
                 link: 'text-primary underline-offset-4 hover:underline',
+
+                filter: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-3xl',
+                activeFilter: 'text-white bg-my-accent hover:bg-my-accent-hover rounded-3xl',
             },
             size: {
-                default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+                default: 'h-9 px-4 py-2', // has-[svg]:pr-2
                 sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
                 lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
-                icon: 'size-9',
+                icon: 'size-8',
             },
         },
         defaultVariants: {

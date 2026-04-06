@@ -26,7 +26,11 @@ export default function ProductFiltersBar({
     showAuthorFilter = true,
 }: IProductFiltersBarProps) {
     return (
-        <FiltersBarShell search={filters.search} onSearchChange={(search) => onFilterChange({ ...filters, search })}>
+        <FiltersBarShell
+            search={filters.search}
+            onSearchChange={(search) => onFilterChange({ ...filters, search })}
+            sortBar={<SortBar sort={sort} onSortChange={onSortChange} options={PRODUCTS_SORT_OPTIONS} />}
+        >
             <PriceFilter
                 priceFrom={filters.priceFrom}
                 priceTo={filters.priceTo}
@@ -34,17 +38,16 @@ export default function ProductFiltersBar({
                     onFilterChange({ ...filters, priceFrom: priceFrom, priceTo: priceTo })
                 }
             />
-            <CategoryFilter
-                category={filters?.category}
-                onCategoryChange={(category) => onFilterChange({ ...filters, category })}
-            />
             {showAuthorFilter && (
                 <AuthorFilter
                     initialAuthor={filters.authors}
                     onAuthorChange={(author) => onFilterChange({ ...filters, authors: author })}
                 />
             )}
-            <SortBar sort={sort} onSortChange={onSortChange} options={PRODUCTS_SORT_OPTIONS} />
+            <CategoryFilter
+                category={filters?.category}
+                onCategoryChange={(category) => onFilterChange({ ...filters, category })}
+            />
         </FiltersBarShell>
     );
 }

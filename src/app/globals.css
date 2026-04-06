@@ -53,12 +53,38 @@
     --radius-xl: calc(var(--radius) + 4px);
 
     --color-my-accent: var(--my-accent);
+    --color-my-primary: var(--my-primary);
+    --color-my-secondary: var(--my-secondary);
+    --color-my-disabled: var(--my-disabled);
+
     --color-my-secondary-background: var(--my-secondary-background);
+    --color-my-accent-hover: var(--my-accent-hover);
+
+    --color-my-button-primary-default: var(--my-button-primary-default);
+    --color-my-button-primary-hover: var(--my-button-primary-hover);
+    --color-my-button-primary-disabled: var(--my-button-primary-disabled);
+
+    --color-my-button-secondary-default: var(--my-button-secondary-default);
+    --color-my-button-secondary-hover: var(--my-button-secondary-hover);
+    --color-my-button-secondary-disabled: var(--my-button-secondary-disabled);
 }
 
 :root {
+    --my-primary: #111827;
+    --my-secondary: #4B5563;
     --my-accent: #01959D;
+    --my-disabled: #9CA3AF;
+
+    --my-accent-hover: #01959D;
     --my-secondary-background: #EAF8F9;
+
+    --my-button-primary-default: #01AAB3;
+    --my-button-primary-hover: #01AAB3;
+    --my-button-primary-disabled: #D1D5DB;
+
+    --my-button-secondary-default: #EAF8F9;
+    --my-button-secondary-hover: #EAF8F9;
+    --my-button-secondary-disabled: #F3F4F6;
 
     --radius: 0.625rem;
     --card: oklch(1 0 0);
