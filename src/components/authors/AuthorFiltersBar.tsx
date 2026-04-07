@@ -16,15 +16,16 @@ interface IAuthorFiltersBarProps {
 
 export default function AuthorsFiltersBar({ filters, sort, onFilterChange, onSortChange }: IAuthorFiltersBarProps) {
     return (
-        <FiltersBarShell search={filters.search} onSearchChange={(search) => onFilterChange({ ...filters, search })}>
+        <FiltersBarShell
+            search={filters.search}
+            onSearchChange={(search) => onFilterChange({ ...filters, search })}
+            sortBar={<SortBar sort={sort} onSortChange={onSortChange} options={AUTHORS_SORT_OPTIONS} />}
+        >
             {/* Категории */}
             <CategoryFilter
                 category={filters?.category}
                 onCategoryChange={(category) => onFilterChange({ ...filters, category })}
             />
-
-            {/* Сортировка */}
-            <SortBar sort={sort} onSortChange={onSortChange} options={AUTHORS_SORT_OPTIONS} />
         </FiltersBarShell>
     );
 }

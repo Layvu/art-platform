@@ -223,6 +223,8 @@ export interface Author {
   slug?: string | null;
   bio?: string | null;
   avatar?: (number | null) | Media;
+  cover?: (number | null) | Media;
+  externalLink?: string | null;
   products_count?: number | null;
   product_categories?:
     | {
@@ -617,6 +619,8 @@ export interface AuthorsSelect<T extends boolean = true> {
   slug?: T;
   bio?: T;
   avatar?: T;
+  cover?: T;
+  externalLink?: T;
   products_count?: T;
   product_categories?:
     | T

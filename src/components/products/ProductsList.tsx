@@ -11,6 +11,8 @@ import { Button } from '../ui/button';
 
 import ProductCard from './ProductCard';
 import { cn } from '@/shared/utils/tailwind';
+import { getPageNumbers } from '@/shared/utils/getPageNumbers';
+import { t } from '@payloadcms/translations';
 
 type ProductListProps = {
     initialParams: ProductsQueryParams;
@@ -37,23 +39,7 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
 
     const { hasNextPage = false, hasPrevPage = false, prevPage, nextPage, totalPages = 1 } = data;
 
-    const getPageNumbers = () => {
-        const delta = 2;
-        const pages: (number | string)[] = [];
-        
-        for (let i = 1; i <= totalPages; i++) {
-            if (
-                i === 1 || 
-                i === totalPages || 
-                (i >= page - delta && i <= page + delta) 
-            ) {
-                pages.push(i);
-            } else if (pages[pages.length - 1] !== '...') {
-                pages.push('...');
-            }
-        }
-        return pages;
-    };
+
 
     return (
         <>
@@ -65,7 +51,7 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
             {products.length === 0 ? (
                 <div className="text-2xl font-semibold text-center">Ничего не нашлось.</div>
             ) : (
-                <div className="flex gap-2 justify-center items-center mt-10">
+                <div className="flex gap-2 justify-center items-center mt-8">
                     {/* Кнопка "Назад" */}
                     <Button
                         variant="ghost"
@@ -78,7 +64,7 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
                     </Button>
 
                     {/* Номера страниц */}
-                    {getPageNumbers().map((pageNum, idx) => (
+                    {getPageNumbers(totalPages, page).map((pageNum, idx) => (
                         typeof pageNum === 'number' ? (
                             <Button
                                 key={idx}

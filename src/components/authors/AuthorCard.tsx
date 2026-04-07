@@ -25,26 +25,23 @@ export default function AuthorCard({ name, slug, avatar }: Author) {
                 }, 300))
             }
             onMouseLeave={() => timerRef.current && clearTimeout(timerRef.current)}
-        >
-            <div className="flex flex-1 aspect-square relative items-center ">
-                {avatar ? (
+            className='hover:outline-4 hover:outline-[#D8F2F3] outline-0 outline-offset-0'
+            >
+            <Link href={PAGES.AUTHOR(slug!)} className='flex flex-col gap-3'>
+                <div className="flex flex-1 aspect-square relative items-center rounded-md overflow-hidden">
                     <Image
                         alt="Картинка"
-                        src={isImageData(avatar) ? (avatar?.url ? avatar.url : '') : ''}
+                        src={isImageData(avatar) ? (avatar?.url ? avatar.url : '/placeholder.png') : '/placeholder.png'}
                         fill
-                        className="object-cover rounded-md"
+                        className="object-cover "
                         priority
                     />
-                ) : null}
-            </div>
+                </div>
 
-            <CardContent className="flex flex-col gap-2">
-                <CardTitle>
-                    <Link href={PAGES.AUTHOR(slug!)} className="font-semibold hover:underline">
-                        {name}
-                    </Link>
-                </CardTitle>
-            </CardContent>
+                <CardContent className="flex flex-col gap-2">
+                    <CardTitle className="font-semibold hover:underline">{name}</CardTitle>
+                </CardContent>
+            </Link>
         </Card>
     );
 }

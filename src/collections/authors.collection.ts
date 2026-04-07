@@ -82,6 +82,28 @@ export const AuthorsCollection: CollectionConfig = {
             relationTo: COLLECTION_SLUGS.MEDIA,
         },
         {
+            name: 'cover',
+            type: 'upload',
+            relationTo: COLLECTION_SLUGS.MEDIA,
+        },
+        {
+            name: 'externalLink',
+            type: 'text',
+            label: 'Ссылка на социальную сеть',
+            admin: {
+                placeholder: 'https://t.me/username или https://instagram.com/...',
+            },
+            // validate: (value: string | string[] | null | undefined) => {
+            //     if (typeof value === 'string') {
+            //         const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+            //         return urlPattern.test(value) ? value : 'Некорректная ссылка';
+            //     } else {
+            //         // Handle the case where value is not a string
+            //         return 'Некорректное значение';
+            //     }
+            // },
+        },
+        {
             name: 'products_count',
             type: 'number',
             defaultValue: 0,

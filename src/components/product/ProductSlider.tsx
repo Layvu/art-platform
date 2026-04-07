@@ -16,7 +16,14 @@ export default function ProductSlider({ gallery }: Props) {
     const mainSlider = useRef<Slider | null>(null);
     const thumbSlider = useRef<Slider | null>(null);
 
-    if (!gallery?.length) return null;
+    if (!gallery?.length)
+        return (
+            <div className="relative w-145 h-145 pt-3">
+                <div className="relative w-145 h-145 overflow-hidden rounded-lg bg-gray-100">
+                    <Image src="/placeholder.png" alt="Placeholder" fill priority className="object-cover" />
+                </div>
+            </div>
+        );
 
     const mainSettings = {
         asNavFor: thumbSlider.current as Slider | undefined,
@@ -39,7 +46,6 @@ export default function ProductSlider({ gallery }: Props) {
         speed: 400,
     };
 
-    
     return (
         <div className="flex gap-5">
             <div className="w-24 flex h-145">
