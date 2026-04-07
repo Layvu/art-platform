@@ -1,37 +1,59 @@
 'use client';
 
 import * as React from 'react';
-
-import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
-import { CheckIcon } from 'lucide-react';
-
+import { Square, SquareCheck } from 'lucide-react';
 import { cn } from '@/shared/utils/tailwind';
 
-function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
-    return (
-        <CheckboxPrimitive.Root
-            data-slot="checkbox"
-            className={cn(
-                // базовое состояние
-                'peer size-5 shrink-0 rounded-[4px] border border-zinc-300  bg-white shadow-xs outline-none transition',
-
-                // checked
-                'data-[state=checked]:border-zinc-300 data-[state=checked]:bg-white',
-
-                // focus / disabled
-                'focus-visible:ring-2 focus-visible:ring-ring/50',
-                'disabled:cursor-not-allowed disabled:opacity-50',
-
-                className,
-                'cursor-pointer',
-            )}
-            {...props}
-        >
-            <CheckboxPrimitive.Indicator className="flex items-center justify-center">
-                <CheckIcon className="size-4" stroke="black" strokeWidth={3} />
-            </CheckboxPrimitive.Indicator>
-        </CheckboxPrimitive.Root>
-    );
+interface CheckboxProps {
+    checked?: boolean;
+    onCheckedChange?: (checked: boolean) => void;
+    disabled?: boolean;
+    className?: string;
 }
+
+const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
+    ({ checked = false, onCheckedChange, disabled = false, className }, ref) => {
+        const handleToggle = (e: React.MouseEvent | React.KeyboardEvent) => {
+            if (disabled) return;
+            e.preventDefault();
+            onCheckedChange?.(!checked);
+        };
+
+        return (
+            <div
+                ref={ref}
+                role="checkbox"
+                aria-checked={checked}
+                aria-disabled={disabled}
+                tabIndex={disabled ? -1 : 0}
+                onClick={handleToggle}
+                className={cn(
+                    // Базовые стили контейнера
+                    'relative size-6 shrink-0 cursor-pointer outline-none transition-all',
+                    'focus-visible:ring-2 focus-visible:ring-my-accent/50 rounded-[4px]',
+                    disabled && 'cursor-not-allowed opacity-50',
+                    className,
+                )}
+            >
+                <input type="checkbox" className="sr-only" checked={checked} readOnly disabled={disabled} />
+
+           
+
+                {checked ? (
+                    <SquareCheck size={24} className="absolute inset-0 text-my-accent " />
+                ) : (
+                    <Square
+                    size={24}
+                        className={cn(
+                            'text-my-primary absolute inset-0 transition-colors duration-200',
+                        )}
+                    />
+                )}
+            </div>
+        );
+    },
+);
+
+Checkbox.displayName = 'Checkbox';
 
 export { Checkbox };

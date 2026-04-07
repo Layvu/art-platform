@@ -16,12 +16,11 @@ import { useFetchProduct } from '@/shared/hooks/useFetchData';
 import type { Media } from '@/shared/types/payload-types';
 import type { ProductQueryParams, ProductsQueryParams } from '@/shared/types/query-params.type';
 
-import { Button } from '../ui/button';
+import CounterButton, { Button } from '../ui/button';
 
 import ProductSlider from './ProductSlider';
 
 import './product.scss';
-import BuyButton from '../shared/BuyButton';
 import AuthorProductsSection from './AuthorProductsSection';
 import { useUpdateQueryParams } from '@/shared/hooks/useUpdateQueryParams';
 
@@ -41,11 +40,11 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
         notFound();
     }
 
-    const { id, title, description, gallery, price, author } = product;
+    const { id, title, description, gallery, price, author, quantity } = product;
     const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
-    const isAvailable = price && price > 0;
+    const isAvailable = price && price > 0 && quantity && quantity > 0;
 
     const images = gallery?.map((galleryItem) => galleryItem.image).filter((image) => isImageData(image)) || [];
 
@@ -62,11 +61,12 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
 
                         <div className="flex flex-col gap-2">
                             {productInCart ? (
-                                <BuyButton
+                                <CounterButton
                                     quantity={productInCart.quantity}
                                     handleMinus={() => decrease(id)}
                                     handlePlus={() => increase(id)}
-                                ></BuyButton>
+                                    variant={'default'}
+                                ></CounterButton>
                             ) : (
                                 <Button
                                     className="w-full rounded cursor-pointer"
@@ -77,7 +77,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                                     {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
                                 </Button>
                             )}
-                            {/* <span className="text-my-accent font-[450]">В наличии 4 шт</span> */}
+                            {!!quantity && quantity > 0 && <span className="text-my-accent font-[450]">В наличии {quantity} шт</span>}
                         </div>
                     </div>
 

@@ -16,6 +16,7 @@ interface CartState {
     removeItem: (productId: number) => void;
     clear: () => void;
     clearCheckedItems: () => void;
+    toggleAll: (checked: boolean) => void;
 }
 
 export const useCartStore = create<CartState>()(
@@ -92,6 +93,18 @@ export const useCartStore = create<CartState>()(
                         cart: {
                             ...state.cart,
                             items: state.cart.items?.filter((item) => !item.checked),
+                        },
+                    };
+                });
+            },
+            toggleAll: (checked: boolean) => {
+                set((state) => {
+                    if (!state.cart || !state.cart.items) return state;
+
+                    return {
+                        cart: {
+                            ...state.cart,
+                            items: state.cart.items.map((item) => ({ ...item, checked })),
                         },
                     };
                 });

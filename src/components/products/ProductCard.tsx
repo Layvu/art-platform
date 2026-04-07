@@ -1,13 +1,10 @@
 'use client';
-import placeholderImage from '@/public/placeholder.png'; // или правильный путь к файлу
-
 import { useRef } from 'react';
 
-import { Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Button } from '@/components/ui/button';
+import CounterButton, { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { useCartStore } from '@/services/store/cart/store';
@@ -18,7 +15,6 @@ import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
-import BuyButton from '../shared/BuyButton';
 
 export default function ProductCard({ id, title, slug, price, author, gallery }: Product) {
     const timerRef = useRef<Timer | null>(null);
@@ -73,7 +69,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                     <CardAction className="w-full cursor-default" onClick={handleCardActionClick}>
                         {productInCart ? (
            
-                            <BuyButton quantity={productInCart.quantity} handleMinus={() => decrease(id)} handlePlus={() => increase(id)}></BuyButton>
+                            <CounterButton variant={'default'} quantity={productInCart.quantity} handleMinus={() => decrease(id)} handlePlus={() => increase(id)}></CounterButton>
                         ) : (
                             <Button
                                 className="w-full rounded"

@@ -20,6 +20,7 @@ const buttonVariants = cva(
 
                 ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
                 empty: 'hover:bg-my-button-primary-hover',
+                secondaryEmpty: 'hover:bg-my-button-primary-hover/50',
                 link: 'text-primary underline-offset-4 hover:underline',
 
                 filter: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-3xl',
@@ -55,25 +56,14 @@ function Button({
     return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
 }
 
-export const counterVariants = cva(
-    'relative flex w-full items-center justify-center gap-1 rounded-md transition isolate',
+const counterVariants = cva(
+    'flex p-0.5 w-full gap-1 items-center justify-between rounded-lg',
     {
         variants: {
             variant: {
-                default: 'bg-gradient-to-l from-orange-400 to-orange-500 text-white',
+                default: 'text-white bg-my-button-primary-default',
 
-                outline: [
-                    'bg-transparent text-orange-400 border-transparent', // Делаем основной фон прозрачным
-
-                    // 1. Слой Градиента (наша "рамка") - самый нижний слой
-                    'before:absolute before:inset-0 before:-z-20',
-                    'before:rounded-md before:bg-gradient-to-r before:from-orange-400 before:to-orange-500',
-
-                    // 2. Слой Белого фона - лежит поверх градиента, но под контентом
-                    // inset-[2px] создает отступ от края, имитируя толщину границы
-                    'after:absolute after:inset-[2px] after:-z-10',
-                    'after:rounded-[6px] after:bg-white',
-                ].join(' '),
+                secondary: 'text-my-accent bg-my-secondary-background',
             },
         },
         defaultVariants: {
@@ -82,32 +72,24 @@ export const counterVariants = cva(
     },
 );
 
-function CounterButton({
-    quantity,
-    increase,
-    decrease,
-    id,
-    variant,
-}: {
+export default function CounterButton({handleMinus, handlePlus, quantity, variant}: {
+    handleMinus: () => void;
+    handlePlus: () => void;
     quantity: number;
-    increase: (id: number) => void;
-    decrease: (id: number) => void;
-    id: number;
     variant?: VariantProps<typeof counterVariants>['variant'];
-}) {
-    return (
-        <div className={cn(counterVariants({ variant }))}>
-            <Button variant="empty" className="" onClick={() => decrease(id)} size="icon">
-                <Minus />
-            </Button>
-
-            <div className="px-2 font-semibold select-none">{quantity}</div>
-
-            <Button variant="empty" size="icon" className="" onClick={() => increase(id)}>
-                <Plus />
-            </Button>
-        </div>
-    );
-}
+  }) {
+      return (
+          <div className={cn(counterVariants({ variant }))}>
+              <Button className="p-0 w-9" onClick={handleMinus} variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}>
+                  <Minus width={36} height={36} />
+              </Button>
+              <div className="px-2">{quantity}</div>
+              <Button className="p-0 w-9" onClick={handlePlus} variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}>
+                  <Plus width={36} height={36} />
+              </Button>
+          </div>
+      );
+  }
+  
 
 export { Button, buttonVariants, CounterButton };

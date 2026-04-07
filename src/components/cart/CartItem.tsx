@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-
 import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -10,57 +9,85 @@ import { useCartStore } from '@/services/store/cart/store';
 import { isImageData } from '@/shared/guards/image.guard';
 import { isProductData } from '@/shared/guards/product.guard';
 import type { ICartItem } from '@/shared/types/cart.interface';
+import { cn } from '@/shared/utils/tailwind';
 
-import { CounterButton } from '../ui/button';
+import { Button, CounterButton } from '../ui/button';
 import { Card } from '../ui/card';
+import Link from 'next/link';
+import { PAGES } from '@/config/public-pages.config';
 
-export default function CartItem({ item }: { item: ICartItem }) {
+export default function CartItem({ item, available }: { item: ICartItem; available: boolean }) {
     const { toggleChecked, increase, decrease, removeItem } = useCartStore();
 
-    const productId = typeof item.product === 'number' ? item.product : item.product.id;
     const product = item.product;
-    if (!isProductData(product)) return <div className="wrap">No product found</div>;
+
+    if (!isProductData(product)) return null;
+
+    const productId = product.id;
+    const price = product.price ?? 0;
+    const stock = product.quantity ?? 0;
 
     const mainImage = product.gallery && isImageData(product.gallery[0]?.image) ? product.gallery[0].image : '';
 
     return (
-        <Card className="grid grid-cols-4 gap-x-4 w-full items-center">
-            <div className="col-span-2 flex gap-4 flex-row">
-                <div className="flex flex-col justify-between items-center">
-                    <Checkbox
-                        checked={item.checked || false}
-                        onCheckedChange={() => toggleChecked(productId)}
-                        className=""
-                    />
-                    <Trash2
-                        onClick={() => removeItem(productId)}
-                        size={24}
-                        className="text-zinc-400"
-                        cursor={'pointer'}
-                    />
-                </div>
-                {mainImage && (
+        <Card className="flex flex-row gap-4 w-full p-0 overflow-hidden items-center">
+            <div className="relative shrink-0 w-30 h-30">
+                <Link href={PAGES.PRODUCT(product.slug)}>
                     <Image
-                        src={mainImage.url || ''}
+                        src={(typeof mainImage === 'object' && mainImage?.url) || '/placeholder.png'}
                         alt={product.title}
-                        width={72}
-                        height={72}
-                        className="w-18 h-18 object-cover rounded-lg"
+                        fill
+                        className="object-cover rounded-lg"
                     />
-                )}
-                <div className="font-semibold content-center">{product.title}</div>
+                </Link>
             </div>
-            <div className="col-span-1">
-                <div className="font-semibold text-xl">Цена: {product.price}</div>
-            </div>
-            <div className="col-span-1">
-                <CounterButton
-                    variant="outline"
-                    quantity={item.quantity}
-                    increase={increase}
-                    decrease={decrease}
-                    id={productId}
-                />
+
+            <div className="grid grid-cols-4 md:grid-cols-3 flex-row h-full w-full p-4 gap-6">
+                <div className="col-span-2 md:col-span-1 flex flex-col flex-1 gap-4 justify-between">
+                    <Link href={PAGES.PRODUCT(product.slug)}>
+                        <div className="font-semibold leading-tight text-my-primary line-clamp-2">{product.title}</div>
+                    </Link>
+                    {available && (
+                        <div
+                            className={cn(
+                                'flex items-center gap-2 cursor-pointer select-none transition-colors',
+                                item.checked ? 'text-my-accent' : 'text-my-primary',
+                            )}
+                            onClick={() => toggleChecked(productId)}
+                        >
+                            <Checkbox checked={item.checked ?? false} onCheckedChange={() => {}} />
+                            <span className="text-sm font-medium">Выбрать</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="col-span-1 flex flex-col gap-2 justify-center items-center text-center">
+                    {available && (
+                        <div className="text-xl font-bold text-my-primary">
+                            {(price * item.quantity).toLocaleString()} ₽
+                        </div>
+                    )}
+                    <div className="text-my-tertriary text-sm">{price.toLocaleString()} ₽ / шт.</div>
+                </div>
+
+                <div className="col-span-1 flex flex-col gap-2 justify-center items-center">
+                    {available ? (
+                        <>
+                            <CounterButton
+                                variant="secondary"
+                                quantity={item.quantity}
+                                handleMinus={() => decrease(productId)}
+                                handlePlus={() => increase(productId)}
+                            />
+
+                            <div className="text-[15px] text-my-accent font-[450]">В наличии {stock} шт.</div>
+                        </>
+                    ) : (
+                        <Button className="w-full" variant={'pagination'} disabled>
+                            Нет в наличии
+                        </Button>
+                    )}
+                </div>
             </div>
         </Card>
     );
