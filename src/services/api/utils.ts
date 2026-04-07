@@ -3,7 +3,7 @@ import type { AuthorsQueryParams, ProductsQueryParams, QueryParams } from '@/sha
 
 // ProductsQueryParams -> QueryParams
 export function toQueryParams(params: ProductsQueryParams): QueryParams {
-    const { page, sort, limit, search, authors, category, tags, priceFrom, priceTo } = params;
+    const { page, sort, limit, search, authors, category, tags, priceFrom, priceTo, excludeId, authorId } = params;
 
     const where: Record<string, unknown> = {};
 
@@ -21,7 +21,13 @@ export function toQueryParams(params: ProductsQueryParams): QueryParams {
     if (tags) where.tags = { in: tags.split(URL_SEPARATOR) };
     if (priceFrom) where.price = { ...(where.price || {}), greater_than_equal: priceFrom };
     if (priceTo) where.price = { ...(where.price || {}), less_than_equal: priceTo };
-
+    
+    if (excludeId) {
+        where.id = { not_equals: excludeId };
+    }
+    if (authorId) {
+        where.author = { equals: authorId };
+    }
     return {
         ...(page ? { page: Number(page) } : { page: 1 }),
         ...(limit ? { limit } : {}),

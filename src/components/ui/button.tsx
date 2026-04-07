@@ -12,11 +12,11 @@ const buttonVariants = cva(
         variants: {
             variant: {
                 default:
-                    'bg-my-button-primary-default text-white hover:bg-button-primary-hover disabled:my-button-primary-disabled',
+                    'bg-my-button-primary-default text-white hover:bg-button-primary-hover disabled:bg-my-button-primary-disabled',
                 destructive:
                     'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
                 outline: 'border-2',
-                secondary: 'bg-my-button-secondary-default text-my-accent hover:my-button-secondary-hover disabled:my-button-secondary-disabled',
+                secondary: 'bg-my-button-secondary-default text-my-accent hover:bg-my-button-secondary-hover disabled:bg-my-button-secondary-disabled disabled:text-my-tertriary',
 
                 ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
                 empty: 'hover:bg-my-button-primary-hover',
@@ -24,6 +24,7 @@ const buttonVariants = cva(
 
                 filter: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-3xl',
                 activeFilter: 'text-white bg-my-accent hover:bg-my-accent-hover rounded-3xl',
+                pagination: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
             },
             size: {
                 default: 'h-9 px-4 py-2', // has-[svg]:pr-2

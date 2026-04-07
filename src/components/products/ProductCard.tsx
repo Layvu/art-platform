@@ -1,4 +1,5 @@
 'use client';
+import placeholderImage from '@/public/placeholder.png'; // или правильный путь к файлу
 
 import { useRef } from 'react';
 
@@ -17,6 +18,7 @@ import type { Product } from '@/shared/types/payload-types';
 import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
+import BuyButton from '../shared/BuyButton';
 
 export default function ProductCard({ id, title, slug, price, author, gallery }: Product) {
     const timerRef = useRef<Timer | null>(null);
@@ -48,15 +50,13 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
         >
             <Card className="h-[480.5px] overflow-hidden">
                 <CardHeader className="relative w-full aspect-square overflow-hidden">
-                    {mainImage ? (
-                        <Image
-                            alt="Картинка"
-                            src={mainImage.url || ''}
-                            fill
-                            className="object-cover hover:scale-110 transition-transform duration-300"
-                            priority
-                        />
-                    ) : null}
+                    <Image
+                        alt="Картинка"
+                        src={(typeof mainImage === 'object' && mainImage?.url) || '/placeholder.png'}
+                        fill
+                        className="object-cover hover:scale-110 transition-transform duration-300"
+                        priority
+                    />
                 </CardHeader>
 
                 <CardContent className="flex flex-col flex-1 mb-auto">
@@ -72,15 +72,8 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                     </div>
                     <CardAction className="w-full cursor-default" onClick={handleCardActionClick}>
                         {productInCart ? (
-                            <div className="flex p-0.5 w-full gap-1 items-center justify-between text-white rounded-lg bg-my-button-primary-default">
-                                <Button className="p-0 w-9" onClick={() => decrease(id)} variant="empty">
-                                    <Minus width={36} height={36} />
-                                </Button>
-                                <div className="px-2">{productInCart.quantity}</div>
-                                <Button className="p-0 w-9" onClick={() => increase(id)} variant="empty">
-                                    <Plus width={36} height={36} />
-                                </Button>
-                            </div>
+           
+                            <BuyButton quantity={productInCart.quantity} handleMinus={() => decrease(id)} handlePlus={() => increase(id)}></BuyButton>
                         ) : (
                             <Button
                                 className="w-full rounded"
@@ -88,12 +81,11 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                                 onClick={() => addItem(id)}
                                 disabled={!isAvailable}
                             >
-                                {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
+                                {isAvailable ? `${price} ₽` : 'Нет в наличии'}
                             </Button>
                         )}
                     </CardAction>
                 </CardContent>
-                {/* <CardFooter className="flex flex-col gap-2"></CardFooter> */}
             </Card>
         </Link>
     );

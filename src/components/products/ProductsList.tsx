@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { toQueryParams } from '@/services/api/utils';
 import { useFetchProducts } from '@/shared/hooks/useFetchData';
 import type { ProductsQueryParams } from '@/shared/types/query-params.type';
@@ -34,7 +35,25 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
         return <div>Products not found</div>;
     }
 
-    const { hasNextPage = false, hasPrevPage = false, prevPage, nextPage } = data;
+    const { hasNextPage = false, hasPrevPage = false, prevPage, nextPage, totalPages = 1 } = data;
+
+    const getPageNumbers = () => {
+        const delta = 2;
+        const pages: (number | string)[] = [];
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (
+                i === 1 || 
+                i === totalPages || 
+                (i >= page - delta && i <= page + delta) 
+            ) {
+                pages.push(i);
+            } else if (pages[pages.length - 1] !== '...') {
+                pages.push('...');
+            }
+        }
+        return pages;
+    };
 
     return (
         <>
@@ -46,28 +65,46 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
             {products.length === 0 ? (
                 <div className="text-2xl font-semibold text-center">Ничего не нашлось.</div>
             ) : (
-                <div className="flex gap-2 justify-center mt-10">
-                    {prevPage && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => updateQueryParams({ page: prevPage }, { resetPage: false })}
-                            disabled={!hasPrevPage}
-                        >
-                            {page - 1}
-                        </Button>
-                    )}
-                    <Button variant="secondary" disabled={true}>
-                        {page}
+                <div className="flex gap-2 justify-center items-center mt-10">
+                    {/* Кнопка "Назад" */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => updateQueryParams({ page: prevPage || page - 1 }, { resetPage: false })}
+                        disabled={!hasPrevPage}
+                        className="h-10 w-10"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    {nextPage && (
-                        <Button
-                            variant="ghost"
-                            onClick={() => updateQueryParams({ page: nextPage }, { resetPage: false })}
-                            disabled={!hasNextPage}
-                        >
-                            {page + 1}
-                        </Button>
-                    )}
+
+                    {/* Номера страниц */}
+                    {getPageNumbers().map((pageNum, idx) => (
+                        typeof pageNum === 'number' ? (
+                            <Button
+                                key={idx}
+                                variant={pageNum === page ? "pagination" : "ghost"}
+                                onClick={() => updateQueryParams({ page: pageNum }, { resetPage: false })}
+                                className="h-10 w-10"
+                            >
+                                {pageNum}
+                            </Button>
+                        ) : (
+                            <span key={idx} className="px-2 text-muted-foreground">
+                                {pageNum}
+                            </span>
+                        )
+                    ))}
+
+                    {/* Кнопка "Вперед" */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => updateQueryParams({ page: nextPage || page + 1 }, { resetPage: false })}
+                        disabled={!hasNextPage}
+                        className="h-10 w-10"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
                 </div>
             )}
         </>

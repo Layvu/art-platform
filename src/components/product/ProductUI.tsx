@@ -14,18 +14,22 @@ import { isImageData } from '@/shared/guards/image.guard';
 import { isProductData } from '@/shared/guards/product.guard';
 import { useFetchProduct } from '@/shared/hooks/useFetchData';
 import type { Media } from '@/shared/types/payload-types';
-import type { ProductQueryParams } from '@/shared/types/query-params.type';
+import type { ProductQueryParams, ProductsQueryParams } from '@/shared/types/query-params.type';
 
 import { Button } from '../ui/button';
 
 import ProductSlider from './ProductSlider';
 
 import './product.scss';
+import BuyButton from '../shared/BuyButton';
+import AuthorProductsSection from './AuthorProductsSection';
+import { useUpdateQueryParams } from '@/shared/hooks/useUpdateQueryParams';
 
 export default function ProductUI({ initialParams }: { initialParams: ProductQueryParams }) {
     const slug = initialParams.product;
-    const { data, isError, error, isFetching } = useFetchProduct({ slug });
+    const { data: product, isError, error, isFetching } = useFetchProduct({ slug });
     const { cart, addItem, increase, decrease } = useCartStore();
+    const updateQueryParams = useUpdateQueryParams<ProductsQueryParams>();
 
     if (isError) {
         return <div>Error: {error.message}</div>;
@@ -33,11 +37,11 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
     if (isFetching) {
         return <div>Loading...</div>;
     }
-    if (!data) {
+    if (!product) {
         notFound();
     }
 
-    const { id, title, description, gallery, price, author } = data;
+    const { id, title, description, gallery, price, author } = product;
     const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
@@ -46,61 +50,73 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
     const images = gallery?.map((galleryItem) => galleryItem.image).filter((image) => isImageData(image)) || [];
 
     return (
-        <div className="wrap mt-8 grid grid-cols-12 gap-x-10 h-[617px] overflow-hidden mb-20">
-            <div className="col-span-7">
-                <ProductSlider gallery={images as Media[]} />
-            </div>
-
-            <div className="col-span-5 ">
-                <div className="flex flex-col gap-8 mb-26">
-                    <h2 className=" font-semibold text-[32px] leading-10 ">{title}</h2>
-
-                    {productInCart ? (
-                        <div className="flex w-full gap-1 items-center justify-center bg-linear-to-l from-orange-400 to-orange-500 text-white rounded">
-                            <Button className="p-0" onClick={() => decrease(id)} variant="empty">
-                                <Minus />
-                            </Button>
-                            <div className="px-2">{productInCart.quantity}</div>
-                            <Button className="p-0" onClick={() => increase(id)} variant="empty">
-                                <Plus />
-                            </Button>
-                        </div>
-                    ) : (
-                        <Button
-                            className="w-full rounded cursor-pointer"
-                            variant="default"
-                            onClick={() => addItem(id)}
-                            disabled={!isAvailable}
-                        >
-                            {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
-                        </Button>
-                    )}
+        <div className="flex flex-col gap-12 wrap mt-8">
+            <div className="grid grid-cols-12 gap-x-10 overflow-hidden p-8 pt-5 mb-20 shadow-[0_3px_40px_0_rgba(39,39,42,0.05)]  rounded-xl">
+                <div className="col-span-7">
+                    <ProductSlider gallery={images as Media[]} />
                 </div>
 
-                <div className="flex flex-col gap-10">
-                    {description && (
-                        <div className="flex flex-col gap-3">
-                            <h3 className="text-2xl font-semibold">Описание</h3>
-                            <div className="text-zinc-600 text-lg">{description}</div>
-                        </div>
-                    )}
+                <div className="col-span-5 ">
+                    <div className="flex flex-col gap-8 mb-26">
+                        <h2 className=" font-semibold text-[32px] leading-10 ">{title}</h2>
 
-                    {isAuthorData(author) && (
-                        <div className="flex gap-3">
-                            <Image
-                                width={40}
-                                height={40}
-                                src={isImageData(author.avatar) ? author.avatar?.url || '' : ''}
-                                alt="avatar"
-                                className="w-10 h-10 rounded-full object-cover"
-                            ></Image>
-                            <Link href={PAGES.AUTHOR(author.slug!)} className="hover:underline text-2xl font-semibold">
-                                {author.name}
-                            </Link>
+                        <div className="flex flex-col gap-2">
+                            {productInCart ? (
+                                <BuyButton
+                                    quantity={productInCart.quantity}
+                                    handleMinus={() => decrease(id)}
+                                    handlePlus={() => increase(id)}
+                                ></BuyButton>
+                            ) : (
+                                <Button
+                                    className="w-full rounded cursor-pointer"
+                                    variant="default"
+                                    onClick={() => addItem(id)}
+                                    disabled={!isAvailable}
+                                >
+                                    {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
+                                </Button>
+                            )}
+                            {/* <span className="text-my-accent font-[450]">В наличии 4 шт</span> */}
                         </div>
-                    )}
+                    </div>
+
+                    <div className="flex flex-col gap-10">
+                        {description && (
+                            <div className="flex flex-col gap-3">
+                                <h3 className="text-2xl font-semibold">Описание</h3>
+                                <div className="text-zinc-600 text-lg">{description}</div>
+                            </div>
+                        )}
+
+                        {isAuthorData(author) && (
+                            <div className="flex flex-col gap-3">
+                                <h3 className="text-2xl font-semibold">Автор</h3>
+
+                                <Link
+                                    href={PAGES.AUTHOR(author.slug!)}
+                                    className=" flex gap-3 items-center hover:underline text-my-secondary text-[16px] cursor-pointer"
+                                >
+                                    <Image
+                                        width={40}
+                                        height={40}
+                                        src={
+                                            isImageData(author.avatar)
+                                                ? author.avatar?.url || '/placeholder.png'
+                                                : '/placeholder.png'
+                                        }
+                                        alt="avatar"
+                                        className="w-10 h-10 rounded-full object-cover"
+                                    ></Image>
+
+                                    {author.name}
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
+            <AuthorProductsSection product={product} updateQueryParams={updateQueryParams} />
         </div>
     );
 }

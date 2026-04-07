@@ -14,6 +14,8 @@ export type ProductsQueryParams = ProductsFilters & {
     page?: number;
     sort?: ProductsSortOptions;
     limit?: number;
+    excludeId?: number;
+    authorId?: number;
 };
 
 export type ProductsFilters = {
