@@ -126,7 +126,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
 
     return (
         <div className="max-w-lg mx-auto p-6">
-            <Card>
+            <Card className="p-4">
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl text-center">Вход в аккаунт</CardTitle>
                     <CardDescription className="text-center">
@@ -154,7 +154,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                     onSubmit={customerForm.handleSubmit((data) =>
                                         handleLoginSubmit(data, UserType.CUSTOMER),
                                     )}
-                                    className="space-y-4"
+                                    className="space-y-6"
                                 >
                                     <FormField
                                         control={customerForm.control}
@@ -173,18 +173,9 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                         control={customerForm.control}
                                         name="password"
                                         render={({ field }) => (
-                                            <FormItem>
-                                                <div className="flex items-center justify-between">
-                                                    <FormLabel>Пароль</FormLabel>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleForgotPassword}
-                                                        disabled={resetLoading || loading}
-                                                        className="text-sm text-primary underline underline-offset-4 disabled:opacity-50"
-                                                    >
-                                                        {resetLoading ? 'Отправка...' : 'Забыли пароль?'}
-                                                    </button>
-                                                </div>
+                                            <FormItem className="items-start">
+                                                <FormLabel>Пароль</FormLabel>
+
                                                 <FormControl>
                                                     <Input
                                                         type="password"
@@ -193,13 +184,21 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                                         disabled={loading}
                                                     />
                                                 </FormControl>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleForgotPassword}
+                                                    disabled={resetLoading || loading}
+                                                    className="mr-auto text-sm text-my-accent underline underline-offset-4 disabled:opacity-50"
+                                                >
+                                                    {resetLoading ? 'Отправка...' : 'Забыли пароль?'}
+                                                </button>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
 
                                     <Button type="submit" disabled={loading} className="w-full cursor-pointer">
-                                        {loading ? 'Вход...' : 'Войти как покупатель'}
+                                        {loading ? 'Вход...' : 'Войти в аккаунт'}
                                     </Button>
                                 </form>
                             </Form>
@@ -211,8 +210,11 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                     onSubmit={authorForm.handleSubmit((data) =>
                                         handleLoginSubmit(data, UserType.AUTHOR),
                                     )}
-                                    className="space-y-4"
+                                    className="space-y-6"
                                 >
+                                    <Alert variant="info">
+                                            Для входа используйте данные, предоставленные администратором
+                                    </Alert>
                                     <FormField
                                         control={authorForm.control}
                                         name="email"
@@ -249,12 +251,8 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                         )}
                                     />
 
-                                    <div className="text-sm text-muted-foreground">
-                                        <p>Для входа используйте данные, предоставленные администратором</p>
-                                    </div>
-
                                     <Button type="submit" disabled={loading} className="w-full cursor-pointer">
-                                        {loading ? 'Вход...' : 'Войти как автор'}
+                                        {loading ? 'Вход...' : 'Войти в аккаунт'}
                                     </Button>
                                 </form>
                             </Form>
@@ -274,10 +272,9 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                     )}
 
                     {userType === UserType.CUSTOMER && (
-                        <div className="mt-4 text-center text-sm">
-                            Нет аккаунта?{' '}
-                            <a href={PAGES.REGISTER} className="text-primary underline underline-offset-4">
-                                Зарегистрироваться
+                        <div className="text-my-accent mt-4 text-center text-sm">
+                            <a href={PAGES.REGISTER} className="hover:underline hover:underline-offset-4">
+                                Нет аккаунта? Создать
                             </a>
                         </div>
                     )}

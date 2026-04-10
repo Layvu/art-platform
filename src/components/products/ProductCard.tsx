@@ -44,7 +44,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
             onMouseLeave={() => timerRef.current && clearTimeout(timerRef.current)}
             href={PAGES.PRODUCT(slug)}
         >
-            <Card className="h-[480.5px] overflow-hidden">
+            <Card className="p-0 h-[480.5px] overflow-hidden">
                 <CardHeader className="relative w-full aspect-square overflow-hidden">
                     <Image
                         alt="Картинка"

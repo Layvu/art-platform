@@ -102,9 +102,8 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
     // TODO: loading и error компоненты
 
     return (
-        <div className="wrap mx-auto p-6">
-            <Card>
-                <CardHeader>
+            <Card className='wrap w-4xl space-y-4'>
+                <CardHeader className='space-y-4'>
                     <CardTitle className="text-2xl">Профиль пользователя</CardTitle>
                     <CardDescription>Управление вашими персональными данными и настройками аккаунта</CardDescription>
                 </CardHeader>
@@ -239,6 +238,5 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
                     )}
                 </CardContent>
             </Card>
-        </div>
     );
 }
