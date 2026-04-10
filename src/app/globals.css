@@ -76,12 +76,12 @@
     --my-accent: #01959d;
     --my-disabled: #9ca3af;
     --my-tertriary: #6b7280;
-    
+
     --my-accent-hover: #01959d;
     --my-secondary-background: #eaf8f9;
 
     --my-button-primary-default: #01aab3;
-    --my-button-primary-hover: #01959D;
+    --my-button-primary-hover: #01959d;
     --my-button-primary-disabled: #d1d5db;
 
     --my-button-secondary-default: #eaf8f9;
@@ -120,6 +120,9 @@
     --sidebar-ring: oklch(0.708 0 0);
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
+
+    --i-stroke: 2;
+    --i-size: 20px;
 }
 
 .dark {
@@ -169,4 +172,14 @@
 .slick-next:before {
     color: black;
     font-size: 20px;
+}
+
+.i {
+    stroke-width: var(--i-stroke, 2);
+    width: var(--i-size, 24px);
+    height: var(--i-size, 24px);
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
 }

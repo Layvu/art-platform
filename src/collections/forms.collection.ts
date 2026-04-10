@@ -8,8 +8,8 @@ export const FormsCollection: CollectionConfig = {
     slug: 'forms',
     labels: { singular: 'Анкета', plural: 'Анкеты' },
     admin: {
-        useAsTitle: 'content',
-        defaultColumns: ['content'],
+        useAsTitle: 'nickname',
+        defaultColumns: ['nickname'],
     },
 
     access: {
@@ -21,13 +21,43 @@ export const FormsCollection: CollectionConfig = {
 
     fields: [
         {
-            name: 'content',
-            type: 'textarea',
-            label: 'Сообщение',
+            name: 'email',
+            type: 'email',
             required: true,
-            admin: {
-                readOnly: true,
-            },
+        },
+        {
+            name: 'vkPersonal',
+            type: 'text',
+            required: true,
+        },
+        {
+            name: 'activities',
+            type: 'json',
+            required: true,
+        },
+        {
+            name: 'otherActivity',
+            type: 'text',
+        },
+        {
+            name: 'publicLink',
+            type: 'text',
+            required: true,
+        },
+        {
+            name: 'nickname',
+            type: 'text',
+            required: true,
+        },
+        {
+            name: 'shelves',
+            type: 'json',
+            required: true,
+        },
+        {
+            name: 'needRail',
+            type: 'checkbox',
+            required: true,
         },
         // TODO: добавить новые поля:
         // { name: 'name', type: 'text' },
@@ -54,7 +84,7 @@ export const FormsCollection: CollectionConfig = {
                     await sendEmail({
                         to: process.env.EMAIL_TO || 'zemskyalexey.writer@mail.ru',
                         subject: 'Новая анкета автора',
-                        text: `Получена анкета автора:\n\nСообщение: ${formDoc.content}`,
+                        text: `Получена анкета автора:\n\nСообщение: ${formDoc.nickname}`,
                     });
                 }
             },

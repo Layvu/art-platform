@@ -270,7 +270,30 @@ export interface User {
  */
 export interface Form {
   id: number;
-  content: string;
+  email: string;
+  vkPersonal: string;
+  activities:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  otherActivity?: string | null;
+  publicLink: string;
+  nickname: string;
+  shelves:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  needRail: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -662,7 +685,14 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "forms_select".
  */
 export interface FormsSelect<T extends boolean = true> {
-  content?: T;
+  email?: T;
+  vkPersonal?: T;
+  activities?: T;
+  otherActivity?: T;
+  publicLink?: T;
+  nickname?: T;
+  shelves?: T;
+  needRail?: T;
   createdAt?: T;
   updatedAt?: T;
 }
