@@ -15,6 +15,7 @@ import { apiUrl } from '../api-url-builder';
 import { BaseServerService } from './base-server.service';
 import { payloadDataService } from './payload-data.service';
 import { yookassaService } from './yookassa.service';
+import { isImageData } from '@/shared/guards/image.guard';
 
 export const STOCK_ADJUSTMENT = {
     DECREMENT: 'decrement',
@@ -194,12 +195,14 @@ export class OrderServerService extends BaseServerService {
             }
 
             totalOrderSum += productPrice * orderItem.quantity;
-
+            //const mainImage = product.gallery && isImageData(product.gallery[0]?.image) ? product.gallery[0].image : '';
+            
             payloadItems.push({
                 productSnapshot: {
                     productId: product.id,
                     title: product.title,
                     price: productPrice,
+                    image: product.gallery && product.gallery[0]?.image,
                 },
                 quantity: orderItem.quantity,
             });

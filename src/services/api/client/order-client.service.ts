@@ -44,7 +44,7 @@ export class OrderClientService {
     async getOrdersByCustomer(customerId: number): Promise<Order[]> {
         const url = apiUrl.collection(COLLECTION_SLUGS.ORDERS, {
             where: { customer: { equals: customerId } },
-            depth: 1,
+            depth: 2,
         });
 
         const response = await fetch(url, {

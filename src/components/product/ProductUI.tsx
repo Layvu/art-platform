@@ -70,7 +70,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                             ) : (
                                 <Button
                                     className="w-full rounded cursor-pointer"
-                                    variant="default"
+                                    variant="secondary"
                                     onClick={() => addItem(id)}
                                     disabled={!isAvailable}
                                 >
