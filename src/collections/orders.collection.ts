@@ -71,13 +71,6 @@ export const OrdersCollection: CollectionConfig = {
                             label: 'Цена за штуку',
                             admin: { readOnly: true },
                         },
-                        {
-                            name: 'image',
-                            type: 'upload',
-                            relationTo: COLLECTION_SLUGS.MEDIA,
-                            label: 'Изображение',
-                            admin: { readOnly: true },
-                        },
                     ],
                 },
                 {

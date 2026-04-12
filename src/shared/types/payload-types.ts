@@ -351,7 +351,6 @@ export interface Order {
       productId: number;
       title: string;
       price: number;
-      image?: (number | null) | Media;
     };
     quantity: number;
     id?: string | null;
@@ -752,7 +751,6 @@ export interface OrdersSelect<T extends boolean = true> {
               productId?: T;
               title?: T;
               price?: T;
-              image?: T;
             };
         quantity?: T;
         id?: T;

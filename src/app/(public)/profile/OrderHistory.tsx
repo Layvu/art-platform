@@ -11,7 +11,7 @@ import { PAGES } from '@/config/public-pages.config';
 import { orderClientService } from '@/services/api/client/order-client.service';
 import { DELIVERY_TYPES, getOrderStatusText, ORDER_STATUS, PICKUP_ADDRESS } from '@/shared/constants/order.constants';
 import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
-import { useProductSlugs } from '@/shared/hooks/useFetchData';
+import { useProductSlugs, useProductsByIds } from '@/shared/hooks/useFetchData';
 import type { Order } from '@/shared/types/payload-types';
 import type { IYookassaPaymentResponse, IYookassaWebhookEvent } from '@/shared/types/yookassa.interface';
 import { canOrderBeCancelled } from '@/shared/utils/orders.utils';
@@ -38,6 +38,13 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
             .flatMap((order) => order.items.map((item) => item.productSnapshot.productId))
             .filter((id, index, self) => self.indexOf(id) === index); // Уникальные ID
     }, [orders]);
+
+    const {
+        data: products,
+        isLoading: isProductLoading,
+        isError: isProductError,
+        error: productError,
+    } = useProductsByIds(allProductIds);
 
     // Загружаем slug для всех productId
     const { slugMap } = useProductSlugs(allProductIds);
@@ -78,7 +85,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
             </div>
         );
     }
-    console.log(orders)
+    console.log(orders);
 
     return (
         <div className="space-y-6">
@@ -105,9 +112,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                     <Card key={order.id}>
                         {/* Header: Номер и кнопка отмены */}
                         <div className="flex justify-between items-start mb-6">
-                            <h3 className="text-[20px] font-semibold">
-                                {order.orderNumber}
-                            </h3>
+                            <h3 className="text-[20px] font-semibold">{order.orderNumber}</h3>
                             {canOrderBeCancelled(order) && (
                                 <button
                                     onClick={() => handleCancelOrder(order.id)}
@@ -128,11 +133,13 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                             </div>
                             <div>
                                 <p className="text-[#9CA3AF] text-sm mb-1">
-                                    {order.deliveryType === DELIVERY_TYPES.PICKUP ? 'Самовывоз' : 'Доставка СДЭК, курьер'}
+                                    {order.deliveryType === DELIVERY_TYPES.PICKUP
+                                        ? 'Самовывоз'
+                                        : 'Доставка СДЭК, курьер'}
                                 </p>
-                                <p className="text-[#1A1A1A] font-medium leading-tight">
-                                    {order.deliveryType === DELIVERY_TYPES.PICKUP 
-                                        ? PICKUP_ADDRESS 
+                                <p className="font-medium leading-tight">
+                                    {order.deliveryType === DELIVERY_TYPES.PICKUP
+                                        ? PICKUP_ADDRESS
                                         : order.cdekData?.address || 'Адрес не указан'}
                                 </p>
                             </div>
@@ -140,20 +147,31 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
 
                         {/* Product Images */}
                         <div className="flex flex-wrap gap-3 mb-8">
-                            {order.items.map((item, idx) => (
-                                // )
-                                <Link href={PAGES.PRODUCT(slugMap[item.productSnapshot.productId] || '')} key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer">
-                                    <Image
-                                    // isImageData(item.productSnapshot.image) ? (item.productSnapshot.image?.url ? item.productSnapshot.image.url : '/placeholder.png') : 
-                                        src={'/placeholder.png'}
-                                        alt={item.productSnapshot.title}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                    <Badge className="absolute bottom-1 left-1" variant="secondary">{item.quantity} шт</Badge>
-                                 
-                                </Link>
-                            ))}
+                            {order.items.map((item, idx) => {
+                                
+                                const currentProduct = products.find((p) => p.id === item.productSnapshot.productId);
+                                const mainImage = currentProduct && currentProduct.gallery && isImageData(currentProduct.gallery[0]?.image) ? currentProduct.gallery[0].image : '/placeholder.png';
+                                return (
+                                    // )
+                                    <Link
+                                        href={PAGES.PRODUCT(slugMap[item.productSnapshot.productId] || '')}
+                                        key={idx}
+                                        className="relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer"
+                                    >
+                                        <Image
+                                            src={
+                                                isImageData(mainImage) && mainImage.url ? mainImage.url : mainImage as string
+                                            }
+                                            alt={item.productSnapshot.title}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                        <Badge className="absolute bottom-1 left-1" variant="secondary">
+                                            {item.quantity} шт
+                                        </Badge>
+                                    </Link>
+                                );
+                            })}
                         </div>
 
                         {/* Footer: Итого и Статус */}
@@ -162,10 +180,13 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                                 <span className="text-[24px] font-bold text-[#1A1A1A]">
                                     {order.total.toLocaleString('ru-RU')} ₽
                                 </span>
-                                
+
                                 {showPayLink && !isPaymentExpired && (
                                     <a href={paymentLink} target="_blank" rel="noopener noreferrer">
-                                        <Button size="sm" className="bg-[#4FB0AF] hover:bg-[#3d8c8b] text-white rounded-xl px-6">
+                                        <Button
+                                            size="sm"
+                                            className="bg-[#4FB0AF] hover:bg-[#3d8c8b] text-white rounded-xl px-6"
+                                        >
                                             Оплатить сейчас
                                         </Button>
                                     </a>
