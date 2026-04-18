@@ -28,6 +28,10 @@ pnpm dev
 При первом запуске перейдите на `http://localhost:3000/admin` и создайте первого пользователя (главного администратора),
 чтобы получить доступ к панели управления
 
+## Удавление элементов бд 
+
+psql -U art_user -d art_platform -c "TRUNCATE TABLE products, authors, users RESTART IDENTITY CASCADE;"
+
 ## Отдельно поднять и потушить БД
 
 docker compose up -d

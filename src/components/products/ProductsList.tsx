@@ -12,7 +12,6 @@ import { Button } from '../ui/button';
 import ProductCard from './ProductCard';
 import { cn } from '@/shared/utils/tailwind';
 import { getPageNumbers } from '@/shared/utils/getPageNumbers';
-import { t } from '@payloadcms/translations';
 
 type ProductListProps = {
     initialParams: ProductsQueryParams;

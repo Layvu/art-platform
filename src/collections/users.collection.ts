@@ -24,10 +24,10 @@ export const UsersCollection: CollectionConfig = {
         tokenExpiration: 7200, // 2 часа
 
         // Включаем встроенную верификацию email
-        verify: {
-            generateEmailHTML: ({ token }) => generateVerificationEmailHTML(token, baseUrl),
-            generateEmailSubject: () => 'Подтверждение регистрации на Minto',
-        },
+        // verify: {
+        //     generateEmailHTML: ({ token }) => generateVerificationEmailHTML(token, baseUrl),
+        //     generateEmailSubject: () => 'Подтверждение регистрации на Minto',
+        // },
 
         // Сброс пароля
         forgotPassword: {

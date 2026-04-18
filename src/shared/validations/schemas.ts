@@ -38,7 +38,13 @@ export const productSchema = z.object({
     ),
 });
 
-// TODO: Пока не валидируем строго, тк не знаем всех полей
 export const authorWelcomeSchema = z.object({
-    content: z.string().optional(),
+    email: emailSchema,
+    vkPersonal: emailSchema,
+    activities: z.array(z.string()).min(1, 'Выберите хотя бы один род деятельности'),
+    otherActivity: z.string().optional(),
+    publicLink: emailSchema,
+    nickname: z.string().min(2, 'Ник слишком короткий'),
+    shelves: z.array(z.string()).min(1, 'Выберите хотя бы одну полку'),
+    needRail: z.boolean('Выберите вариант'),
 });

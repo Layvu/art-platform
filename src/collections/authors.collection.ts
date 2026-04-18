@@ -59,7 +59,12 @@ export const AuthorsCollection: CollectionConfig = {
         {
             name: 'name',
             type: 'text',
-            label: 'Имя',
+            label: 'Псевдоним',
+        },
+        {
+            name: 'fullName',
+            type: 'text',
+            label: 'ФИО',
         },
         {
             name: 'slug',
