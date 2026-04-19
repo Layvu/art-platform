@@ -31,6 +31,7 @@ async function request(role, method, path, body = null, customHeaders = {}) {
         });
 
         let cookies = [];
+        // Используем getSetCookie если доступно, иначе парсим заголовок
         if (typeof res.headers.getSetCookie === 'function') {
             cookies = res.headers.getSetCookie();
         } else {
@@ -118,19 +119,19 @@ async function createCart(role, cartData) {
 const timestamp = Date.now();
 const VICTIM = {
     email: `victim_${timestamp}@test.com`,
-    password: 'password123',
+    password: 'HardPassword123',
     fullName: 'Victim User',
     phone: '0987654321',
 };
 const HACKER = {
     email: `hacker_${timestamp}@test.com`,
-    password: 'password123',
+    password: 'VeryHardPassword123',
     fullName: 'Hacker User',
     phone: '1234567890',
 };
 const ADMIN = {
     email: `admin_${timestamp}@test.com`,
-    password: 'adminpassword123',
+    password: 'adminPassword123',
     fullName: 'Admin User',
     phone: '1111111111',
 };

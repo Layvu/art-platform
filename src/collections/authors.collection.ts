@@ -17,20 +17,20 @@ export const AuthorsCollection: CollectionConfig = {
 
     access: {
         read: async ({ req: { user } }) => {
-            // Публичный доступ для фронтенда
-            if (!user) return true;
+            // // Публичный доступ для фронтенда
+            // if (!user) return true;
 
-            // Админы видят всех авторов
-            if (isAdmin(user)) return true;
+            // // Админы видят всех авторов
+            // if (isAdmin(user)) return true;
 
-            // Авторы видят только свою запись
-            if (isAuthor(user)) {
-                return {
-                    user: { equals: user.id },
-                };
-            }
+            // // Авторы видят только свою запись
+            // if (isAuthor(user)) {
+            //     return {
+            //         user: { equals: user.id },
+            //     };
+            // }
 
-            // Все остальные видят авторов
+            // // Все остальные видят авторов
             return true;
         },
 
