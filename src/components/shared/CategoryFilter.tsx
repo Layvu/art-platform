@@ -62,7 +62,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                         <CommandGroup>
                             <ScrollArea className="h-46 w-full">
                                 {isError && error && <span>{error.message}</span>}
-                                {isFetching && <span>Loading...</span>}
+                                {isFetching && <span className="w-full mx-auto">Loading...</span>}
                                 {categories.map((category) => {
                                     const isChecked = newCategories.includes(category.value);
 
@@ -81,16 +81,13 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                                             value={category.label}
                                             onSelect={toggle}
                                         >
-                                            <Checkbox
-                                                id={category.value}
-                                                checked={isChecked}
-                                                // Клик по чекбоксу переключает так же
-                                                // нельзя без этого тк CommandItem не считает за чилдрена чекбокс
-                                                onCheckedChange={toggle}
-                                                // Блокируем всплытие, чтобы CommandItem не срабатывал дважды
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="cursor-pointer"
-                                            />
+                                            <div className="shrink-0 pointer-events-auto">
+                                                <Checkbox
+                                                    checked={isChecked}               
+                                                    onCheckedChange={toggle}
+                                                    
+                                                />
+                                            </div>
                                             {category.label}
                                         </CommandItem>
                                     );

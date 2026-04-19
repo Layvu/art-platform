@@ -67,7 +67,9 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
         unavailableItems.forEach((item) => removeItem(item.product.id));
     };
     const handleCheckout = () => {
+        handleDeleteUnavailableItems();
         if (isUserAuthorized) {
+            // удалить товары из корзины котырые недоступны
             router.push(PAGES.ORDER);
         } else {
             router.push(`${PAGES.LOGIN}?redirect=${PAGES.ORDER}`);

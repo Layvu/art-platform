@@ -68,9 +68,11 @@ export const getProductSlugQueryOptions = ({ id }: { id: number }) => {
 };
 
 export const getCategoriesQueryOptions = (queryParams: QueryParams) => {
+    const limit = queryParams.limit || 100;
+    const updatedQueryParams = { ...queryParams, limit, sort: 'label' };
     return {
         queryKey: [COLLECTION_SLUGS.CATEGORIES, queryParams],
-        queryFn: () => payloadDataService.getCategories(queryParams),
+        queryFn: () => payloadDataService.getCategories(updatedQueryParams),
         staleTime: 1000 * 60, // минута,
     };
 };
