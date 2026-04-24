@@ -54,13 +54,12 @@ export default function AboutSlider() {
             <Slider {...settings} className="about-slider">
                 {images.map((url, i) => (
                     <div key={i} className="outline-none">
-                 
                         <div className="relative w-full aspect-video md:aspect-[16/9] lg:h-[500px]">
                             <Image
                                 src={url}
                                 alt={`Slide ${i + 1}`}
                                 fill
-                                priority={i === 0} 
+                                priority={i === 0}
                                 sizes="(max-width: 1024px) 100vw, 60vw"
                                 className="object-cover"
                             />

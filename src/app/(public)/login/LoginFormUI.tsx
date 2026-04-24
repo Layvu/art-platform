@@ -213,7 +213,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                     className="space-y-6"
                                 >
                                     <Alert variant="info">
-                                            Для входа используйте данные, предоставленные администратором
+                                        Для входа используйте данные, предоставленные администратором
                                     </Alert>
                                     <FormField
                                         control={authorForm.control}

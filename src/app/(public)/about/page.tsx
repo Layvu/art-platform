@@ -1,10 +1,12 @@
 import React from 'react';
+
 import { Clock, MapPin, Phone } from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import JoinTeamSection from '@/components/about/JoinTeamSection';
 import AboutSlider from '@/components/about/Slider';
 import YandexMap from '@/components/about/YandexMap';
-import Link from 'next/link';
-import type { Metadata } from 'next';
-import JoinTeamSection from '@/components/about/JoinTeamSection';
 
 export const metadata: Metadata = {
     title: 'О нас | МИНТО — Маркет авторских работ',

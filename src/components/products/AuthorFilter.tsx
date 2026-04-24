@@ -49,7 +49,7 @@ export default function AuthorFilter({ initialAuthor, onAuthorChange }: AuthorFi
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-            <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
+                <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
                     Автор
                     {isActive && (
                         <Button variant="default" size="icon" className="rounded-full w-6 h-6" onClick={onResetClick}>

@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useMemo } from 'react';
+
+import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import CartItem from '@/components/cart/CartItem';
+import { Button } from '@/components/ui/button';
 import { ItemGroup } from '@/components/ui/item';
 import { PAGES } from '@/config/public-pages.config';
 import { useCartStore } from '@/services/store/cart/store';
@@ -11,11 +14,9 @@ import { isProductData } from '@/shared/guards/product.guard';
 import { useProductsByIds } from '@/shared/hooks/useFetchData';
 import type { ICartItem } from '@/shared/types/cart.interface';
 import type { Product } from '@/shared/types/payload-types';
-
-import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { Checkbox } from '../ui/checkbox';
 import { cn } from '@/shared/utils/tailwind';
+
+import { Checkbox } from '../ui/checkbox';
 
 interface ICartUIProps {
     isUserAuthorized: boolean;

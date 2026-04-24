@@ -3,9 +3,9 @@
 import React from 'react';
 
 import ProductsList from '@/components/products/ProductsList';
+import { isAuthorData } from '@/shared/guards/author.guard';
 import type { Product } from '@/shared/types/payload-types';
 import type { ProductsQueryParams } from '@/shared/types/query-params.type';
-import { isAuthorData } from '@/shared/guards/author.guard';
 
 type Props = {
     product: Product;

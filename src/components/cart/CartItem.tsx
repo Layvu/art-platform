@@ -1,10 +1,13 @@
 'use client';
 
 import React from 'react';
+
 import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import { PAGES } from '@/config/public-pages.config';
 import { useCartStore } from '@/services/store/cart/store';
 import { isImageData } from '@/shared/guards/image.guard';
 import { isProductData } from '@/shared/guards/product.guard';
@@ -13,8 +16,6 @@ import { cn } from '@/shared/utils/tailwind';
 
 import { Button, CounterButton } from '../ui/button';
 import { Card } from '../ui/card';
-import Link from 'next/link';
-import { PAGES } from '@/config/public-pages.config';
 
 export default function CartItem({ item, available }: { item: ICartItem; available: boolean }) {
     const { toggleChecked, increase, decrease, removeItem } = useCartStore();

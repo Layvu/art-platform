@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
+
+import clsx from 'clsx';
 import Link from 'next/link';
 
 import type { IMenuItem } from './menu.data';
-import clsx from 'clsx';
 
 export interface IMenuItemProps {
     menuItem: IMenuItem;

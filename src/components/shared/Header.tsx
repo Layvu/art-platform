@@ -2,16 +2,15 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-
-import { PAGES } from '@/config/public-pages.config';
 import { usePathname } from 'next/navigation';
 import { match } from 'path-to-regexp';
 
+import { PAGES } from '@/config/public-pages.config';
 import { useAuthStore } from '@/services/store/auth/store';
 
+import CartButton from '../Menu/CartButton';
 import { MENU } from '../Menu/menu.data';
 import { MenuItem } from '../Menu/MenuItem';
-import CartButton from '../Menu/CartButton';
 import ProfileButton from '../Menu/ProfileButton';
 
 export function Header() {

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // Базовые переиспользуемые правила
 export const emailSchema = z.string().min(1, 'Email обязателен').pipe(z.email('Введите корректный email адрес'));
+export const linkSchema = z.string().min(1, 'Ссылка обязательна').url('Введите корректную ссылку');
 
 export const passwordSchema = z
     .string()
@@ -38,13 +39,18 @@ export const productSchema = z.object({
     ),
 });
 
-export const authorWelcomeSchema = z.object({
+export const authorStep2Schema = z.object({
     email: emailSchema,
-    vkPersonal: emailSchema,
+    vkPersonal: linkSchema,
     activities: z.array(z.string()).min(1, 'Выберите хотя бы один род деятельности'),
     otherActivity: z.string().optional(),
-    publicLink: emailSchema,
+    publicLink: linkSchema,
     nickname: z.string().min(2, 'Ник слишком короткий'),
-    shelves: z.array(z.string()).min(1, 'Выберите хотя бы одну полку'),
-    needRail: z.boolean('Выберите вариант'),
 });
+
+export const authorFullSchema = authorStep2Schema.extend({
+    shelves: z.array(z.string()).min(1, 'Выберите хотя бы одну полку'),
+    needRail: z.string().min(1, 'Please select an option'),
+});
+
+export type AuthorWelcomeValues = z.infer<typeof authorFullSchema>;

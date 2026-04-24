@@ -21,7 +21,7 @@ export default function ProductsUI({
 
     return (
         <div className="wrap">
-            <h1 className='text-[28px] font-semibold mb-8'>Товары</h1>
+            <h1 className="text-[28px] font-semibold mb-8">Товары</h1>
             <ProductFiltersBar
                 filters={{
                     authors: initialParams.authors,

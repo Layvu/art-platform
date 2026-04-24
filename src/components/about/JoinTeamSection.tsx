@@ -1,9 +1,11 @@
 'use client';
 
 import React from 'react';
+
 import Image from 'next/image';
-import { Button } from '@/components/ui/button'; // Предполагаемый путь к Shadcn Button
 import Link from 'next/link';
+
+import { Button } from '@/components/ui/button'; // Предполагаемый путь к Shadcn Button
 
 export default function JoinTeamSection() {
     return (

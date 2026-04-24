@@ -13,11 +13,14 @@ const buttonVariants = cva(
             variant: {
                 default:
                     'bg-my-button-primary-default text-white hover:bg-button-primary-hover disabled:bg-my-button-primary-disabled',
-                smallRounded: 'bg-my-button-primary-default text-white hover:bg-button-primary-hover disabled:bg-my-button-primary-disabled rounded-full w-6 h-6 min-h-0',
+                smallRounded:
+                    'bg-my-button-primary-default text-white hover:bg-button-primary-hover disabled:bg-my-button-primary-disabled rounded-full w-6 h-6 min-h-0',
                 destructive:
                     'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
-                outline: 'border-2 hover:bg-secondary/80 hover:border-bg-secondary/80 dark:hover:bg-secondary/80 dark:hover:border-bg-secondary/80',
-                secondary: 'bg-my-button-secondary-default text-my-accent hover:bg-my-button-secondary-hover disabled:bg-my-button-secondary-disabled disabled:text-my-tertriary',
+                outline:
+                    'border-2 hover:bg-secondary/80 hover:border-bg-secondary/80 dark:hover:bg-secondary/80 dark:hover:border-bg-secondary/80',
+                secondary:
+                    'bg-my-button-secondary-default text-my-accent hover:bg-my-button-secondary-hover disabled:bg-my-button-secondary-disabled disabled:text-my-tertriary',
 
                 ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
                 empty: 'hover:bg-my-button-primary-hover',
@@ -57,40 +60,49 @@ function Button({
     return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
 }
 
-const counterVariants = cva(
-    'flex p-0.5 w-full gap-1 items-center justify-between rounded-md',
-    {
-        variants: {
-            variant: {
-                default: 'text-white bg-my-button-primary-default',
+const counterVariants = cva('flex p-0.5 w-full gap-1 items-center justify-between rounded-md', {
+    variants: {
+        variant: {
+            default: 'text-white bg-my-button-primary-default',
 
-                secondary: 'text-my-accent bg-my-secondary-background',
-            },
-        },
-        defaultVariants: {
-            variant: 'default',
+            secondary: 'text-my-accent bg-my-secondary-background',
         },
     },
-);
+    defaultVariants: {
+        variant: 'default',
+    },
+});
 
-export default function CounterButton({handleMinus, handlePlus, quantity, variant}: {
+export default function CounterButton({
+    handleMinus,
+    handlePlus,
+    quantity,
+    variant,
+}: {
     handleMinus: () => void;
     handlePlus: () => void;
     quantity: number;
     variant?: VariantProps<typeof counterVariants>['variant'];
-  }) {
-      return (
-          <div className={cn(counterVariants({ variant }))}>
-              <Button className="p-0 w-9" onClick={handleMinus} variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}>
-                  <Minus width={36} height={36} />
-              </Button>
-              <div className="px-2">{quantity}</div>
-              <Button className="p-0 w-9" onClick={handlePlus} variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}>
-                  <Plus width={36} height={36} />
-              </Button>
-          </div>
-      );
-  }
-  
+}) {
+    return (
+        <div className={cn(counterVariants({ variant }))}>
+            <Button
+                className="p-0 w-9"
+                onClick={handleMinus}
+                variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}
+            >
+                <Minus width={36} height={36} />
+            </Button>
+            <div className="px-2">{quantity}</div>
+            <Button
+                className="p-0 w-9"
+                onClick={handlePlus}
+                variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}
+            >
+                <Plus width={36} height={36} />
+            </Button>
+        </div>
+    );
+}
 
 export { Button, buttonVariants, CounterButton };

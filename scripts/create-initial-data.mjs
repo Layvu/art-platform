@@ -12,13 +12,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
 config({ path: path.resolve(__dirname, '../', envFile) }); // Путь к корню проекта
 
-
 const CONFIG = {
     filePath: path.join(__dirname, process.env.EXCEL_FILE_PATH),
     baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
-    adminCredentials: { 
-        email: process.env.ADMIN_EMAIL, 
-        password: process.env.ADMIN_PASSWORD 
+    adminCredentials: {
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD,
     },
     credsFile: path.join(__dirname, process.env.CREDS_LOG_PATH),
     fallbackUser: {
@@ -30,12 +29,12 @@ const CONFIG = {
         green: '\x1b[32m',
         yellow: '\x1b[33m',
         red: '\x1b[31m',
-        cyan: '\x1b[36m'
-    }
+        cyan: '\x1b[36m',
+    },
 };
 
 let sessionCookie = null;
-const authorCache = new Map(); 
+const authorCache = new Map();
 const categoryCache = new Map();
 
 const generatePassword = () => Math.random().toString(36).slice(-10) + 'A1!';
@@ -52,11 +51,15 @@ async function request(method, path, body = null) {
         });
 
         const setCookie = res.headers.getSetCookie?.() || [res.headers.get('set-cookie')];
-        const token = setCookie.find(c => c?.includes('payload-token'));
+        const token = setCookie.find((c) => c?.includes('payload-token'));
         if (token) sessionCookie = token.split(';')[0];
 
         let data = {};
-        try { data = await res.json(); } catch { data = { text: await res.text() }; }
+        try {
+            data = await res.json();
+        } catch {
+            data = { text: await res.text() };
+        }
         return { status: res.status, data };
     } catch (e) {
         return { status: 0, data: { error: e.message } };
@@ -67,7 +70,7 @@ async function getCategoryId(label) {
     if (!label) return null;
     const cleanLabel = label.trim();
     if (categoryCache.has(cleanLabel)) return categoryCache.get(cleanLabel);
-    
+
     const res = await request('GET', `/api/categories?where[label][equals]=${encodeURIComponent(cleanLabel)}`);
     if (res.status === 200 && res.data.docs?.length > 0) {
         const id = res.data.docs[0].id;
@@ -78,16 +81,16 @@ async function getCategoryId(label) {
 }
 
 async function createProduct(row, authorId) {
-    const nomenclatureLink = row[9]?.toString() || "";
+    const nomenclatureLink = row[9]?.toString() || '';
     const retailPrice = parseFloat(row[5]) || 0;
-    const nomenclatureCode = row[8]?.toString() || "";
+    const nomenclatureCode = row[8]?.toString() || '';
     const stockBalance = parseInt(row[10]) || 0;
 
-    const parts = nomenclatureLink.split(',').map(s => s?.trim());
-    const title = parts[0] || "Без названия";
+    const parts = nomenclatureLink.split(',').map((s) => s?.trim());
+    const title = parts[0] || 'Без названия';
     const categoryLabel = parts[1];
 
-    if (categoryLabel === "Услуги") return;
+    if (categoryLabel === 'Услуги') return;
 
     const categoryId = await getCategoryId(categoryLabel);
 
@@ -120,7 +123,7 @@ async function runSeed() {
 
     const workbook = XLSX.readFile(CONFIG.filePath);
     const data = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-    
+
     writeFileSync(CONFIG.credsFile, `Лог импорта от ${new Date().toLocaleString()}\n\n`);
 
     for (let i = 1; i < data.length; i++) {
@@ -129,9 +132,9 @@ async function runSeed() {
 
         const serialNumber = row[3]?.toString().trim();
         const supplierInfo = row[7].toString();
-        let [fullName, email] = supplierInfo.split(',').map(s => s?.trim());
-        
-        if (!fullName || fullName === "") {
+        let [fullName, email] = supplierInfo.split(',').map((s) => s?.trim());
+
+        if (!fullName || fullName === '') {
             fullName = CONFIG.fallbackUser.fullName;
             email = CONFIG.fallbackUser.email;
         }
@@ -144,7 +147,7 @@ async function runSeed() {
 
         // 1. ПОИСК СУЩЕСТВУЮЩЕГО АВТОРА (на случай перезапуска скрипта)
         const findAuthor = await request('GET', `/api/authors?where[fullName][equals]=${encodeURIComponent(fullName)}`);
-        
+
         if (findAuthor.status === 200 && findAuthor.data.docs?.length > 0) {
             const authorId = findAuthor.data.docs[0].id;
             authorCache.set(fullName, authorId);
@@ -171,15 +174,19 @@ async function runSeed() {
                 email,
                 password,
                 fullName,
-                role: 'author'
+                role: 'author',
             });
 
             if (newUser.status === 201) {
                 userId = newUser.data.doc.id;
                 appendFileSync(CONFIG.credsFile, `ФИО: ${fullName} | Email: ${email} | Pass: ${password}\n`);
-                console.log(`${CONFIG.colors.green}Создан пользователь и авто-запись автора: ${email}${CONFIG.colors.reset}`);
+                console.log(
+                    `${CONFIG.colors.green}Создан пользователь и авто-запись автора: ${email}${CONFIG.colors.reset}`,
+                );
             } else {
-                console.log(`${CONFIG.colors.red}Ошибка создания пользователя ${email}: ${newUser.status}${CONFIG.colors.reset}`);
+                console.log(
+                    `${CONFIG.colors.red}Ошибка создания пользователя ${email}: ${newUser.status}${CONFIG.colors.reset}`,
+                );
                 continue;
             }
         }
@@ -188,14 +195,14 @@ async function runSeed() {
         if (userId) {
             // Ищем автора, которого создал хук (по связи с user)
             const autoAuthorRes = await request('GET', `/api/authors?where[user][equals]=${userId}`);
-            
+
             if (autoAuthorRes.status === 200 && autoAuthorRes.data.docs?.length > 0) {
                 const authorId = autoAuthorRes.data.docs[0].id;
-                
+
                 // Обновляем пустую запись данными из Excel
                 const updateRes = await request('PATCH', `/api/authors/${authorId}`, {
                     name: serialNumber || fullName,
-                    fullName: fullName
+                    fullName: fullName,
                 });
 
                 if (updateRes.status === 200) {
@@ -203,19 +210,23 @@ async function runSeed() {
                     console.log(`${CONFIG.colors.green}[~] Данные автора заполнены: ${fullName}${CONFIG.colors.reset}`);
                     await createProduct(row, authorId);
                 } else {
-                    console.log(`${CONFIG.colors.red}Ошибка обновления автора ${authorId}: ${updateRes.status}${CONFIG.colors.reset}`);
+                    console.log(
+                        `${CONFIG.colors.red}Ошибка обновления автора ${authorId}: ${updateRes.status}${CONFIG.colors.reset}`,
+                    );
                 }
             } else {
                 // Если вдруг хук не сработал, создаем вручную как fallback
                 const manualAuthor = await request('POST', '/api/authors', {
                     name: serialNumber || fullName,
                     fullName: fullName,
-                    user: userId
+                    user: userId,
                 });
                 if (manualAuthor.status === 201) {
                     const authorId = manualAuthor.data.doc.id;
                     authorCache.set(fullName, authorId);
-                    console.log(`${CONFIG.colors.cyan}[+] Автор создан вручную (хук не сработал): ${fullName}${CONFIG.colors.reset}`);
+                    console.log(
+                        `${CONFIG.colors.cyan}[+] Автор создан вручную (хук не сработал): ${fullName}${CONFIG.colors.reset}`,
+                    );
                     await createProduct(row, authorId);
                 }
             }

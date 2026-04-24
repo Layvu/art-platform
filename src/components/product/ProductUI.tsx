@@ -13,16 +13,16 @@ import { isAuthorData } from '@/shared/guards/author.guard';
 import { isImageData } from '@/shared/guards/image.guard';
 import { isProductData } from '@/shared/guards/product.guard';
 import { useFetchProduct } from '@/shared/hooks/useFetchData';
+import { useUpdateQueryParams } from '@/shared/hooks/useUpdateQueryParams';
 import type { Media } from '@/shared/types/payload-types';
 import type { ProductQueryParams, ProductsQueryParams } from '@/shared/types/query-params.type';
 
 import CounterButton, { Button } from '../ui/button';
 
+import AuthorProductsSection from './AuthorProductsSection';
 import ProductSlider from './ProductSlider';
 
 import './product.scss';
-import AuthorProductsSection from './AuthorProductsSection';
-import { useUpdateQueryParams } from '@/shared/hooks/useUpdateQueryParams';
 
 export default function ProductUI({ initialParams }: { initialParams: ProductQueryParams }) {
     const slug = initialParams.product;
@@ -77,7 +77,9 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                                     {isAvailable ? `${price} ₽` : 'Ждём поступления!'}
                                 </Button>
                             )}
-                            {!!quantity && quantity > 0 && <span className="text-my-accent font-[450]">В наличии {quantity} шт</span>}
+                            {!!quantity && quantity > 0 && (
+                                <span className="text-my-accent font-[450]">В наличии {quantity} шт</span>
+                            )}
                         </div>
                     </div>
 

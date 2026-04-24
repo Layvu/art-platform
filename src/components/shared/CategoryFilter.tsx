@@ -82,11 +82,7 @@ export default function CategoryFilter({ category, onCategoryChange }: CategoryF
                                             onSelect={toggle}
                                         >
                                             <div className="shrink-0 pointer-events-auto">
-                                                <Checkbox
-                                                    checked={isChecked}               
-                                                    onCheckedChange={toggle}
-                                                    
-                                                />
+                                                <Checkbox checked={isChecked} onCheckedChange={toggle} />
                                             </div>
                                             {category.label}
                                         </CommandItem>

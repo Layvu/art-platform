@@ -4,6 +4,7 @@ import React from 'react';
 
 import { ExternalLink } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { useFetchAuthor } from '@/shared/hooks/useFetchData';
@@ -12,7 +13,6 @@ import type { AuthorQueryParams, ProductsQueryParams } from '@/shared/types/quer
 import { isImageData } from '../../shared/guards/image.guard';
 import ProductsUI from '../products/ProductsUI';
 import { Button } from '../ui/button';
-import Link from 'next/link';
 
 export default function AuthorUI({
     initialParams,

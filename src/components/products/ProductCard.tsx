@@ -1,5 +1,5 @@
 'use client';
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
@@ -68,8 +68,12 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                     </div>
                     <CardAction className="w-full cursor-default" onClick={handleCardActionClick}>
                         {productInCart ? (
-           
-                            <CounterButton variant={'default'} quantity={productInCart.quantity} handleMinus={() => decrease(id)} handlePlus={() => increase(id)}></CounterButton>
+                            <CounterButton
+                                variant={'default'}
+                                quantity={productInCart.quantity}
+                                handleMinus={() => decrease(id)}
+                                handlePlus={() => increase(id)}
+                            ></CounterButton>
                         ) : (
                             <Button
                                 className="w-full rounded"

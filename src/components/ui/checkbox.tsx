@@ -1,7 +1,9 @@
 'use client';
 
 import * as React from 'react';
+
 import { Square, SquareCheck } from 'lucide-react';
+
 import { cn } from '@/shared/utils/tailwind';
 
 interface CheckboxProps {
@@ -38,16 +40,12 @@ const Checkbox = React.forwardRef<HTMLDivElement, CheckboxProps>(
             >
                 <input type="checkbox" className="sr-only" checked={checked} readOnly disabled={disabled} />
 
-           
-
                 {checked ? (
                     <SquareCheck size={24} className="absolute inset-0 text-my-accent" />
                 ) : (
                     <Square
-                    size={24}
-                        className={cn(
-                            'text-my-secondary absolute inset-0 transition-colors duration-200',
-                        )}
+                        size={24}
+                        className={cn('text-my-secondary absolute inset-0 transition-colors duration-200')}
                     />
                 )}
             </div>

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CircleUserRound, Lock, LockKeyhole, LogOut, ShoppingBag, User } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -12,15 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { customerClientService } from '@/services/api/client/customer-client.service';
 import type { CustomerProfileUIProps, ICustomerUpdateInput } from '@/shared/types/customer.interface';
+import { cn } from '@/shared/utils/tailwind';
 import { emailSchema, fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
 
 import OrderHistory from './OrderHistory';
-import { CircleUserRound, Lock, LockKeyhole, LogOut, ShoppingBag, User } from 'lucide-react';
-import { cn } from '@/shared/utils/tailwind';
-import { Separator } from '@/components/ui/separator';
 
 const profileSchema = z.object({
     fullName: fullNameSchema,
@@ -205,7 +205,7 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
 
                 {activeTab === 'security' && (
                     <div className="space-y-8">
-                         <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center">
                             <h1 className="text-3xl font-semibold">{currentTabLabel}</h1>
                             <Button
                                 variant="secondary"

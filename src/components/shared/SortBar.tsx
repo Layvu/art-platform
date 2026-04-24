@@ -36,8 +36,13 @@ export default function SortBar<T extends string>({ sort, options, onSortChange 
                 <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
                     <ArrowDownUp />
                     <SelectValue placeholder="По умолчанию" />
-                      {isActive && (
-                        <Button variant="default" size="icon" className="rounded-full w-6 h-6" onPointerDown={onResetClick}>
+                    {isActive && (
+                        <Button
+                            variant="default"
+                            size="icon"
+                            className="rounded-full w-6 h-6"
+                            onPointerDown={onResetClick}
+                        >
                             <X />
                         </Button>
                     )}
@@ -48,7 +53,7 @@ export default function SortBar<T extends string>({ sort, options, onSortChange 
             <SelectContent>
                 {/* <SelectItem value="default">По умолчанию</SelectItem> */}
                 {options.map((s) => (
-                    <SelectItem key={s.value} value={s.value} className=''>
+                    <SelectItem key={s.value} value={s.value} className="">
                         {s.label}
                     </SelectItem>
                 ))}

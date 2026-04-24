@@ -15,7 +15,6 @@ import { apiUrl } from '../api-url-builder';
 import { BaseServerService } from './base-server.service';
 import { payloadDataService } from './payload-data.service';
 import { yookassaService } from './yookassa.service';
-import { isImageData } from '@/shared/guards/image.guard';
 
 export const STOCK_ADJUSTMENT = {
     DECREMENT: 'decrement',
@@ -195,7 +194,7 @@ export class OrderServerService extends BaseServerService {
             }
 
             totalOrderSum += productPrice * orderItem.quantity;
-            
+
             payloadItems.push({
                 productSnapshot: {
                     productId: product.id,

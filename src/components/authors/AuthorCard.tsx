@@ -25,9 +25,9 @@ export default function AuthorCard({ name, slug, avatar }: Author) {
                 }, 300))
             }
             onMouseLeave={() => timerRef.current && clearTimeout(timerRef.current)}
-            className='p-0 hover:outline-4 hover:outline-[#D8F2F3] outline-0 outline-offset-0'
-            >
-            <Link href={PAGES.AUTHOR(slug!)} className='flex flex-col gap-3'>
+            className="p-0 hover:outline-4 hover:outline-[#D8F2F3] outline-0 outline-offset-0"
+        >
+            <Link href={PAGES.AUTHOR(slug!)} className="flex flex-col gap-3">
                 <div className="flex flex-1 aspect-square relative items-center rounded-md overflow-hidden">
                     <Image
                         alt="Картинка"

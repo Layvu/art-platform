@@ -1,9 +1,9 @@
-import * as migration_20260324_093113_auto_20260324_143107 from './20260324_093113_auto_20260324_143107';
+import * as migration_20260421_102138_auto_20260421_152132 from './20260421_102138_auto_20260421_152132';
 
 export const migrations = [
-  {
-    up: migration_20260324_093113_auto_20260324_143107.up,
-    down: migration_20260324_093113_auto_20260324_143107.down,
-    name: '20260324_093113_auto_20260324_143107'
-  },
+    {
+        up: migration_20260421_102138_auto_20260421_152132.up,
+        down: migration_20260421_102138_auto_20260421_152132.down,
+        name: '20260421_102138_auto_20260421_152132',
+    },
 ];

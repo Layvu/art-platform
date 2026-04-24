@@ -2,23 +2,23 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { Timer } from '@/components/shared/Timer';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { orderClientService } from '@/services/api/client/order-client.service';
 import { DELIVERY_TYPES, getOrderStatusText, ORDER_STATUS, PICKUP_ADDRESS } from '@/shared/constants/order.constants';
 import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
-import { useProductSlugs, useProductsByIds } from '@/shared/hooks/useFetchData';
+import { isImageData } from '@/shared/guards/image.guard';
+import { useProductsByIds, useProductSlugs } from '@/shared/hooks/useFetchData';
 import type { Order } from '@/shared/types/payload-types';
 import type { IYookassaPaymentResponse, IYookassaWebhookEvent } from '@/shared/types/yookassa.interface';
 import { canOrderBeCancelled } from '@/shared/utils/orders.utils';
-import Image from 'next/image';
-import { isImageData } from '@/shared/guards/image.guard';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
 
 interface OrderHistoryProps {
     customerId: number;
@@ -148,9 +148,13 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                         {/* Product Images */}
                         <div className="flex flex-wrap gap-3 mb-8">
                             {order.items.map((item, idx) => {
-                                
                                 const currentProduct = products.find((p) => p.id === item.productSnapshot.productId);
-                                const mainImage = currentProduct && currentProduct.gallery && isImageData(currentProduct.gallery[0]?.image) ? currentProduct.gallery[0].image : '/placeholder.png';
+                                const mainImage =
+                                    currentProduct &&
+                                    currentProduct.gallery &&
+                                    isImageData(currentProduct.gallery[0]?.image)
+                                        ? currentProduct.gallery[0].image
+                                        : '/placeholder.png';
                                 return (
                                     // )
                                     <Link
@@ -160,7 +164,9 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                                     >
                                         <Image
                                             src={
-                                                isImageData(mainImage) && mainImage.url ? mainImage.url : mainImage as string
+                                                isImageData(mainImage) && mainImage.url
+                                                    ? mainImage.url
+                                                    : (mainImage as string)
                                             }
                                             alt={item.productSnapshot.title}
                                             fill

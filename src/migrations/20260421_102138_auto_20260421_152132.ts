@@ -1,7 +1,7 @@
 ﻿import { type MigrateDownArgs, type MigrateUpArgs, sql } from '@payloadcms/db-postgres';
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
-  await db.execute(sql`
+    await db.execute(sql`
    CREATE TYPE "public"."_locales" AS ENUM('ru', 'en');
   CREATE TYPE "public"."enum_users_role" AS ENUM('admin', 'author', 'customer');
   CREATE TYPE "public"."enum_orders_delivery_type" AS ENUM('pickup', 'delivery');
@@ -22,7 +22,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   CREATE TABLE "products" (
   	"id" serial PRIMARY KEY NOT NULL,
-  	"article1c" varchar DEFAULT '000001',
+  	"article1c" varchar,
   	"title" varchar NOT NULL,
   	"slug" varchar NOT NULL,
   	"price" numeric,
@@ -44,9 +44,12 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TABLE "authors" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"name" varchar,
+  	"full_name" varchar,
   	"slug" varchar,
   	"bio" varchar,
   	"avatar_id" integer,
+  	"cover_id" integer,
+  	"external_link" varchar,
   	"products_count" numeric DEFAULT 0,
   	"user_id" integer,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
@@ -71,15 +74,20 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"reset_password_expiration" timestamp(3) with time zone,
   	"salt" varchar,
   	"hash" varchar,
-  	"_verified" boolean,
-  	"_verificationtoken" varchar,
   	"login_attempts" numeric DEFAULT 0,
   	"lock_until" timestamp(3) with time zone
   );
   
   CREATE TABLE "forms" (
   	"id" serial PRIMARY KEY NOT NULL,
-  	"content" varchar NOT NULL,
+  	"email" varchar NOT NULL,
+  	"vk_personal" varchar NOT NULL,
+  	"activities" jsonb NOT NULL,
+  	"other_activity" varchar,
+  	"public_link" varchar NOT NULL,
+  	"nickname" varchar NOT NULL,
+  	"shelves" jsonb NOT NULL,
+  	"need_rail" boolean DEFAULT false NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
@@ -303,6 +311,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   ALTER TABLE "products" ADD CONSTRAINT "products_author_id_authors_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."authors"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "authors_product_categories" ADD CONSTRAINT "authors_product_categories_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."authors"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "authors" ADD CONSTRAINT "authors_avatar_id_media_id_fk" FOREIGN KEY ("avatar_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "authors" ADD CONSTRAINT "authors_cover_id_media_id_fk" FOREIGN KEY ("cover_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "authors" ADD CONSTRAINT "authors_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "users_sessions" ADD CONSTRAINT "users_sessions_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "carts_items" ADD CONSTRAINT "carts_items_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE set null ON UPDATE no action;
@@ -340,6 +349,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "authors_product_categories_parent_id_idx" ON "authors_product_categories" USING btree ("_parent_id");
   CREATE UNIQUE INDEX "authors_slug_idx" ON "authors" USING btree ("slug");
   CREATE INDEX "authors_avatar_idx" ON "authors" USING btree ("avatar_id");
+  CREATE INDEX "authors_cover_idx" ON "authors" USING btree ("cover_id");
   CREATE UNIQUE INDEX "authors_user_idx" ON "authors" USING btree ("user_id");
   CREATE INDEX "users_sessions_order_idx" ON "users_sessions" USING btree ("_order");
   CREATE INDEX "users_sessions_parent_id_idx" ON "users_sessions" USING btree ("_parent_id");
@@ -410,11 +420,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_preferences_rels_path_idx" ON "payload_preferences_rels" USING btree ("path");
   CREATE INDEX "payload_preferences_rels_users_id_idx" ON "payload_preferences_rels" USING btree ("users_id");
   CREATE INDEX "payload_migrations_updated_at_idx" ON "payload_migrations" USING btree ("updated_at");
-  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`)
+  CREATE INDEX "payload_migrations_created_at_idx" ON "payload_migrations" USING btree ("created_at");`);
 }
 
 export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
-  await db.execute(sql`
+    await db.execute(sql`
    DROP TABLE "products_gallery" CASCADE;
   DROP TABLE "products" CASCADE;
   DROP TABLE "authors_product_categories" CASCADE;
@@ -451,5 +461,5 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_payload_jobs_log_task_slug";
   DROP TYPE "public"."enum_payload_jobs_log_state";
   DROP TYPE "public"."enum_payload_jobs_log_parent_task_slug";
-  DROP TYPE "public"."enum_payload_jobs_task_slug";`)
+  DROP TYPE "public"."enum_payload_jobs_task_slug";`);
 }

@@ -5,16 +5,15 @@ import React from 'react';
 import { ShoppingBasket } from 'lucide-react';
 import Link from 'next/link';
 
+import { PAGES } from '@/config/public-pages.config';
 import { useCartStore } from '@/services/store/cart/store';
 
 import { Badge } from '../ui/badge';
 
-import { PAGES } from '@/config/public-pages.config';
-
-export default function CartButton({ isActive }: {isActive: boolean}) {
+export default function CartButton({ isActive }: { isActive: boolean }) {
     const { cart } = useCartStore();
     const itemsCount = cart?.items?.length ?? 0;
-    const href= PAGES.CART;
+    const href = PAGES.CART;
     return (
         <Link href={href}>
             <div className="p-2 relative w-fit cursor-pointer">

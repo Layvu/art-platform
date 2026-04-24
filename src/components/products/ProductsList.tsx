@@ -3,15 +3,16 @@
 import React from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { toQueryParams } from '@/services/api/utils';
 import { useFetchProducts } from '@/shared/hooks/useFetchData';
 import type { ProductsQueryParams } from '@/shared/types/query-params.type';
+import { getPageNumbers } from '@/shared/utils/getPageNumbers';
+import { cn } from '@/shared/utils/tailwind';
 
 import { Button } from '../ui/button';
 
 import ProductCard from './ProductCard';
-import { cn } from '@/shared/utils/tailwind';
-import { getPageNumbers } from '@/shared/utils/getPageNumbers';
 
 type ProductListProps = {
     initialParams: ProductsQueryParams;
@@ -38,8 +39,6 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
 
     const { hasNextPage = false, hasPrevPage = false, prevPage, nextPage, totalPages = 1 } = data;
 
-
-
     return (
         <>
             <div className={cn('grid grid-cols-12 gap-6 auto-rows-fr', isPlaceholderData && 'opacity-50')}>
@@ -63,11 +62,11 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
                     </Button>
 
                     {/* Номера страниц */}
-                    {getPageNumbers(totalPages, page).map((pageNum, idx) => (
+                    {getPageNumbers(totalPages, page).map((pageNum, idx) =>
                         typeof pageNum === 'number' ? (
                             <Button
                                 key={idx}
-                                variant={pageNum === page ? "pagination" : "ghost"}
+                                variant={pageNum === page ? 'pagination' : 'ghost'}
                                 onClick={() => updateQueryParams({ page: pageNum }, { resetPage: false })}
                                 className="h-10 w-10"
                             >
@@ -77,8 +76,8 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
                             <span key={idx} className="px-2 text-muted-foreground">
                                 {pageNum}
                             </span>
-                        )
-                    ))}
+                        ),
+                    )}
 
                     {/* Кнопка "Вперед" */}
                     <Button

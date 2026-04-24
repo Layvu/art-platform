@@ -1,10 +1,14 @@
 import { exit } from 'process';
+import { config } from 'dotenv';
+
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+config({ path: path.resolve(__dirname, '../', envFile) }); // Путь к корню проекта
 
 const CONFIG = {
-    baseUrl: 'http://localhost:3000',
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
     adminCredentials: {
-        email: 'vita@mail.com',
-        password: 'root'
+        email: process.env.ADMIN_EMAIL,
+        password: process.env.ADMIN_PASSWORD,
     },
     colors: {
         reset: '\x1b[0m',
@@ -18,22 +22,89 @@ const CONFIG = {
 let sessionCookie = null;
 
 const CATEGORIES_LIST = [
-    "3D стикер", "Акриловый значок", "Аксессуар", "Билет", "Блок для заметок",
-    "Блокнот", "Браслет", "Брелки парные", "Брелок", "Брелок-конфета",
-    "Брелок-кучеряшка", "Брелок-пищалка", "Брелок-шейкер", "Брошь", "Гача",
-    "Гирлянда", "Зажигалка", "Закладка", "Заколка", "Зеркало", "Зин",
-    "Значок", "Игрушка", "Календарь", "Карта", "Карточки", "Картхолдер",
-    "Коврик для мыши", "Колье", "Кольцо", "Комикс", "Кошелек", "Кружка",
-    "Кубарики", "Лайтбук", "Лента", "Линогравюра", "Ловец солнца",
-    "Ловец радуги", "Магнит", "Магнитик", "Моносерьга", "Набор значков",
-    "Набор принтов", "Набор стикеров", "Наклейка на карту", "Нашивка",
-    "Носочки", "Обложка на паспорт", "Обложка на студенческий", "Открытка",
-    "Пенал", "Переводное тату", "Переливашка", "Пиала", "Пин", "Плакат",
-    "Плюшевый брелок", "Плюшевый брелок-конфета", "Повязка на голову",
-    "Подвес", "Подвеска", "Подсвечник", "Постер", "Принт", "Своп карта",
-    "Секретный конверт", "Сережки", "Сквиш", "Скетчбук", "Скотч",
-    "Соусник", "Стенд", "Стикер", "Стикерпак", "Стикеры парные", "СТМ",
-    "Тарелка", "Фигурка", "Футболка", "Холст", "Шкатулка", "Шоппер"
+    '3D стикер',
+    'Акриловый значок',
+    'Аксессуар',
+    'Билет',
+    'Блок для заметок',
+    'Блокнот',
+    'Браслет',
+    'Брелки парные',
+    'Брелок',
+    'Брелок-конфета',
+    'Брелок-кучеряшка',
+    'Брелок-пищалка',
+    'Брелок-шейкер',
+    'Брошь',
+    'Гача',
+    'Гирлянда',
+    'Зажигалка',
+    'Закладка',
+    'Заколка',
+    'Зеркало',
+    'Зин',
+    'Значок',
+    'Игрушка',
+    'Календарь',
+    'Карта',
+    'Карточки',
+    'Картхолдер',
+    'Коврик для мыши',
+    'Колье',
+    'Кольцо',
+    'Комикс',
+    'Кошелек',
+    'Кружка',
+    'Кубарики',
+    'Лайтбук',
+    'Лента',
+    'Линогравюра',
+    'Ловец солнца',
+    'Ловец радуги',
+    'Магнит',
+    'Магнитик',
+    'Моносерьга',
+    'Набор значков',
+    'Набор принтов',
+    'Набор стикеров',
+    'Наклейка на карту',
+    'Нашивка',
+    'Носочки',
+    'Обложка на паспорт',
+    'Обложка на студенческий',
+    'Открытка',
+    'Пенал',
+    'Переводное тату',
+    'Переливашка',
+    'Пиала',
+    'Пин',
+    'Плакат',
+    'Плюшевый брелок',
+    'Плюшевый брелок-конфета',
+    'Повязка на голову',
+    'Подвес',
+    'Подвеска',
+    'Подсвечник',
+    'Постер',
+    'Принт',
+    'Своп карта',
+    'Секретный конверт',
+    'Сережки',
+    'Сквиш',
+    'Скетчбук',
+    'Скотч',
+    'Соусник',
+    'Стенд',
+    'Стикер',
+    'Стикерпак',
+    'Стикеры парные',
+    'СТМ',
+    'Тарелка',
+    'Фигурка',
+    'Футболка',
+    'Холст',
+    'Шкатулка',
+    'Шоппер',
 ];
 
 async function request(method, path, body = null) {
@@ -48,7 +119,7 @@ async function request(method, path, body = null) {
         });
 
         const setCookie = res.headers.getSetCookie?.() || [res.headers.get('set-cookie')];
-        const token = setCookie.find(c => c?.includes('payload-token'));
+        const token = setCookie.find((c) => c?.includes('payload-token'));
         if (token) sessionCookie = token.split(';')[0];
 
         let data = {};
@@ -70,7 +141,7 @@ async function seedCategories() {
     // 1. Вход под админом
     console.log(`[1/2] Авторизация админа (${CONFIG.adminCredentials.email})...`);
     const adminLogin = await request('POST', '/api/users/login', CONFIG.adminCredentials);
-    
+
     if (adminLogin.status !== 200) {
         console.error(`${CONFIG.colors.red}Ошибка входа: ${JSON.stringify(adminLogin.data)}${CONFIG.colors.reset}`);
         return;
@@ -79,13 +150,13 @@ async function seedCategories() {
 
     // 2. Создание категорий
     console.log(`[2/2] Создание категорий (${CATEGORIES_LIST.length} шт.)...`);
-    
+
     let createdCount = 0;
     let errorCount = 0;
 
     for (const categoryLabel of CATEGORIES_LIST) {
         const payload = {
-            label: categoryLabel
+            label: categoryLabel,
             // Поле 'value' сгенерируется автоматически вашим hook: beforeChange
         };
 
@@ -105,7 +176,7 @@ async function seedCategories() {
     console.log(`\n${CONFIG.colors.cyan}=== ИТОГИ ===${CONFIG.colors.reset}`);
     console.log(`Создано: ${CONFIG.colors.green}${createdCount}${CONFIG.colors.reset}`);
     console.log(`Ошибок/Дублей: ${CONFIG.colors.red}${errorCount}${CONFIG.colors.reset}`);
-    
+
     exit(0);
 }
 

@@ -25,6 +25,16 @@ function checkAuth(req: NextRequest) {
     return login === LOGIN && password === PASSWORD;
 }
 
+// function getFilePath(filename: string) {
+//     const dir = path.join(process.cwd(), '1c_uploads');
+
+//     if (!fs.existsSync(dir)) {
+//         fs.mkdirSync(dir, { recursive: true });
+//     }
+
+//     return path.join(dir, filename);
+// }
+
 function getFilePath(filename: string) {
     const dir = path.join(process.cwd(), '1c_uploads');
 
@@ -32,9 +42,25 @@ function getFilePath(filename: string) {
         fs.mkdirSync(dir, { recursive: true });
     }
 
-    return path.join(dir, filename);
-}
+    // разбиваем имя файла
+    const ext = path.extname(filename);
+    const name = path.basename(filename, ext);
 
+    const now = new Date();
+
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    const timestamp =
+        `${now.getFullYear()}-` +
+        `${pad(now.getMonth() + 1)}-` +
+        `${pad(now.getDate())}_` +
+        `${pad(now.getHours())}-` +
+        `${pad(now.getMinutes())}`;
+
+    const newFilename = `${name}_${timestamp}${ext}`;
+
+    return path.join(dir, newFilename);
+}
 
 export async function GET(req: NextRequest) {
     const url = new URL(req.url);
@@ -70,7 +96,6 @@ file_limit=2000000`,
 
     return NextResponse.json({ error: 'not allowed' }, { status: 403 });
 }
-
 
 export async function POST(req: NextRequest) {
     const url = new URL(req.url);

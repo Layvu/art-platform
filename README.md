@@ -29,7 +29,7 @@ pnpm dev
 чтобы получить доступ к панели управления
 
 ## Отдельно поднять и потушить БД
-  
+
 docker compose up -d
 
 docker compose down

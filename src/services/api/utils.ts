@@ -21,7 +21,7 @@ export function toQueryParams(params: ProductsQueryParams): QueryParams {
     if (tags) where.tags = { in: tags.split(URL_SEPARATOR) };
     if (priceFrom) where.price = { ...(where.price || {}), greater_than_equal: priceFrom };
     if (priceTo) where.price = { ...(where.price || {}), less_than_equal: priceTo };
-    
+
     if (excludeId) {
         where.id = { not_equals: excludeId };
     }

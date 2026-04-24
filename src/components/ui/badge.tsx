@@ -10,7 +10,8 @@ const badgeVariants = cva(
         variants: {
             variant: {
                 default: 'border-transparent bg-my-button-primary-default hover:my-button-primary-default/80',
-                counter: 'border-transparent text-white bg-my-button-primary-default hover:my-button-primary-default/80',
+                counter:
+                    'border-transparent text-white bg-my-button-primary-default hover:my-button-primary-default/80',
 
                 secondary: 'border-transparent bg-white text-my-secondary px-1 py-0 font-semibold',
                 destructive:
