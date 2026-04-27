@@ -5,7 +5,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Button } from '@/components/ui/button'; // Предполагаемый путь к Shadcn Button
+import { Button } from '@/components/ui/button'; 
 
 export default function JoinTeamSection() {
     return (
@@ -13,6 +13,7 @@ export default function JoinTeamSection() {
             <h2 className="wrap text-4xl font-semibold leading-tight text-center">
                 Дорогой автор, присоединяйся к нашей команде!
             </h2>
+            
 
             <div className="w-full relative flex justify-center">
                 <Image
@@ -30,6 +31,6 @@ export default function JoinTeamSection() {
                     <Link href="/questionnaire">Заполнить анкету</Link>
                 </Button>
             </div>
-        </section>
+        </section> 
     );
 }

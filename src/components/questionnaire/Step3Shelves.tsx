@@ -7,10 +7,11 @@ import type z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { authorFullSchema, type AuthorWelcomeValues } from '@/shared/validations/schemas';
 
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import Image from 'next/image';
 
 const shelfOptions = [
     { id: '6', label: '6 уровень (верхняя полка) - 1100 р.' },
@@ -37,10 +38,15 @@ export default function Step3Shelves({
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormLabel className="font-semibold text-xl">Выбор полочки</FormLabel>
                 <div className="space-y-3">
-                    <FormLabel className="font-semibold text-xl">Выбор полочки</FormLabel>
-
+                    <div>
+                        Цена указана за 1 (один) месяц аренды!
+                        <br />
+                        ПОЛОВИНА ПОЛОЧКИ (38см/32,5см/28см)
+                    </div>
+                    <Image src="/shelves.png" alt="shelves" width={600} height={456} className="w-full"></Image>
                     {shelfOptions.map((shelf) => (
                         <FormField
                             name="shelves"
@@ -91,6 +97,12 @@ export default function Step3Shelves({
                         </FormItem>
                     )}
                 />
+                <div className="">
+                    В соответствии с требованиями Федерального закона от 27.07.2006 г. № 152-ФЗ «О персональных данных»
+                    нажимая кнопку «Отправить» я даю согласие на обработку своих персональных данных.
+                    <br />
+                    Данные не будут переданы третьим лицам
+                </div>
 
                 <div className="flex justify-between">
                     <Button type="button" variant="secondary" onClick={onBack}>
