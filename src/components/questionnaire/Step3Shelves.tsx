@@ -7,7 +7,8 @@ import type z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
 import { authorFullSchema, type AuthorWelcomeValues } from '@/shared/validations/schemas';
 
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -81,22 +82,34 @@ export default function Step3Shelves({
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel className="font-normal leading-tight text-my-secondary">
-                                Нyжен ли рейл?
+                                Нужен ли рейл?
                             </FormLabel>
+
                             <FormControl>
-                                <RadioGroup onValueChange={field.onChange} value={field.value}>
-                                    <div className="flex gap-2 items-center cursor-pointer">
-                                        <RadioGroupItem value="yes" /> Да
-                                    </div>
-                                    <div className="flex gap-2 items-center cursor-pointer">
-                                        <RadioGroupItem value="no" /> Нет
-                                    </div>
+                                <RadioGroup onValueChange={field.onChange} value={field.value} className="w-fit">
+                                    <Field orientation="horizontal">
+                                        <RadioGroupItem value="yes" id="need-rail-yes" />
+
+                                        <FieldContent>
+                                            <FieldLabel htmlFor="need-rail-yes">Да</FieldLabel>
+                                        </FieldContent>
+                                    </Field>
+
+                                    <Field orientation="horizontal">
+                                        <RadioGroupItem value="no" id="need-rail-no" />
+
+                                        <FieldContent>
+                                            <FieldLabel htmlFor="need-rail-no">Нет</FieldLabel>
+                                        </FieldContent>
+                                    </Field>
                                 </RadioGroup>
                             </FormControl>
+
                             <FormMessage />
                         </FormItem>
                     )}
                 />
+
                 <div className="">
                     В соответствии с требованиями Федерального закона от 27.07.2006 г. № 152-ФЗ «О персональных данных»
                     нажимая кнопку «Отправить» я даю согласие на обработку своих персональных данных.

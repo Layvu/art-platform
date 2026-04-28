@@ -12,7 +12,9 @@ const alertVariants = cva(
                 default: 'bg-card text-card-foreground border',
                 destructive:
                     'text-destructive border bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90',
-                info: 'border-[#17BBFF] bg-[#F2FAFE] rounded-none border-l-4 whitespace-normal block py-2 px-4',
+                infoBlue: 'border-[#17BBFF] bg-[#F2FAFE] rounded-none border-l-4 whitespace-normal block py-2 px-4',
+                infoRed: 'border-red-500 bg-red-50 rounded-none border-l-4 whitespace-normal block py-2 px-4',
+                infoYellow: 'border-[#F18200] bg-[#FFFCED] rounded-none border-l-4 whitespace-normal block py-2 px-4',
             },
         },
         defaultVariants: {

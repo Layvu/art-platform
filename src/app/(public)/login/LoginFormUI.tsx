@@ -212,7 +212,7 @@ export default function LoginForm({ redirectUrl }: LoginFormProps) {
                                     )}
                                     className="space-y-6"
                                 >
-                                    <Alert variant="info">
+                                    <Alert variant="infoBlue">
                                         Для входа используйте данные, предоставленные администратором
                                     </Alert>
                                     <FormField

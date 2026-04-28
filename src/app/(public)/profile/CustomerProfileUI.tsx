@@ -163,7 +163,7 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
                             </Button>
                         </div>
 
-                        <Alert variant={'info'}>
+                        <Alert variant={'infoBlue'}>
                             Указанные ниже данные используются для оформления доставки. При необходимости, данные можно
                             будет изменить на этапе оформления заказа.
                         </Alert>

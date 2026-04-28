@@ -11,9 +11,10 @@ import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input, Textarea } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PAGES } from '@/config/public-pages.config';
 import { customerClientService } from '@/services/api/client/customer-client.service';
 import { orderClientService } from '@/services/api/client/order-client.service';
@@ -30,6 +31,11 @@ import {
 import { fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
 
 import { CdekWidget } from './CdekWidget';
+import Link from 'next/link';
+import { isImageData } from '@/shared/guards/image.guard';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+import { Alert } from '@/components/ui/alert';
 
 const orderSchema = z
     .object({
@@ -151,21 +157,67 @@ export default function OrderUI({ customer }: OrderUIProps) {
 
             {!isLoading && !isError && checkedItems.length > 0 && (
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-10">
-                        <Card className="flex flex-col gap-8 flex-1">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-12 gap-16">
+                        <Card className="flex flex-col gap-8 flex-1 col-span-8">
                             <h1 className="text-2xl font-bold mb-6">Оформление заказа</h1>
-
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <CardHeader>
-                                    <CardTitle>Личные данные</CardTitle>
+                                    <CardTitle>Состав Заказа</CardTitle>
                                 </CardHeader>
-                                <CardContent className="space-y-4 p-0">
+                                <div className="flex flex-wrap gap-3 mb-8">
+                                    {checkedItems.map((item, idx) => {
+                                        const currentProduct = products.find(
+                                            (p) =>
+                                                p.id === (isProductData(item.product) ? item.product.id : item.product),
+                                        );
+                                        const mainImage =
+                                            currentProduct &&
+                                            currentProduct.gallery &&
+                                            isImageData(currentProduct.gallery[0]?.image)
+                                                ? currentProduct.gallery[0].image
+                                                : '/placeholder.png';
+                                        return (
+                                            // )
+                                            <Link
+                                                href={PAGES.PRODUCT(currentProduct?.slug || '')}
+                                                key={idx}
+                                                className="relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer"
+                                            >
+                                                <Image
+                                                    src={
+                                                        isImageData(mainImage) && mainImage.url
+                                                            ? mainImage.url
+                                                            : (mainImage as string)
+                                                    }
+                                                    alt={currentProduct?.title || 'title'}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                                <Badge className="absolute bottom-1 left-1" variant="secondary">
+                                                    {item.quantity} шт
+                                                </Badge>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <CardHeader>
+                                    <CardTitle>Данные получателя</CardTitle>
+                                </CardHeader>
+                                <Alert variant={'infoBlue'}>
+                                    В качестве данных получателя используются личные данные, указанные в профиле. Вы
+                                    можете указать другие данные, которые будут актуальны только для текущего заказа.
+                                    После завершения оформления заказа данные профиля не изменятся.
+                                </Alert>
+                                <CardContent className="space-y-6 p-0">
                                     <FormField
                                         control={form.control}
                                         name="fullName"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>ФИО *</FormLabel>
+                                                <FormLabel>ФИО</FormLabel>
                                                 <FormControl>
                                                     <Input {...field} />
                                                 </FormControl>
@@ -178,7 +230,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                         name="phone"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Телефон *</FormLabel>
+                                                <FormLabel>Телефон</FormLabel>
                                                 <FormControl>
                                                     <PhoneInput {...field} />
                                                 </FormControl>
@@ -190,7 +242,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                             </div>
 
                             {/* Способ получения */}
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <CardHeader>
                                     <CardTitle>Способ получения</CardTitle>
                                 </CardHeader>
@@ -199,53 +251,67 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                         value={deliveryType}
                                         onValueChange={(val) => {
                                             form.setValue('deliveryType', val);
-                                            if (val === DELIVERY_TYPES.PICKUP) form.setValue('cdekData', null);
+                                            if (val === DELIVERY_TYPES.PICKUP) {
+                                                form.setValue('cdekData', null);
+                                            }
                                         }}
-                                        className="space-y-3"
+                                        className="flex gap-3"
                                     >
-                                        <div className="flex items-center space-x-2">
-                                            <RadioGroupItem value={DELIVERY_TYPES.PICKUP} id="pickup" />
-                                            <Label htmlFor="pickup" className="cursor-pointer">
-                                                Самовывоз
-                                            </Label>
-                                        </div>
-                                        {!isDelivery && (
-                                            <div className="ml-6 p-3 bg-muted rounded-md">
-                                                <p className="text-sm">Адрес самовывоза: {PICKUP_ADDRESS}</p>
-                                            </div>
-                                        )}
+                                        {/* PICKUP */}
+                                        <FieldLabel htmlFor="pickup">
+                                            <Field orientation="horizontal">
+                                                <FieldContent>
+                                                    <FieldTitle>Самовывоз</FieldTitle>
+                                                    <FieldDescription>Забрать самостоятельно</FieldDescription>
+                                                </FieldContent>
 
-                                        <div className="flex items-center space-x-2">
-                                            <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
-                                            <Label htmlFor="delivery" className="cursor-pointer">
-                                                Доставка СДЭК
-                                            </Label>
-                                        </div>
-                                        {isDelivery && (
-                                            <div className="ml-6 space-y-2">
-                                                <Label>Выберите пункт выдачи</Label>
-                                                <CdekWidget onChoose={handleCdekSelect} />
-                                                {form.watch('cdekData') && (
-                                                    <div className="p-3 bg-muted rounded-md text-sm">
-                                                        {form.watch('cdekData').address}
-                                                    </div>
-                                                )}
-                                                {/* Вывод кастомной ошибки Zod для cdekData */}
-                                                {form.formState.errors.cdekData && (
-                                                    <p className="text-sm font-medium text-destructive">
-                                                        {form.formState.errors.cdekData.message as string}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        )}
+                                                <RadioGroupItem value={DELIVERY_TYPES.PICKUP} id="pickup" />
+                                            </Field>
+                                        </FieldLabel>
+
+                                        {/* DELIVERY */}
+                                        <FieldLabel htmlFor="delivery">
+                                            <Field orientation="horizontal">
+                                                <FieldContent>
+                                                    <FieldTitle>Доставка</FieldTitle>
+                                                    <FieldDescription>Курьер или пункт выдачи</FieldDescription>
+                                                </FieldContent>
+
+                                                <RadioGroupItem value={DELIVERY_TYPES.DELIVERY} id="delivery" />
+                                            </Field>
+                                        </FieldLabel>
                                     </RadioGroup>
+
+                                    {!isDelivery && (
+                                        <div className="space-y-1.5 rounded-xl">
+                                            <div className="text-[#4B5563]">Адрес доставки</div>
+                                            <div className="bg-[#F3F4F6] py-2.5 px-2 rounded-md">{PICKUP_ADDRESS}</div>
+                                        </div>
+                                    )}
+                                    {isDelivery && (
+                                        <div className="mt-3 space-y-2">
+                                            <Label>Выберите пункт выдачи</Label>
+
+                                            <CdekWidget onChoose={handleCdekSelect} />
+
+                                            {form.watch('cdekData') && (
+                                                <div className="text-sm">{form.watch('cdekData').address}</div>
+                                            )}
+
+                                            {form.formState.errors.cdekData && (
+                                                <p className="text-sm text-destructive">
+                                                    {form.formState.errors.cdekData.message as string}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
                                 </CardContent>
                             </div>
 
                             {/* Комментарий */}
                             <div className="space-y-4">
                                 <CardHeader>
-                                    <CardTitle>Комментарий к заказу</CardTitle>
+                                    <CardTitle>Комментарий</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4 p-0">
                                     <FormField
@@ -254,7 +320,11 @@ export default function OrderUI({ customer }: OrderUIProps) {
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormControl>
-                                                    <Input {...field} />
+                                                    <Textarea
+                                                        {...field}
+                                                        className="h-20"
+                                                        placeholder="Комментарий или пожелание относительно заказа или нашей работы"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -265,7 +335,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
                         </Card>
 
                         {/* Товары в заказе */}
-                        <Card className="h-fit bg-zinc-100 w-[405px]">
+                        <Card className="h-fit bg-zinc-100 col-span-4">
                             <CardHeader>
                                 <CardTitle>Товары в заказе</CardTitle>
                             </CardHeader>
