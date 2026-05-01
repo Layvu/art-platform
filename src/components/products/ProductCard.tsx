@@ -16,7 +16,7 @@ import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-export default function ProductCard({ id, title, slug, price, author, gallery }: Product) {
+export default function ProductCard({ id, title, slug, price, author, gallery, quantity }: Product) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 
@@ -71,6 +71,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery }:
                             <CounterButton
                                 variant={'default'}
                                 quantity={productInCart.quantity}
+                                boundary={quantity || 0}
                                 handleMinus={() => decrease(id)}
                                 handlePlus={() => increase(id)}
                             ></CounterButton>

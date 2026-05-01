@@ -77,6 +77,7 @@ export default function CartItem({ item, available }: { item: ICartItem; availab
                             <CounterButton
                                 variant="secondary"
                                 quantity={item.quantity}
+                                boundary={stock}
                                 handleMinus={() => decrease(productId)}
                                 handlePlus={() => increase(productId)}
                             />

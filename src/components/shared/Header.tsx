@@ -50,7 +50,7 @@ export function Header() {
                     isRegistered={!!user}
                     isActive={checkIsActive(PAGES.LOGIN) || checkIsActive(PAGES.PROFILE)}
                 />
-                <span style={{ fontSize: '6px' }}>v 1.0.5</span>
+                <span style={{ fontSize: '6px' }}>v 1.0.6</span>
             </nav>
         </header>
     );

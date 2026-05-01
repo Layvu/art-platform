@@ -23,8 +23,8 @@ const buttonVariants = cva(
                     'bg-my-button-secondary-default text-my-accent hover:bg-my-button-secondary-hover disabled:bg-my-button-secondary-disabled disabled:text-my-tertriary',
 
                 ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-                empty: 'hover:bg-my-button-primary-hover',
-                secondaryEmpty: 'hover:bg-my-button-primary-hover/50',
+                empty: '',//'hover:bg-my-button-primary-hover',
+                secondaryEmpty: '', //'hover:bg-my-button-primary-hover/50',
                 link: 'text-primary underline-offset-4 hover:underline',
 
                 filter: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-3xl',
@@ -78,11 +78,13 @@ export default function CounterButton({
     handlePlus,
     quantity,
     variant,
+    boundary,
 }: {
     handleMinus: () => void;
     handlePlus: () => void;
     quantity: number;
     variant?: VariantProps<typeof counterVariants>['variant'];
+    boundary?: number;
 }) {
     return (
         <div className={cn(counterVariants({ variant }))}>
@@ -95,7 +97,7 @@ export default function CounterButton({
             </Button>
             <div className="px-2">{quantity}</div>
             <Button
-                className="p-0 w-9"
+                className={`p-0 w-9 ${quantity === boundary ? 'pointer-events-none disabled' : ''}`}
                 onClick={handlePlus}
                 variant={variant === 'default' ? 'empty' : 'secondaryEmpty'}
             >

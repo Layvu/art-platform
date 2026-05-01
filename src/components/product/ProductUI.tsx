@@ -63,6 +63,7 @@ export default function ProductUI({ initialParams }: { initialParams: ProductQue
                             {productInCart ? (
                                 <CounterButton
                                     quantity={productInCart.quantity}
+                                    boundary={quantity || 0}
                                     handleMinus={() => decrease(id)}
                                     handlePlus={() => increase(id)}
                                     variant={'default'}

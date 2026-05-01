@@ -1,3 +1,5 @@
+import { ProductsLoader } from '@/components/shared/Skeleton';
+
 export default function Loading() {
-    return <div>loading from app/home/loading</div>;
+    return <ProductsLoader showHeader={true} productsCount={12} columnsCount={4} />;
 }
