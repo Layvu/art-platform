@@ -1,12 +1,39 @@
 import crypto from 'crypto';
+import { XMLParser } from 'fast-xml-parser';
 import fs, { createWriteStream, writeFileSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
-import { XMLParser } from 'fast-xml-parser';
-import { getChangedDetailed, type ChangedOfferType, type ParsedOffer } from '@/shared/utils/getChangedDetailed';
+
+import { type ChangedOfferType, getChangedDetailed, type ParsedOffer } from '@/shared/utils/getChangedDetailed';
 import { syncProductsFromDiff } from '@/shared/utils/syncProductsFromDiff';
+
+type RawPrice = {
+    ЦенаЗаЕдиницу?: string | number;
+};
+
+type RawOffer = {
+    Артикул?: string | number;
+    Количество?: string | number;
+    Цены?: {
+        Цена?: RawPrice | RawPrice[];
+    };
+};
+
+type RawXml = {
+    КоммерческаяИнформация?: {
+        ПакетПредложений?: {
+            Предложения?: {
+                Предложение?: RawOffer | RawOffer[];
+            };
+        };
+    };
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
 
 const LOGIN = process.env.ONEC_LOGIN;
 const PASSWORD = process.env.ONEC_PASSWORD;
@@ -26,7 +53,7 @@ function checkAuth(req: NextRequest) {
     return login === LOGIN && password === PASSWORD;
 }
 
-function parseOffersXml(xmlRaw: string): ParsedOffer[] {
+export function parseOffersXml(xmlRaw: string): ParsedOffer[] {
     const parser = new XMLParser({
         ignoreAttributes: false,
         attributeNamePrefix: '',
@@ -34,25 +61,30 @@ function parseOffersXml(xmlRaw: string): ParsedOffer[] {
         trimValues: true,
     });
 
-    const jsonObj = parser.parse(xmlRaw);
+    // parser.parse возвращает unknown — сужаем через guard.
+    const parsed: unknown = parser.parse(xmlRaw);
 
-    const offers = jsonObj?.КоммерческаяИнформация?.ПакетПредложений?.Предложения?.Предложение;
+    if (!isRecord(parsed)) {
+        throw new Error('XML не распарсился в объект');
+    }
+
+    const root = parsed as RawXml;
+    const offers = root.КоммерческаяИнформация?.ПакетПредложений?.Предложения?.Предложение;
 
     if (!offers) {
         throw new Error('В XML не найдены предложения');
     }
 
-    const offersArray = Array.isArray(offers) ? offers : [offers];
+    const offersArray: RawOffer[] = Array.isArray(offers) ? offers : [offers];
 
-    return offersArray.map((offer: any) => {
-        const priceVal = Array.isArray(offer?.Цены?.Цена)
-            ? offer.Цены.Цена[0]?.ЦенаЗаЕдиницу
-            : offer?.Цены?.Цена?.ЦенаЗаЕдиницу;
+    return offersArray.map((offer): ParsedOffer => {
+        const priceNode = offer.Цены?.Цена;
+        const priceVal = Array.isArray(priceNode) ? priceNode[0]?.ЦенаЗаЕдиницу : priceNode?.ЦенаЗаЕдиницу;
 
         return {
-            id: String(offer?.Артикул ?? ''),
+            id: String(offer.Артикул ?? ''),
             price: Number(priceVal ?? 0),
-            stock: Number(offer?.Количество ?? 0),
+            stock: Number(offer.Количество ?? 0),
         };
     });
 }
@@ -166,9 +198,11 @@ export async function POST(req: NextRequest) {
             fs.renameSync(newPath, oldPath);
 
             return new NextResponse('success');
-        } catch (err: any) {
-            console.error('Parse error:', err.message);
-            return NextResponse.json({ error: err.message }, { status: 500 });
+        } catch (err: unknown) {
+            return {
+                status: 0,
+                error: err instanceof Error ? err.message : 'unknown error',
+            };
         }
     }
 
@@ -204,12 +238,13 @@ export async function POST(req: NextRequest) {
 
             // (опционально) удалить XML
             // fs.unlinkSync(filePath);
-
-            return new NextResponse('success');
-        } catch (err: any) {
-            console.error('Parse error:', err.message);
-            return new NextResponse('failure');
+        } catch (err: unknown) {
+            return {
+                status: 0,
+                error: err instanceof Error ? err.message : 'unknown error',
+            };
         }
+        return new NextResponse('success');
     }
 
     return NextResponse.json({ error: 'unknown mode' }, { status: 400 });

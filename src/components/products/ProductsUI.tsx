@@ -8,8 +8,6 @@ import type { ProductsQueryParams } from '@/shared/types/query-params.type';
 import ProductFiltersBar from './ProductFiltersBar';
 import ProductsList from './ProductsList';
 
-import './products.scss';
-
 export default function ProductsUI({
     initialParams,
     showAuthorFilter,

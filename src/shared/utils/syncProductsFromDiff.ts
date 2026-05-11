@@ -1,7 +1,8 @@
-import type { ChangedParsedOffers } from "./getChangedDetailed";
+import { config } from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { config } from 'dotenv';
+
+import type { ChangedParsedOffers } from "./getChangedDetailed";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -22,7 +23,6 @@ type RequestMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 type Success<T> = { status: number; data: T; error?: never };
 type Fail = { status: number; data?: never; error: string };
-
 type RequestResponse<T> = Success<T> | Fail;
 
 type Product = {
@@ -36,12 +36,24 @@ type ProductsResponse = {
     docs: Product[];
 };
 
+interface HeadersWithSetCookie extends Headers {
+    getSetCookie(): string[];
+}
+
+function extractSetCookies(headers: Headers): string[] {
+    const h = headers as HeadersWithSetCookie;
+    if (typeof h.getSetCookie === 'function') {
+        return h.getSetCookie();
+    }
+    const single = headers.get('set-cookie');
+    return single ? [single] : [];
+}
+
 async function request<T>(
     method: RequestMethod,
     path: string,
-    body?: unknown
+    body?: unknown,
 ): Promise<RequestResponse<T>> {
-
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
@@ -57,33 +69,26 @@ async function request<T>(
             body: body ? JSON.stringify(body) : undefined,
         });
 
-        const setCookie =
-            (res.headers as any).getSetCookie?.() ??
-            [res.headers.get('set-cookie')];
-
-        const token = setCookie.find((c: string) =>
-            c?.includes('payload-token')
-        );
-
+        const setCookies = extractSetCookies(res.headers);
+        const token = setCookies.find((c) => c.includes('payload-token'));
         if (token) {
-            sessionCookie = token.split(';')[0];
+            sessionCookie = token.split(';')[0] ?? null;
         }
 
-        let data: any = {};
-
+        // Тело ответа — unknown, дальше доверяем generic T от вызывающего.
+        let data: unknown;
         try {
             data = await res.json();
         } catch {
             data = { text: await res.text() };
         }
 
-        return { status: res.status, data };
-
+        return { status: res.status, data: data as T };
     } catch (e: unknown) {
         return {
             status: 0,
-            data: { error: e instanceof Error ? e.message : 'unknown error' } as any
-          };
+            error: e instanceof Error ? e.message : 'unknown error',
+        };
     }
 }
 

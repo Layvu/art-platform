@@ -22,8 +22,6 @@ import CounterButton, { Button } from '../ui/button';
 import AuthorProductsSection from './AuthorProductsSection';
 import ProductSlider from './ProductSlider';
 
-import './product.scss';
-
 export default function ProductUI({ initialParams }: { initialParams: ProductQueryParams }) {
     const slug = initialParams.product;
     const { data: product, isError, error, isFetching } = useFetchProduct({ slug });

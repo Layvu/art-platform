@@ -3,23 +3,28 @@
 import React, { useCallback, useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { PhoneInput } from '@/components/shared/PhoneInput';
+import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@/components/ui/field';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input, Textarea } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { PAGES } from '@/config/public-pages.config';
 import { customerClientService } from '@/services/api/client/customer-client.service';
 import { orderClientService } from '@/services/api/client/order-client.service';
 import { useCartStore } from '@/services/store/cart/store';
 import { DELIVERY_TYPES, PICKUP_ADDRESS } from '@/shared/constants/order.constants';
+import { isImageData } from '@/shared/guards/image.guard';
 import { isProductData } from '@/shared/guards/product.guard';
 import { useProductsByIds } from '@/shared/hooks/useFetchData';
 import {
@@ -31,11 +36,6 @@ import {
 import { fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
 
 import { CdekWidget } from './CdekWidget';
-import Link from 'next/link';
-import { isImageData } from '@/shared/guards/image.guard';
-import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
-import { Alert } from '@/components/ui/alert';
 
 const orderSchema = z
     .object({
