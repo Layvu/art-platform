@@ -1,11 +1,12 @@
 import crypto from 'crypto';
+import { XMLParser } from 'fast-xml-parser';
 import fs, { createWriteStream, writeFileSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
-import { XMLParser } from 'fast-xml-parser';
-import { getChangedDetailed, type ChangedOfferType, type ParsedOffer } from '@/shared/utils/getChangedDetailed';
+
+import { type ChangedOfferType, getChangedDetailed, type ParsedOffer } from '@/shared/utils/getChangedDetailed';
 import { syncProductsFromDiff } from '@/shared/utils/syncProductsFromDiff';
 
 const LOGIN = process.env.ONEC_LOGIN;

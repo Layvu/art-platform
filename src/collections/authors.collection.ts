@@ -16,21 +16,7 @@ export const AuthorsCollection: CollectionConfig = {
     },
 
     access: {
-        read: async ({ req: { user } }) => {
-            // // Публичный доступ для фронтенда
-            // if (!user) return true;
-
-            // // Админы видят всех авторов
-            // if (isAdmin(user)) return true;
-
-            // // Авторы видят только свою запись
-            // if (isAuthor(user)) {
-            //     return {
-            //         user: { equals: user.id },
-            //     };
-            // }
-
-            // // Все остальные видят авторов
+        read: async () => {
             return true;
         },
 
@@ -98,15 +84,6 @@ export const AuthorsCollection: CollectionConfig = {
             admin: {
                 placeholder: 'https://t.me/username или https://instagram.com/...',
             },
-            // validate: (value: string | string[] | null | undefined) => {
-            //     if (typeof value === 'string') {
-            //         const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-            //         return urlPattern.test(value) ? value : 'Некорректная ссылка';
-            //     } else {
-            //         // Handle the case where value is not a string
-            //         return 'Некорректное значение';
-            //     }
-            // },
         },
         {
             name: 'products_count',
@@ -166,38 +143,53 @@ export const AuthorsCollection: CollectionConfig = {
             },
         },
     ],
+
     hooks: {
         beforeChange: [
             // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {
                 const { payload } = req;
 
-                // Генерируем slug только если передан name И если slug отсутствует или name изменился
-                if (data.name && (!data.slug || data.name !== originalDoc?.name)) {
-                    const baseSlug = slugify(data.name, {
-                        lower: true,
-                        strict: true,
-                        locale: 'ru',
-                    });
-                    let slug = `${baseSlug}-${nanoid(6)}`;
+                // Генерируем slug только если у записи ещё нет slug или автор сменил псевдоним
 
-                    // Проверяем уникальность slug (маловероятно, на всякий случай)
-                    let counter = 1;
-                    while (
-                        await payload
-                            .count({
-                                collection: COLLECTION_SLUGS.AUTHORS,
-                                where: { slug: { equals: slug } },
-                            })
-                            .then((res) => res.totalDocs > 0)
-                    ) {
-                        slug = `${baseSlug}-${nanoid(6)}-${counter++}`;
+                const existingSlug = originalDoc?.slug;
+                const nameChanged = !!data.name && data.name !== originalDoc?.name;
+                const shouldGenerateSlug = !existingSlug || nameChanged;
+
+                if (shouldGenerateSlug) {
+                    if (data.name) {
+                        const baseSlug = slugify(data.name, {
+                            lower: true,
+                            strict: true,
+                            locale: 'ru',
+                        });
+                        let slug = `${baseSlug}-${nanoid(6)}`;
+
+                        // Проверяем уникальность slug (маловероятно, на всякий случай)
+                        let counter = 1;
+                        while (
+                            await payload
+                                .count({
+                                    collection: COLLECTION_SLUGS.AUTHORS,
+                                    where: {
+                                        and: [
+                                            { slug: { equals: slug } },
+                                            ...(originalDoc?.id ? [{ id: { not_equals: originalDoc.id } }] : []),
+                                        ],
+                                    },
+                                })
+                                .then((res) => res.totalDocs > 0)
+                        ) {
+                            slug = `${baseSlug}-${nanoid(6)}-${counter++}`;
+                        }
+
+                        data.slug = slug;
+                    } else {
+                        // Если name нет, генерируем slug на основе Id пользователя
+                        data.slug = `author-${nanoid(6)}`;
                     }
-
-                    data.slug = slug;
                 } else {
-                    // Если name нет, генерируем slug на основе Id пользователя
-                    data.slug = `author-${nanoid(6)}`;
+                    data.slug = existingSlug;
                 }
 
                 return data;

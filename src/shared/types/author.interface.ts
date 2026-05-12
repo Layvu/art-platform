@@ -6,11 +6,13 @@ export type IAuthorUpdateInput = Omit<
 >;
 export type IAuthorProductCategory = Exclude<Author['product_categories'], undefined | null>[number];
 export type IAuthorAvatar = IAuthorUpdateInput['avatar'];
+export type IAuthorCover = IAuthorUpdateInput['cover'];
 
 export interface AuthorProfileFormValues {
     name: string;
     bio: string;
     avatar?: IAuthorAvatar;
+    cover?: IAuthorCover;
 }
 
 export interface AuthorProfileUIProps {

@@ -2,44 +2,48 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { Loader2, UploadCloud, X } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 
 import { authorClientService } from '@/services/api/client/author-client.service';
 import { isImageData } from '@/shared/guards/image.guard';
+import type { Media } from '@/shared/types/payload-types';
 import type { IGalleryItem } from '@/shared/types/product.type';
+import { cn } from '@/shared/utils/tailwind';
 
 interface GalleryUploaderProps {
-    value?: IGalleryItem[] | null;
-    onChange: (items: IGalleryItem[]) => void;
+    value: IGalleryItem[];
+    onChange: (gallery: IGalleryItem[]) => void;
 }
 
-export default function GalleryUploader({ value = [], onChange }: GalleryUploaderProps) {
+const ACCEPTED_FORMATS = 'JPG, GIF, PNG, WEBP или HEIC/HEIF';
+
+export default function GalleryUploader({ value, onChange }: GalleryUploaderProps) {
     const [uploading, setUploading] = useState(false);
-    const images = value || [];
 
-    const uploadFiles = async (files: File[]) => {
-        setUploading(true);
-        const uploadedItems = [...images];
-
-        for (const file of files) {
-            const res = await authorClientService.uploadMedia(file);
-
-            if (res.success && res.media) {
-                uploadedItems.push({ image: res.media });
-            }
-        }
-
-        onChange(uploadedItems);
-        setUploading(false);
-    };
+    const upload = useCallback(async (file: File): Promise<Media | null> => {
+        const res = await authorClientService.uploadMedia(file);
+        if (res.success && res.media) return res.media;
+        return null;
+    }, []);
 
     const onDrop = useCallback(
-        (acceptedFiles: File[]) => {
-            uploadFiles(acceptedFiles);
+        async (acceptedFiles: File[]) => {
+            if (!acceptedFiles.length) return;
+            setUploading(true);
+            try {
+                const uploaded: IGalleryItem[] = [];
+                for (const file of acceptedFiles) {
+                    const media = await upload(file);
+                    if (media) uploaded.push({ id: null, image: media });
+                }
+                if (uploaded.length) onChange([...value, ...uploaded]);
+            } finally {
+                setUploading(false);
+            }
         },
-        [images, onChange],
+        [upload, value, onChange],
     );
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -48,62 +52,70 @@ export default function GalleryUploader({ value = [], onChange }: GalleryUploade
         disabled: uploading,
     });
 
-    const handleRemoveImage = (indexToRemove: number) => {
-        if (uploading) return;
-        onChange(images.filter((_, index) => index !== indexToRemove));
+    const removeImage = (index: number) => {
+        const newGallery = [...value];
+        newGallery.splice(index, 1);
+        onChange(newGallery);
     };
 
     return (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-9">
             <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-                    ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'}
-                    ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+                className={cn(
+                    'relative flex items-center justify-center w-full min-h-36 rounded-lg border-2 border-dashed transition-colors cursor-pointer px-6 py-8',
+                    isDragActive
+                        ? 'border-my-accent bg-my-secondary-background'
+                        : 'border-my-disabled hover:border-my-accent',
+                    uploading && 'opacity-60 pointer-events-none',
+                )}
             >
                 <input {...getInputProps()} />
                 {uploading ? (
                     <div className="flex flex-col items-center gap-2">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <p className="text-sm text-muted-foreground">Загрузка изображений...</p>
+                        <Loader2 className="w-7 h-7 animate-spin text-my-accent" />
+                        <p className="text-sm text-my-tertriary">Загрузка...</p>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center gap-2">
-                        <UploadCloud className="h-8 w-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">
-                            Перетащите изображения сюда или кликните для выбора
-                        </p>
+                    <div className="flex flex-col items-center gap-2 text-center pointer-events-none">
+                        <Plus className="w-6 h-6 text-my-secondary" strokeWidth={1.5} />
+                        <p className="text-base font-medium text-my-primary">Загрузить фотографии</p>
+                        <p className="text-xs text-my-tertriary">Доступные форматы — {ACCEPTED_FORMATS}</p>
                     </div>
                 )}
             </div>
 
-            {images.length > 0 && (
-                <div className="grid grid-cols-4 gap-4">
-                    {images.map((item, idx) => {
-                        const imgObj = isImageData(item.image) ? item.image : null;
-
+            {value.length > 0 && (
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
+                    {value.map((item, idx) => {
+                        const media = item.image;
+                        const url = isImageData(media) ? media.url : null;
                         return (
-                            <div key={idx} className="relative group aspect-square rounded-md overflow-hidden border">
-                                {imgObj?.url ? (
+                            <div
+                                key={item.id ?? `new-${idx}`}
+                                className="relative group aspect-square rounded-lg overflow-hidden border border-gray-100"
+                            >
+                                {url ? (
                                     <Image
-                                        src={imgObj.url}
-                                        alt="Gallery item"
+                                        src={url}
+                                        alt={`Фото ${idx + 1}`}
                                         fill
                                         unoptimized
                                         className="object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-muted flex items-center justify-center text-xs text-center p-2">
-                                        Нет превью
+                                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-xs text-my-tertriary">
+                                        Нет фото
                                     </div>
                                 )}
+
                                 <button
                                     type="button"
-                                    onClick={() => handleRemoveImage(idx)}
-                                    disabled={uploading}
-                                    className="absolute top-1 right-1 bg-background/80 hover:bg-destructive hover:text-destructive-foreground p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+                                    onClick={() => removeImage(idx)}
+                                    aria-label="Удалить фотографию"
+                                    className="absolute top-1.5 right-1.5 w-8 h-8 flex items-center justify-center rounded-md bg-white text-red-500 shadow-md opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-50"
                                 >
-                                    <X className="w-4 h-4" />
+                                    <Trash2 className="w-5 h-5" strokeWidth={1.5} />
                                 </button>
                             </div>
                         );

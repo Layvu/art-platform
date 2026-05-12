@@ -1,24 +1,35 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-import { Download, FileText, Plus, Search, Trash2 } from 'lucide-react';
+import { Search, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiUrl } from '@/services/api/api-url-builder';
 import { authorClientService } from '@/services/api/client/author-client.service';
+import { isImageData } from '@/shared/guards/image.guard';
 import {
     type AuthorInvoiceManagerProps,
     type IInvoiceItemKey,
-    type IInvoiceItems,
     INVOICE_ITEM_CONDITION,
+    type InvoiceItemWithProduct,
 } from '@/shared/types/invoice.interface';
-import type { Product } from '@/shared/types/payload-types';
+import type { Invoice, Product } from '@/shared/types/payload-types';
+import { cn } from '@/shared/utils/tailwind';
 
 const INVOICE_FIELDS = {
     QUANTITY: 'quantity',
@@ -32,92 +43,158 @@ const CONDITION_LABELS = {
     [INVOICE_ITEM_CONDITION.REVALUATION]: 'Переоценка (П)',
 };
 
-export default function AuthorInvoiceManager({ authorId, products, latestInvoice }: AuthorInvoiceManagerProps) {
-    const router = useRouter();
+const CONDITIONS_WITH_PRICE = [INVOICE_ITEM_CONDITION.OLD, INVOICE_ITEM_CONDITION.REVALUATION];
+const CONDITIONS_WITHOUT_PRICE = [INVOICE_ITEM_CONDITION.NEW];
 
-    // Если есть последняя накладная, загружаем её товары, иначе пустой массив
-    const [invoiceItems, setInvoiceItems] = useState<IInvoiceItems>(
-        latestInvoice?.items.map((item) => ({
+const SELECT_TRIGGER_CLASS =
+    'h-auto py-2 w-full flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-transparent px-2 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-100 disabled:text-my-primary disabled:bg-gray-50';
+
+const INPUT_CELL_CLASS =
+    'h-auto py-2 px-2 border-gray-200 text-base bg-transparent disabled:cursor-not-allowed disabled:opacity-100 disabled:text-my-primary disabled:bg-gray-50';
+
+// soft deleted
+function isProductPopulated(product: Product | number | null | undefined): product is Product {
+    return typeof product === 'object' && product !== null && typeof product.title === 'string';
+}
+
+function mapInvoiceItems(latestInvoice: Invoice | null): InvoiceItemWithProduct[] {
+    if (!latestInvoice) return [];
+
+    return latestInvoice.items
+        .filter((item): item is typeof item & { product: Product } => isProductPopulated(item.product))
+        .map((item) => ({
             orderNumber: item.orderNumber,
             product: item.product,
             quantity: item.quantity,
-            price: item.price ?? (item.product as Product).price ?? 0,
+            price: item.price ?? item.product.price ?? 0,
             condition: item.condition,
-        })) || [],
-    );
+        }));
+}
 
+function getInvoiceRowMeta(item: InvoiceItemWithProduct, errors?: { quantity?: boolean; price?: boolean }) {
+    const hasInitialPrice = (item.product.price ?? 0) > 0;
+
+    return {
+        hasInitialPrice,
+        isPriceDisabled: item.condition === INVOICE_ITEM_CONDITION.OLD,
+        isQuantityDisabled: item.condition === INVOICE_ITEM_CONDITION.REVALUATION,
+        errors: errors || {},
+        conditionsToShow: hasInitialPrice ? CONDITIONS_WITH_PRICE : CONDITIONS_WITHOUT_PRICE,
+    };
+}
+
+export default function AuthorInvoiceManager({ authorId, products, latestInvoice }: AuthorInvoiceManagerProps) {
+    const router = useRouter();
+
+    const [invoiceItems, setInvoiceItems] = useState<InvoiceItemWithProduct[]>(() => mapInvoiceItems(latestInvoice));
     const [savedInvoiceId, setSavedInvoiceId] = useState<number | null>(latestInvoice?.id || null);
-    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [validationErrors, setValidationErrors] = useState<Record<number, { quantity?: boolean; price?: boolean }>>(
+        {},
+    );
 
-    const filteredProductsByTitleAndArticle = useMemo(() => {
-        if (!searchQuery.trim()) return [];
-        const query = searchQuery.toLowerCase();
-        return products.filter(
-            (p) => p.title.toLowerCase().includes(query) || (p.article1C && p.article1C.toLowerCase().includes(query)),
-        );
-    }, [products, searchQuery]);
+    useEffect(() => {
+        if (!latestInvoice) return;
+
+        setInvoiceItems(mapInvoiceItems(latestInvoice));
+        setSavedInvoiceId(latestInvoice.id);
+    }, [latestInvoice]);
+
+    const availableProducts = useMemo(() => {
+        const addedIds = new Set(invoiceItems.map((item) => item.product.id));
+
+        return products.filter((product) => !addedIds.has(product.id));
+    }, [products, invoiceItems]);
+
+    const productsByTitle = useMemo(
+        () => new Map(availableProducts.map((product) => [product.title, product])),
+        [availableProducts],
+    );
 
     const clearMessages = () => {
         setError('');
         setSuccess('');
     };
 
-    const handleAddProduct = (product: Product) => {
-        // Проверяем, нет ли уже такого товара в списке
-        if (invoiceItems.some((item) => (item.product as Product).id === product.id)) {
-            setError('Этот товар уже добавлен в накладную');
-            return;
-        }
-
-        // TODO: enum и const статусов НСП
-        const price = product.price || 0;
-        // Если цена есть, значит старый
-        const condition = price > 0 ? INVOICE_ITEM_CONDITION.OLD : INVOICE_ITEM_CONDITION.NEW;
-
-        setInvoiceItems((prev) => [
-            ...prev,
-            {
-                orderNumber: prev.length + 1,
-                product,
-                quantity: 0,
-                condition,
-                price,
-            },
-        ]);
-
-        setSearchQuery('');
+    const resetFeedbackState = () => {
         clearMessages();
+        setValidationErrors({});
+    };
+
+    const handleValueChange = (title: string | null) => {
+        if (!title) return;
+
+        const product = productsByTitle.get(title);
+        if (!product) return;
+
+        const hasPrice = (product.price ?? 0) > 0;
+
+        const newItem: InvoiceItemWithProduct = {
+            orderNumber: invoiceItems.length + 1,
+            product,
+            quantity: 0,
+            condition: hasPrice ? INVOICE_ITEM_CONDITION.OLD : INVOICE_ITEM_CONDITION.NEW,
+            price: product.price ?? 0,
+        };
+
+        setInvoiceItems((prev) => [...prev, newItem]);
+
+        resetFeedbackState();
     };
 
     const handleRemoveItem = (productId: number) => {
-        setInvoiceItems((prev) => prev.filter((item) => (item.product as Product).id !== productId));
-        clearMessages();
+        setInvoiceItems((prev) => prev.filter((item) => item.product.id !== productId));
+
+        resetFeedbackState();
     };
 
     const handleItemChange = (productId: number, field: IInvoiceItemKey, value: string | number) => {
         setInvoiceItems((prev) =>
             prev.map((item) => {
-                const product = item.product as Product;
-                if (product.id === productId) {
-                    const updatedItem = { ...item, [field]: value };
+                if (item.product.id !== productId) {
+                    return item;
+                }
 
-                    if (field === INVOICE_FIELDS.CONDITION) {
-                        if (value === INVOICE_ITEM_CONDITION.REVALUATION) {
-                            updatedItem.quantity = product.quantity || 0;
-                        } else if (value === INVOICE_ITEM_CONDITION.OLD) {
-                            updatedItem.price = product.price || 0;
-                        }
-                    }
+                const updatedItem = {
+                    ...item,
+                    [field]: value,
+                };
 
+                if (field !== INVOICE_FIELDS.CONDITION) {
                     return updatedItem;
                 }
-                return item;
+
+                if (value === INVOICE_ITEM_CONDITION.REVALUATION) {
+                    updatedItem.quantity = item.product.quantity || 0;
+                }
+
+                if (value === INVOICE_ITEM_CONDITION.OLD) {
+                    updatedItem.price = item.product.price || 0;
+                }
+
+                return updatedItem;
             }),
         );
+
         clearMessages();
+
+        setValidationErrors((prev) => {
+            const newErrors = { ...prev };
+            const currentErrors = newErrors[productId];
+            if (!currentErrors) {
+                return newErrors;
+            }
+
+            delete currentErrors[field as 'quantity' | 'price'];
+
+            if (Object.keys(currentErrors).length === 0) {
+                delete newErrors[productId];
+            }
+
+            return newErrors;
+        });
     };
 
     const handleSaveInvoice = async () => {
@@ -126,228 +203,302 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
             return;
         }
 
+        const errors: Record<number, { quantity?: boolean; price?: boolean }> = {};
+
+        invoiceItems.forEach((item, index) => {
+            const itemErrors: { quantity?: boolean; price?: boolean } = {};
+
+            if (!item.quantity || item.quantity < 1) {
+                itemErrors.quantity = true;
+            }
+
+            if (!item.price || item.price < 1) {
+                itemErrors.price = true;
+            }
+
+            if (Object.keys(itemErrors).length > 0) {
+                errors[index] = itemErrors;
+            }
+        });
+
+        if (Object.keys(errors).length > 0) {
+            setValidationErrors(errors);
+            setError('Заполните обязательные поля');
+            return;
+        }
+
+        setValidationErrors({});
         setLoading(true);
-        setError('');
-        setSuccess('');
+        clearMessages();
 
         try {
             // Пересчёт номеров
             // Иначе, если автор добавит 3 товара, удалит 2-й и добавит новый, порядковые номера собьются (1,3,3)
-            const itemsToSave = invoiceItems.map((item, idx) => ({ ...item, orderNumber: idx + 1 }));
+            const itemsToSave = invoiceItems.map((item, index) => ({
+                ...item,
+                orderNumber: index + 1,
+            }));
 
-            let result;
-            if (savedInvoiceId) {
-                // Обновляем существующую накладную
-                result = await authorClientService.updateInvoice(savedInvoiceId, itemsToSave);
-            } else {
-                // Создаём новую
-                result = await authorClientService.saveInvoice(authorId, itemsToSave);
-            }
+            const result = savedInvoiceId
+                ? await authorClientService.updateInvoice(savedInvoiceId, itemsToSave)
+                : await authorClientService.saveInvoice(authorId, itemsToSave);
 
             if (result.success && result.invoice) {
                 setSuccess('Накладная успешно сохранена');
                 setSavedInvoiceId(result.invoice.id);
+
+                router.refresh();
             } else {
                 setError(result.error || 'Ошибка сохранения');
             }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            console.error('Save Invoice Error:', errorMessage);
+        } catch (err) {
+            console.error('Save Invoice Error:', err instanceof Error ? err.message : err);
             setError('Системная ошибка при сохранении');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleStartNew = () => {
+    const handleClearAll = () => {
         setInvoiceItems([]);
         setSavedInvoiceId(null);
+        setValidationErrors({});
+
         clearMessages();
     };
 
     const handleDownload = () => {
         if (!savedInvoiceId) return;
-        // Формирование и скачивание накладной находится на эндпоинте, то есть в серверной среде
+
         router.replace(apiUrl.invoice.export(savedInvoiceId));
     };
 
-    const renderTable = () => (
-        <div className="border rounded-md">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-12">№</TableHead>
-                        <TableHead>Артикул</TableHead>
-                        <TableHead>Наименование</TableHead>
-                        <TableHead className="w-32">Кол-во</TableHead>
-                        <TableHead className="w-32">Состояние</TableHead>
-                        <TableHead>Цена</TableHead>
-                        <TableHead className="w-12" />
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {invoiceItems.map((item, index) => {
-                        const product = item.product as Product;
-                        const hasInitialPrice = (product.price ?? 0) > 0;
-
-                        // Логика блокировок
-                        const isPriceDisabled = item.condition === INVOICE_ITEM_CONDITION.OLD;
-                        const isQuantityDisabled = item.condition === INVOICE_ITEM_CONDITION.REVALUATION;
-
-                        // Формирование списка доступных условий
-                        const conditionsToShow = Object.values(INVOICE_ITEM_CONDITION).filter((cond) => {
-                            if (!hasInitialPrice) {
-                                return cond === INVOICE_ITEM_CONDITION.NEW;
-                            } else {
-                                return cond !== INVOICE_ITEM_CONDITION.NEW;
-                            }
-                        });
-
-                        return (
-                            <TableRow key={product.id}>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>{product.article1C || '000001'}</TableCell>
-                                <TableCell className="font-medium">{product.title}</TableCell>
-
-                                <TableCell>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        value={item.quantity}
-                                        disabled={isQuantityDisabled}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value, 10);
-                                            handleItemChange(product.id, INVOICE_FIELDS.QUANTITY, val);
-                                        }}
-                                        className={`w-20 ${isQuantityDisabled ? 'bg-muted cursor-not-allowed' : ''}`}
-                                    />
-                                </TableCell>
-
-                                <TableCell>
-                                    <Select
-                                        value={item.condition}
-                                        disabled={!hasInitialPrice}
-                                        onValueChange={(val) =>
-                                            handleItemChange(product.id, INVOICE_FIELDS.CONDITION, val)
-                                        }
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {conditionsToShow.map((condition) => (
-                                                <SelectItem key={condition} value={condition}>
-                                                    {CONDITION_LABELS[condition]}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </TableCell>
-
-                                <TableCell>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        value={item.price ?? 0}
-                                        disabled={isPriceDisabled}
-                                        onChange={(e) => {
-                                            const val = parseFloat(e.target.value);
-                                            handleItemChange(product.id, INVOICE_FIELDS.PRICE, val);
-                                        }}
-                                        className={`w-24 ${isPriceDisabled ? 'bg-muted cursor-not-allowed' : ''}`}
-                                    />
-                                </TableCell>
-
-                                <TableCell>
-                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(product.id)}>
-                                        <Trash2 className="w-4 h-4 text-destructive" />
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        );
-                    })}
-                </TableBody>
-            </Table>
-        </div>
-    );
-
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h3 className="text-lg font-semibold">Формирование накладной</h3>
-                    <p className="text-sm text-muted-foreground">
-                        Найдите свои товары и добавьте их в акт приема-передачи
-                    </p>
-                </div>
-                {savedInvoiceId && (
-                    <Button variant="outline" onClick={handleStartNew}>
-                        <Plus className="w-4 h-4 mr-2" /> Новая накладная
-                    </Button>
-                )}
-            </div>
+        <div className="flex flex-col gap-8">
+            <h1 className="text-3xl font-semibold">Накладная</h1>
 
-            <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Поиск товара по названию или артикулу..."
-                    className="pl-9"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <div className="flex flex-col gap-4">
+                <Combobox items={availableProducts.map((product) => product.title)} onValueChange={handleValueChange}>
+                    <div className="relative w-full">
+                        <ComboboxInput placeholder="Найти товар по названию или артикулу" />
 
-                {filteredProductsByTitleAndArticle.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-md max-h-60 overflow-y-auto">
-                        {filteredProductsByTitleAndArticle.map((product) => (
-                            <div
-                                key={product.id}
-                                className="flex justify-between items-center p-3 hover:bg-muted cursor-pointer border-b last:border-0"
-                                onClick={() => handleAddProduct(product)}
-                            >
-                                <div>
-                                    <p className="font-medium">{product.title}</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Артикул: {product.article1C || '000001'}
-                                    </p>
-                                </div>
-                                <span className="text-sm font-semibold">{product.price} ₽</span>
-                            </div>
-                        ))}
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 text-my-primary pointer-events-none" />
+                    </div>
+
+                    <ComboboxContent className="p-3">
+                        <ComboboxEmpty>Товары не найдены</ComboboxEmpty>
+
+                        <ComboboxList>
+                            {(title: string) => {
+                                const product = productsByTitle.get(title);
+
+                                if (!product) return null;
+
+                                return <ProductComboboxItem key={product.id} product={product} />;
+                            }}
+                        </ComboboxList>
+                    </ComboboxContent>
+                </Combobox>
+
+                {invoiceItems.length === 0 ? (
+                    <div className="rounded-xl bg-gray-50 py-10 px-6 text-center">
+                        <p className="text-base text-my-secondary">
+                            В накладной пока нет товаров. Используйте поиск выше, чтобы добавить их.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="rounded-md border border-gray-200 overflow-hidden">
+                        <Table className="[font-family:'Wix_Madefor_Display',sans-serif] text-base leading-[100%] font-[450] tracking-[0px] [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]">
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent border-b border-gray-200">
+                                    <TableHead className="w-12 text-my-primary font-[450] py-4 pr-2 pl-3">№</TableHead>
+
+                                    <TableHead className="w-32 text-my-primary font-[450] py-4 px-2">Артикул</TableHead>
+
+                                    <TableHead className="text-my-primary font-[450] py-4 px-2">Наименование</TableHead>
+
+                                    <TableHead className="w-32 text-my-primary font-[450] py-4 px-2">
+                                        Количество
+                                    </TableHead>
+
+                                    <TableHead className="w-44 text-my-primary font-[450] py-4 px-2">
+                                        Состояние
+                                    </TableHead>
+
+                                    <TableHead className="w-32 text-my-primary font-[450] py-4 px-2">Цена</TableHead>
+
+                                    <TableHead className="w-12 py-4 px-2" />
+                                </TableRow>
+                            </TableHeader>
+
+                            <TableBody className="[&_tr:last-child]:border-0">
+                                {invoiceItems.map((item, index) => {
+                                    const meta = getInvoiceRowMeta(item, validationErrors[index]);
+
+                                    return (
+                                        <TableRow
+                                            key={item.product.id}
+                                            className="hover:bg-transparent border-b border-gray-200"
+                                        >
+                                            <TableCell className="py-5 pr-2 pl-3 text-my-primary">
+                                                {index + 1}
+                                            </TableCell>
+
+                                            <TableCell className="py-5 px-2 text-my-primary">
+                                                {item.product.article1C || '—'}
+                                            </TableCell>
+
+                                            <TableCell className="py-5 px-2 text-my-primary font-[450]">
+                                                {item.product.title}
+                                            </TableCell>
+
+                                            <TableCell className="py-3 px-2">
+                                                <Input
+                                                    type="number"
+                                                    min={0}
+                                                    value={item.quantity}
+                                                    disabled={meta.isQuantityDisabled}
+                                                    onChange={(e) =>
+                                                        handleItemChange(
+                                                            item.product.id,
+                                                            INVOICE_FIELDS.QUANTITY,
+                                                            parseInt(e.target.value, 10) || 0,
+                                                        )
+                                                    }
+                                                    className={cn(
+                                                        INPUT_CELL_CLASS,
+                                                        meta.errors.quantity &&
+                                                            'border-red-300 focus-visible:ring-red-100',
+                                                    )}
+                                                />
+                                            </TableCell>
+
+                                            <TableCell className="py-3 px-2">
+                                                <Select
+                                                    value={item.condition}
+                                                    disabled={!meta.hasInitialPrice}
+                                                    onValueChange={(value) =>
+                                                        handleItemChange(
+                                                            item.product.id,
+                                                            INVOICE_FIELDS.CONDITION,
+                                                            value,
+                                                        )
+                                                    }
+                                                >
+                                                    <SelectTrigger className={SELECT_TRIGGER_CLASS}>
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+
+                                                    <SelectContent>
+                                                        {meta.conditionsToShow.map((condition) => (
+                                                            <SelectItem key={condition} value={condition}>
+                                                                {CONDITION_LABELS[condition]}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </TableCell>
+
+                                            <TableCell className="py-3 px-2">
+                                                <Input
+                                                    type="number"
+                                                    min={0}
+                                                    value={item.price ?? 0}
+                                                    disabled={meta.isPriceDisabled}
+                                                    onChange={(e) =>
+                                                        handleItemChange(
+                                                            item.product.id,
+                                                            INVOICE_FIELDS.PRICE,
+                                                            parseFloat(e.target.value) || 0,
+                                                        )
+                                                    }
+                                                    className={cn(
+                                                        INPUT_CELL_CLASS,
+                                                        meta.errors.price &&
+                                                            'border-red-300 focus-visible:ring-red-100',
+                                                    )}
+                                                />
+                                            </TableCell>
+
+                                            <TableCell className="py-3 px-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveItem(item.product.id)}
+                                                    aria-label="Удалить товар из накладной"
+                                                    className="w-10 h-10 flex items-center justify-center rounded-md bg-red-50 hover:bg-red-100 text-red-500 transition-colors cursor-pointer"
+                                                >
+                                                    <Trash2 className="w-6 h-6" strokeWidth={1.5} />
+                                                </button>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
                     </div>
                 )}
             </div>
-
-            {invoiceItems.length > 0 ? (
-                renderTable()
-            ) : (
-                <div className="text-center p-8 border border-dashed rounded-md bg-muted/20">
-                    <FileText className="w-8 h-8 mx-auto text-muted-foreground mb-2 opacity-50" />
-                    <p className="text-sm text-muted-foreground">
-                        В накладной пока нет товаров. Используйте поиск выше, чтобы добавить их.
-                    </p>
-                </div>
-            )}
 
             {error && (
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
+
             {success && (
-                <Alert>
+                <Alert className="bg-green-50 border-green-200 text-green-800">
                     <AlertDescription>{success}</AlertDescription>
                 </Alert>
             )}
 
-            <div className="flex justify-end gap-3 mt-4">
-                <Button variant="default" onClick={handleSaveInvoice} disabled={invoiceItems.length === 0 || loading}>
-                    {loading ? 'Сохранение...' : savedInvoiceId ? 'Обновить накладную' : 'Сохранить накладную'}
-                </Button>
-                <Button variant="secondary" onClick={handleDownload} disabled={!savedInvoiceId}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Скачать Word (.docx)
-                </Button>
-            </div>
+            {invoiceItems.length > 0 && (
+                <div className="flex flex-wrap items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Button onClick={handleSaveInvoice} disabled={loading}>
+                            {loading ? 'Сохранение...' : 'Сохранить'}
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            className="font-semibold"
+                            onClick={handleDownload}
+                            disabled={!savedInvoiceId}
+                        >
+                            Скачать
+                        </Button>
+                    </div>
+
+                    <Button
+                        type="button"
+                        onClick={handleClearAll}
+                        className="bg-gray-200 hover:bg-gray-200 text-my-secondary font-semibold pl-2"
+                    >
+                        <Trash2 className="!size-6" strokeWidth={1.5} />
+                        Очистить все
+                    </Button>
+                </div>
+            )}
         </div>
+    );
+}
+
+function ProductComboboxItem({ product }: { product: Product }) {
+    const image = product.gallery?.[0]?.image;
+    const imageUrl = isImageData(image) ? image.url : null;
+
+    return (
+        <ComboboxItem value={product.title}>
+            <div className="flex w-full items-center justify-between rounded-md p-1 hover:bg-gray-50">
+                <div className="flex items-center gap-3">
+                    <div className="relative w-11 h-11 rounded-md overflow-hidden bg-gray-200">
+                        {imageUrl && <Image src={imageUrl} alt="" fill unoptimized className="object-cover" />}
+                    </div>
+
+                    <span className="font-semibold text-my-primary truncate">{product.title}</span>
+                </div>
+
+                <span className="text-my-tertriary tabular-nums">{product.article1C || '—'}</span>
+            </div>
+        </ComboboxItem>
     );
 }

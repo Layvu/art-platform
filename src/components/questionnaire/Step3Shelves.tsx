@@ -2,17 +2,17 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft } from 'lucide-react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import type z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Field, FieldContent, FieldLabel } from '@/components/ui/field';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { authorFullSchema, type AuthorWelcomeValues } from '@/shared/validations/schemas';
 
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import Image from 'next/image';
 
 const shelfOptions = [
     { id: '6', label: '6 уровень (верхняя полка) - 1100 р.' },
