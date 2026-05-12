@@ -7,6 +7,15 @@ interface ProductsLoaderProps {
     columnsCount?: number;
 }
 
+export function HomeLoader() {
+    return (
+        <div className="wrap">
+            <Skeleton className="h-screen w-full mb-4" />
+            <ProductsLoader showHeader={false} />
+        </div>
+    );
+}
+
 export function ProductsLoader({ showHeader = true, productsCount = 12, columnsCount = 4 }: ProductsLoaderProps) {
     return (
         <div className="wrap">
@@ -35,7 +44,13 @@ function ProductsHeaderLoader() {
     );
 }
 
-function ProductsGridLoader({ productsCount = 16, columnsCount }: { productsCount: number; columnsCount: number }) {
+export function ProductsGridLoader({
+    productsCount = 16,
+    columnsCount,
+}: {
+    productsCount: number;
+    columnsCount: number;
+}) {
     const gridColsClass =
         {
             2: 'grid-cols-1 sm:grid-cols-2',
@@ -127,4 +142,3 @@ export const ProductsSkeleton = {
         </div>
     ),
 };
-

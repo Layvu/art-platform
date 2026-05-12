@@ -77,10 +77,10 @@ export const getCategoriesQueryOptions = (queryParams: QueryParams) => {
     };
 };
 
-// export const getMediaQueryOptions = ({ id }: { id: number }) => {
-//     return {
-//         queryKey: [COLLECTION_SLUGS.PRODUCTS, id],
-//         queryFn: () => payloadDataService.getMediaById(id),
-//         staleTime: 1000 * 60, // минута,
-//     };
-// };
+export const getHomeSliderQueryOptions = () => {
+    return {
+        queryKey: [COLLECTION_SLUGS.HOME_SLIDER],
+        queryFn: () => payloadDataService.getHomeSlides(),
+        staleTime: 1000 * 60 * 60, // час,
+    };
+};

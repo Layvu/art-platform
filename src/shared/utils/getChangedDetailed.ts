@@ -1,10 +1,12 @@
+import { XMLParser } from 'fast-xml-parser';
+
 export type ParsedOffer = {
     id: string;
     price: number;
     stock: number;
 };
 
-export type ChangedOfferType = "price" | "stock" | "new" | "deleted";
+export type ChangedOfferType = 'price' | 'stock' | 'new' | 'deleted';
 
 export type ChangedParsedOffers = {
     id: string;
@@ -12,10 +14,7 @@ export type ChangedParsedOffers = {
     newValue?: number;
 };
 
-export function getChangedDetailed(
-    prev: ParsedOffer[],
-    next: ParsedOffer[]
-): ChangedParsedOffers[] {
+export function getChangedDetailed(prev: ParsedOffer[], next: ParsedOffer[]): ChangedParsedOffers[] {
     const prevMap = new Map<string, ParsedOffer>();
     const nextMap = new Map<string, ParsedOffer>();
 
@@ -35,7 +34,7 @@ export function getChangedDetailed(
 
         // новый товар
         if (!prevItem) {
-            changes.push({ id, type: "new" });
+            changes.push({ id, type: 'new' });
             continue;
         }
 
@@ -43,20 +42,81 @@ export function getChangedDetailed(
         const stockChanged = prevItem.stock !== nextItem.stock;
 
         if (priceChanged) {
-            changes.push({ id, type: "price", newValue: nextItem.price });
+            changes.push({ id, type: 'price', newValue: nextItem.price });
         }
 
         if (stockChanged) {
-            changes.push({ id, type: "stock", newValue: nextItem.stock });
+            changes.push({ id, type: 'stock', newValue: nextItem.stock });
         }
     }
 
     // 2. Удалённые
     for (const id of prevMap.keys()) {
         if (!nextMap.has(id)) {
-            changes.push({ id, type: "deleted" });
+            changes.push({ id, type: 'deleted' });
         }
     }
 
     return changes;
+}
+
+type RawPrice = {
+    ЦенаЗаЕдиницу?: string | number;
+};
+
+type RawOffer = {
+    Артикул?: string | number;
+    Количество?: string | number;
+    Цены?: {
+        Цена?: RawPrice | RawPrice[];
+    };
+};
+
+type RawXml = {
+    КоммерческаяИнформация?: {
+        ПакетПредложений?: {
+            Предложения?: {
+                Предложение?: RawOffer | RawOffer[];
+            };
+        };
+    };
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+export function parseOffersXml(xmlRaw: string): ParsedOffer[] {
+    const parser = new XMLParser({
+        ignoreAttributes: false,
+        attributeNamePrefix: '',
+        parseTagValue: false,
+        trimValues: true,
+    });
+
+    const parsed: unknown = parser.parse(xmlRaw);
+
+    if (!isRecord(parsed)) {
+        throw new Error('XML не распарсился в объект');
+    }
+
+    const root = parsed as RawXml;
+    const offers = root.КоммерческаяИнформация?.ПакетПредложений?.Предложения?.Предложение;
+
+    if (!offers) {
+        throw new Error('В XML не найдены предложения');
+    }
+
+    const offersArray: RawOffer[] = Array.isArray(offers) ? offers : [offers];
+
+    return offersArray.map((offer): ParsedOffer => {
+        const priceNode = offer.Цены?.Цена;
+        const priceVal = Array.isArray(priceNode) ? priceNode[0]?.ЦенаЗаЕдиницу : priceNode?.ЦенаЗаЕдиницу;
+
+        return {
+            id: String(offer.Артикул ?? ''),
+            price: Number(priceVal ?? 0),
+            stock: Number(offer.Количество ?? 0),
+        };
+    });
 }

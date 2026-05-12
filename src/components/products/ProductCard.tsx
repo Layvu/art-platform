@@ -35,7 +35,6 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
 
     return (
         <Link
-            className="col-span-3"
             onMouseEnter={() =>
                 (timerRef.current = setTimeout(() => {
                     queryClient.prefetchQuery(getProductQueryOptions({ slug }));
@@ -44,7 +43,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
             onMouseLeave={() => timerRef.current && clearTimeout(timerRef.current)}
             href={PAGES.PRODUCT(slug)}
         >
-            <Card className="p-0 h-[480.5px] overflow-hidden">
+            <Card className="p-0 overflow-hidden h-full">
                 <CardHeader className="relative w-full aspect-square overflow-hidden">
                     <Image
                         alt="Картинка"
@@ -55,8 +54,8 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
                     />
                 </CardHeader>
 
-                <CardContent className="flex flex-col flex-1 mb-auto">
-                    <div className="flex flex-col gap-3 mb-auto">
+                <CardContent className="flex flex-col flex-1 mb-auto p-3 md:p-4">
+                    <div className="flex flex-col gap-2 md:gap-3 mb-auto">
                         <CardTitle>{title}</CardTitle>
                         <CardDescription>
                             {isAuthorData(author) && (
@@ -66,18 +65,18 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
                             )}
                         </CardDescription>
                     </div>
-                    <CardAction className="w-full cursor-default" onClick={handleCardActionClick}>
+                    <CardAction className="w-full cursor-default mt-3" onClick={handleCardActionClick}>
                         {productInCart ? (
                             <CounterButton
-                                variant={'default'}
+                                variant="default"
                                 quantity={productInCart.quantity}
                                 boundary={quantity || 0}
                                 handleMinus={() => decrease(id)}
                                 handlePlus={() => increase(id)}
-                            ></CounterButton>
+                            />
                         ) : (
                             <Button
-                                className="w-full rounded"
+                                className="w-full rounded text-xs md:text-sm"
                                 variant="secondary"
                                 onClick={() => addItem(id)}
                                 disabled={!isAvailable}
@@ -91,5 +90,3 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
         </Link>
     );
 }
-
-// TODO: Семантическая вёрстка / tailwind / shadcn

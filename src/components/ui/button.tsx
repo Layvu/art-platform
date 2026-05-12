@@ -23,7 +23,7 @@ const buttonVariants = cva(
                     'bg-my-button-secondary-default text-my-accent hover:bg-my-button-secondary-hover disabled:bg-my-button-secondary-disabled disabled:text-my-tertriary',
 
                 ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-                empty: '',//'hover:bg-my-button-primary-hover',
+                empty: '', //'hover:bg-my-button-primary-hover',
                 secondaryEmpty: '', //'hover:bg-my-button-primary-hover/50',
                 link: 'text-primary underline-offset-4 hover:underline',
 

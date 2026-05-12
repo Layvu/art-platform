@@ -18,8 +18,8 @@ export default function ProductSlider({ gallery }: Props) {
 
     if (!gallery?.length)
         return (
-            <div className="relative w-145 h-145 pt-3">
-                <div className="relative w-145 h-145 overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative w-full aspect-square">
+                <div className="relative w-full h-full overflow-hidden rounded-lg bg-gray-100">
                     <Image src="/placeholder.png" alt="Placeholder" fill priority className="object-cover" />
                 </div>
             </div>
@@ -47,12 +47,13 @@ export default function ProductSlider({ gallery }: Props) {
     };
 
     return (
-        <div className="flex gap-5">
-            <div className="w-24 flex h-145">
-                <Slider ref={thumbSlider} {...thumbSettings}>
+        <div className="flex gap-3 md:gap-5 h-full">
+            {/* Миниатюры — скрываем на мобильных */}
+            <div className="hidden md:flex w-20 lg:w-24 shrink-0">
+                <Slider ref={thumbSlider} {...thumbSettings} className="w-full">
                     {gallery.map((img) => (
-                        <div key={img.id} className="px-0 py-3 outline-none">
-                            <div className="relative w-24 h-24 overflow-hidden rounded-lg cursor-pointer">
+                        <div key={img.id} className="px-0 py-1.5 md:py-3 outline-none">
+                            <div className="relative w-20 h-20 lg:w-24 lg:h-24 overflow-hidden rounded-lg cursor-pointer">
                                 <Image src={img.url!} alt={img.filename ?? ''} fill className="object-cover" />
                             </div>
                         </div>
@@ -60,11 +61,12 @@ export default function ProductSlider({ gallery }: Props) {
                 </Slider>
             </div>
 
-            <div className="relative w-145 h-145 pt-3">
+            {/* Основной слайдер */}
+            <div className="relative flex-1 pt-3">
                 <Slider ref={mainSlider} {...mainSettings}>
                     {gallery.map((img) => (
                         <div key={img.id}>
-                            <div className="relative w-145 h-145 overflow-hidden rounded-lg">
+                            <div className="relative w-full aspect-square overflow-hidden rounded-lg">
                                 <Image src={img.url!} alt={img.filename ?? ''} fill priority className="object-cover" />
                             </div>
                         </div>
@@ -73,19 +75,30 @@ export default function ProductSlider({ gallery }: Props) {
 
                 <button
                     onClick={() => mainSlider.current?.slickPrev()}
-                    className="absolute left-3 top-1/2 -translate-y-1/2
-                     bg-white/80 hover:bg-white rounded-md p-2 shadow cursor-pointer"
+                    className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2
+                     bg-white/80 hover:bg-white rounded-md p-1.5 md:p-2 shadow cursor-pointer z-10"
                 >
-                    <ChevronLeft />
+                    <ChevronLeft className="size-4 md:size-5" />
                 </button>
 
                 <button
                     onClick={() => mainSlider.current?.slickNext()}
-                    className="absolute right-3 top-1/2 -translate-y-1/2
-                     bg-white/80 hover:bg-white rounded-md p-2 shadow cursor-pointer"
+                    className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2
+                     bg-white/80 hover:bg-white rounded-md p-1.5 md:p-2 shadow cursor-pointer z-10"
                 >
-                    <ChevronRight />
+                    <ChevronRight className="size-4 md:size-5" />
                 </button>
+
+                {/* Точки-миниатюры на мобильных вместо боковых thumb */}
+                <div className="flex md:hidden justify-center gap-1.5 mt-3">
+                    {gallery.map((img, i) => (
+                        <button
+                            key={img.id}
+                            onClick={() => mainSlider.current?.slickGoTo(i)}
+                            className="w-1.5 h-1.5 rounded-full bg-gray-300 transition-colors"
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

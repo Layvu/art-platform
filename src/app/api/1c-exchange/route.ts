@@ -6,7 +6,12 @@ import path from 'path';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 
-import { type ChangedOfferType, getChangedDetailed, type ParsedOffer } from '@/shared/utils/getChangedDetailed';
+import {
+    type ChangedOfferType,
+    getChangedDetailed,
+    type ParsedOffer,
+    parseOffersXml,
+} from '@/shared/utils/getChangedDetailed';
 import { syncProductsFromDiff } from '@/shared/utils/syncProductsFromDiff';
 
 const LOGIN = process.env.ONEC_LOGIN;
@@ -25,37 +30,6 @@ function checkAuth(req: NextRequest) {
     const [login, password] = decoded.split(':');
 
     return login === LOGIN && password === PASSWORD;
-}
-
-function parseOffersXml(xmlRaw: string): ParsedOffer[] {
-    const parser = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: '',
-        parseTagValue: false,
-        trimValues: true,
-    });
-
-    const jsonObj = parser.parse(xmlRaw);
-
-    const offers = jsonObj?.КоммерческаяИнформация?.ПакетПредложений?.Предложения?.Предложение;
-
-    if (!offers) {
-        throw new Error('В XML не найдены предложения');
-    }
-
-    const offersArray = Array.isArray(offers) ? offers : [offers];
-
-    return offersArray.map((offer: any) => {
-        const priceVal = Array.isArray(offer?.Цены?.Цена)
-            ? offer.Цены.Цена[0]?.ЦенаЗаЕдиницу
-            : offer?.Цены?.Цена?.ЦенаЗаЕдиницу;
-
-        return {
-            id: String(offer?.Артикул ?? ''),
-            price: Number(priceVal ?? 0),
-            stock: Number(offer?.Количество ?? 0),
-        };
-    });
 }
 
 export async function GET(req: NextRequest) {
@@ -167,9 +141,8 @@ export async function POST(req: NextRequest) {
             fs.renameSync(newPath, oldPath);
 
             return new NextResponse('success');
-        } catch (err: any) {
-            console.error('Parse error:', err.message);
-            return NextResponse.json({ error: err.message }, { status: 500 });
+        } catch (err: unknown) {
+            return NextResponse.json({ error: err instanceof Error ? err.message : 'unknown error' }, { status: 500 });
         }
     }
 
@@ -205,12 +178,10 @@ export async function POST(req: NextRequest) {
 
             // (опционально) удалить XML
             // fs.unlinkSync(filePath);
-
-            return new NextResponse('success');
-        } catch (err: any) {
-            console.error('Parse error:', err.message);
-            return new NextResponse('failure');
+        } catch (err: unknown) {
+            return NextResponse.json({ error: err instanceof Error ? err.message : 'unknown error' }, { status: 500 });
         }
+        return new NextResponse('success');
     }
 
     return NextResponse.json({ error: 'unknown mode' }, { status: 400 });

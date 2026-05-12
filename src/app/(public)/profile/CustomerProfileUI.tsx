@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleUserRound, Lock, LockKeyhole, LogOut, ShoppingBag, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { customerClientService } from '@/services/api/client/customer-client.service';
+import { useAuthStore } from '@/services/store/auth/store';
 import type { CustomerProfileUIProps, ICustomerUpdateInput } from '@/shared/types/customer.interface';
 import { cn } from '@/shared/utils/tailwind';
 import { emailSchema, fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
@@ -42,6 +44,14 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
     const [loading, setLoading] = useState(false);
     const [resetLoading, setResetLoading] = useState(false);
 
+    const router = useRouter();
+    const logout = useAuthStore((state) => state.logout);
+    const handleLogout = async () => {
+        await logout();
+
+        // Принудительно обновляем страницу, чтобы все компоненты перерисовались
+        router.refresh();
+    };
     // Формы
     const profileForm = useForm({
         resolver: zodResolver(profileSchema),
@@ -81,7 +91,7 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
             const result = await customerClientService.updateProfile(data);
             if (result.success) {
                 setSuccess('Email успешно изменен.');
-                securityForm.setValue('password', ''); // Очищаем пароль
+                securityForm.setValue('password', '');
             } else setError(result.error || 'Ошибка при изменении Email');
         } finally {
             setLoading(false);
@@ -105,7 +115,6 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
         }
     };
 
-    // Метаданные для табов
     const tabs = [
         { id: 'profile', label: 'Личные данные', icon: CircleUserRound },
         { id: 'orders', label: 'Заказы', icon: ShoppingBag },
@@ -140,7 +149,10 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
 
                 <Separator color="gray-200" />
 
-                <button className="flex gap-2.5 py-1.5 cursor-pointer hover:text-red-500 transition-colors w-full text-left">
+                <button
+                    onClick={handleLogout}
+                    className="flex gap-2.5 py-1.5 cursor-pointer hover:text-red-500 transition-colors w-full text-left"
+                >
                     <LogOut size={24} strokeWidth={1.5} />
                     Выйти
                 </button>

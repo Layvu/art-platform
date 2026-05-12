@@ -366,14 +366,13 @@ async function runSeed() {
     console.log(`\n${CONFIG.colors.cyan}=== ИМПОРТ ЗАВЕРШЕН ===${CONFIG.colors.reset}`);
 }
 
-
 async function main() {
     // Сначала создаём категории
     await seedCategories();
-    
+
     // Затем импортируем товары
     await runSeed();
-    
+
     console.log('Готово!');
     exit(0);
 }

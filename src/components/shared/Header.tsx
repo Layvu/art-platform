@@ -13,42 +13,40 @@ import { MENU } from '../Menu/menu.data';
 import { MenuItem } from '../Menu/MenuItem';
 import ProfileButton from '../Menu/ProfileButton';
 
+function checkIsActive(href: string, pathName: string): boolean {
+    try {
+        return !!match(href, { decode: decodeURIComponent })(pathName);
+    } catch {
+        return pathName === href;
+    }
+}
+
 export function Header() {
     const pathName = usePathname();
-    // Получаем частичные данные текущего пользователя из localStorage
     const user = useAuthStore((state) => state.user);
 
-    // Если пользователь авторизован (user существует), то отрисовываем Profile и Logout
-    // Иначе отрисовываем Login и Register
-    // const menuItems = MENU.filter((menuItem) => {
-    //     if (user) {
-    //         return !menuItem.guestOnly;
-    //     } else {
-    //         return !menuItem.requiresAuth;
-    //     }
-    // });
-    const checkIsActive = (href: string) => {
-        try {
-            return !!match(href, { decode: decodeURIComponent })(pathName);
-        } catch (error) {
-            return pathName === href;
-        }
-    };
     return (
-        <header className="flex items-center justify-between py-4 mb-8 wrap">
+        // hidden на мобильных, flex на md+
+        <header className="hidden md:flex items-center justify-between py-4 mb-8 wrap">
             <Link href={PAGES.HOME} className="flex items-center gap-2">
                 <Image src="/logo.svg" alt="Minto Logo" width={80} height={40} priority />
             </Link>
+
             <nav className="flex gap-6">
                 {MENU.map((menuItem) => (
-                    <MenuItem key={menuItem.name} menuItem={menuItem} isActive={checkIsActive(menuItem.href)} />
+                    <MenuItem
+                        key={menuItem.name}
+                        menuItem={menuItem}
+                        isActive={checkIsActive(menuItem.href, pathName)}
+                    />
                 ))}
             </nav>
-            <nav className="flex gap-4">
-                <CartButton isActive={checkIsActive(PAGES.CART)} />
+
+            <nav className="flex gap-4 items-center">
+                <CartButton isActive={checkIsActive(PAGES.CART, pathName)} />
                 <ProfileButton
                     isRegistered={!!user}
-                    isActive={checkIsActive(PAGES.LOGIN) || checkIsActive(PAGES.PROFILE)}
+                    isActive={checkIsActive(PAGES.LOGIN, pathName) || checkIsActive(PAGES.PROFILE, pathName)}
                 />
                 <span style={{ fontSize: '6px' }}>v 1.0.6</span>
             </nav>

@@ -19,6 +19,7 @@ import { ProductsCollection } from '@/collections/products.collection';
 import { UsersCollection } from '@/collections/users.collection';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 
+import { HomeSliderCollection } from './collections/homeSlider.collection';
 import { InvoicesCollection } from './collections/invoices.collection';
 import { cancelExpiredOrders } from './jobs/cancelExpiredOrders';
 import { cleanupUnverifiedUsers } from './jobs/cleanupUnverifiedUsers';
@@ -44,6 +45,7 @@ export default buildConfig({
         MediaCollection,
         CategoriesCollection,
         InvoicesCollection,
+        HomeSliderCollection,
     ],
 
     i18n: {
