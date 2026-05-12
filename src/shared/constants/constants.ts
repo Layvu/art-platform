@@ -10,6 +10,7 @@ export const COLLECTION_SLUGS = {
     ORDERS: 'orders',
     CATEGORIES: 'categories',
     INVOICES: 'invoices',
+    HOME_SLIDER: 'home-slider',
 } as const;
 
 export const HTTP_METHODS = {

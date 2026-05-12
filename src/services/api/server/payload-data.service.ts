@@ -1,5 +1,5 @@
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
-import type { Author, Category, Product } from '@/shared/types/payload-types';
+import type { Author, Category, HomeSlider, Product } from '@/shared/types/payload-types';
 import type { QueryParams } from '@/shared/types/query-params.type';
 
 import { apiUrl } from '../api-url-builder';
@@ -129,6 +129,10 @@ export class PayloadDataService {
 
     async getCategories(params: QueryParams): Promise<PaginatedResponse<Category>> {
         return this.getCollection(COLLECTION_SLUGS.CATEGORIES, { ...params, depth: 1 });
+    }
+
+    async getHomeSlides(): Promise<PaginatedResponse<HomeSlider>> {
+        return this.getCollection<HomeSlider>(COLLECTION_SLUGS.HOME_SLIDER, { limit: 100 });
     }
 }
 

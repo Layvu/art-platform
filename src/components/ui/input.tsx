@@ -24,7 +24,7 @@ function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
             className={cn(
                 'placeholder:text-muted-foreground border-input w-full min-w-0 rounded-md border bg-transparent px-3 py-2 text-base shadow-xs outline-none resize-none',
                 'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
-                className
+                className,
             )}
             {...props}
         />

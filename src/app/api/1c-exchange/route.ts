@@ -1,39 +1,17 @@
 import crypto from 'crypto';
-import { XMLParser } from 'fast-xml-parser';
 import fs, { createWriteStream, writeFileSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 
-import { type ChangedOfferType, getChangedDetailed, type ParsedOffer } from '@/shared/utils/getChangedDetailed';
+import {
+    type ChangedOfferType,
+    getChangedDetailed,
+    type ParsedOffer,
+    parseOffersXml,
+} from '@/shared/utils/getChangedDetailed';
 import { syncProductsFromDiff } from '@/shared/utils/syncProductsFromDiff';
-
-type RawPrice = {
-    ЦенаЗаЕдиницу?: string | number;
-};
-
-type RawOffer = {
-    Артикул?: string | number;
-    Количество?: string | number;
-    Цены?: {
-        Цена?: RawPrice | RawPrice[];
-    };
-};
-
-type RawXml = {
-    КоммерческаяИнформация?: {
-        ПакетПредложений?: {
-            Предложения?: {
-                Предложение?: RawOffer | RawOffer[];
-            };
-        };
-    };
-};
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
-}
 
 const LOGIN = process.env.ONEC_LOGIN;
 const PASSWORD = process.env.ONEC_PASSWORD;
@@ -51,42 +29,6 @@ function checkAuth(req: NextRequest) {
     const [login, password] = decoded.split(':');
 
     return login === LOGIN && password === PASSWORD;
-}
-
-export function parseOffersXml(xmlRaw: string): ParsedOffer[] {
-    const parser = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: '',
-        parseTagValue: false,
-        trimValues: true,
-    });
-
-    // parser.parse возвращает unknown — сужаем через guard.
-    const parsed: unknown = parser.parse(xmlRaw);
-
-    if (!isRecord(parsed)) {
-        throw new Error('XML не распарсился в объект');
-    }
-
-    const root = parsed as RawXml;
-    const offers = root.КоммерческаяИнформация?.ПакетПредложений?.Предложения?.Предложение;
-
-    if (!offers) {
-        throw new Error('В XML не найдены предложения');
-    }
-
-    const offersArray: RawOffer[] = Array.isArray(offers) ? offers : [offers];
-
-    return offersArray.map((offer): ParsedOffer => {
-        const priceNode = offer.Цены?.Цена;
-        const priceVal = Array.isArray(priceNode) ? priceNode[0]?.ЦенаЗаЕдиницу : priceNode?.ЦенаЗаЕдиницу;
-
-        return {
-            id: String(offer.Артикул ?? ''),
-            price: Number(priceVal ?? 0),
-            stock: Number(offer.Количество ?? 0),
-        };
-    });
 }
 
 export async function GET(req: NextRequest) {
@@ -199,10 +141,7 @@ export async function POST(req: NextRequest) {
 
             return new NextResponse('success');
         } catch (err: unknown) {
-            return {
-                status: 0,
-                error: err instanceof Error ? err.message : 'unknown error',
-            };
+            return NextResponse.json({ error: err instanceof Error ? err.message : 'unknown error' }, { status: 500 });
         }
     }
 
@@ -239,10 +178,7 @@ export async function POST(req: NextRequest) {
             // (опционально) удалить XML
             // fs.unlinkSync(filePath);
         } catch (err: unknown) {
-            return {
-                status: 0,
-                error: err instanceof Error ? err.message : 'unknown error',
-            };
+            return NextResponse.json({ error: err instanceof Error ? err.message : 'unknown error' }, { status: 500 });
         }
         return new NextResponse('success');
     }

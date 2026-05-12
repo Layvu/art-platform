@@ -2,7 +2,7 @@ import { config } from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import type { ChangedParsedOffers } from "./getChangedDetailed";
+import type { ChangedParsedOffers } from './getChangedDetailed';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -49,11 +49,7 @@ function extractSetCookies(headers: Headers): string[] {
     return single ? [single] : [];
 }
 
-async function request<T>(
-    method: RequestMethod,
-    path: string,
-    body?: unknown,
-): Promise<RequestResponse<T>> {
+async function request<T>(method: RequestMethod, path: string, body?: unknown): Promise<RequestResponse<T>> {
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
     };
@@ -92,7 +88,6 @@ async function request<T>(
     }
 }
 
-
 export async function syncProductsFromDiff(changes: ChangedParsedOffers[]) {
     console.log('=== SYNC PRODUCTS START ===');
 
@@ -111,31 +106,26 @@ export async function syncProductsFromDiff(changes: ChangedParsedOffers[]) {
         try {
             const find = await request<ProductsResponse>(
                 'GET',
-                `/api/products?where[article1C][equals]=${encodeURIComponent(id)}`
+                `/api/products?where[article1C][equals]=${encodeURIComponent(id)}`,
             );
 
             const existing = find.data?.docs?.[0];
 
-
-            // TODO: чтение json в котором описывается названеи товара и id автора. 
+            // TODO: чтение json в котором описывается названеи товара и id автора.
             // ...
-             
+
             if (type === 'new') {
                 if (existing) {
                     console.log(`⚠ already exists: ${id}`);
                     continue;
                 }
 
-                const res = await request(
-                    'POST',
-                    '/api/products',
-                    {
-                        article1C: id,
-                        title: `Импорт ${id}`,
-                        price: 0,
-                        quantity: 0,
-                    }
-                );
+                const res = await request('POST', '/api/products', {
+                    article1C: id,
+                    title: `Импорт ${id}`,
+                    price: 0,
+                    quantity: 0,
+                });
 
                 console.log(`+ created ${id} (${res.status})`);
                 continue;
@@ -147,10 +137,7 @@ export async function syncProductsFromDiff(changes: ChangedParsedOffers[]) {
                     continue;
                 }
 
-                const res = await request(
-                    'DELETE',
-                    `/api/products/${existing.id}`
-                );
+                const res = await request('DELETE', `/api/products/${existing.id}`);
 
                 console.log(`- deleted ${id} (${res.status})`);
                 continue;
@@ -164,27 +151,18 @@ export async function syncProductsFromDiff(changes: ChangedParsedOffers[]) {
             const updateData: Partial<Product> = {};
 
             if (type === 'price') {
-                updateData.price = (change).newValue;
+                updateData.price = change.newValue;
             }
 
             if (type === 'stock') {
-                updateData.quantity = (change).newValue;
+                updateData.quantity = change.newValue;
             }
 
-            const res = await request(
-                'PATCH',
-                `/api/products/${existing.id}`,
-                updateData
-            );
+            const res = await request('PATCH', `/api/products/${existing.id}`, updateData);
 
             console.log(`~ updated ${id} (${type}) → ${res.status}`);
-
         } catch (err: unknown) {
-            console.log(
-                `✘ error ${id}: ${
-                    err instanceof Error ? err.message : 'unknown'
-                }`
-            );
+            console.log(`✘ error ${id}: ${err instanceof Error ? err.message : 'unknown'}`);
         }
     }
 

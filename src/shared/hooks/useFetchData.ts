@@ -4,12 +4,13 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 
 import type { PaginatedResponse } from '@/services/api/server/payload-data.service';
 
-import type { Author, Category, Product } from '../types/payload-types';
+import type { Author, Category, HomeSlider, Product } from '../types/payload-types';
 import type { QueryParams } from '../types/query-params.type';
 import {
     getAuthorQueryOptions,
     getAuthorsQueryOptions,
     getCategoriesQueryOptions,
+    getHomeSliderQueryOptions,
     getProductByIdQueryOptions,
     getProductQueryOptions,
     getProductSlugQueryOptions,
@@ -28,6 +29,15 @@ export const useFetchProducts = (queryParams: QueryParams) => {
 export const useFetchAuthors = (queryParams: QueryParams) => {
     return useQuery<PaginatedResponse<Author>>({
         ...getAuthorsQueryOptions({ ...queryParams }),
+        placeholderData: (previousData) => {
+            return previousData;
+        },
+    });
+};
+
+export const useFetchHomeSlider = () => {
+    return useQuery<PaginatedResponse<HomeSlider>>({
+        ...getHomeSliderQueryOptions(),
         placeholderData: (previousData) => {
             return previousData;
         },

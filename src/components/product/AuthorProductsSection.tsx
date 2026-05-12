@@ -25,7 +25,7 @@ export default function AuthorProductsSection({ product, updateQueryParams }: Pr
 
     return (
         <div className="">
-            <h2 className="text-[28px] font-semibold mb-8">Другие товары автора</h2>
+            <h2 className="lg:text-[28px] text-xl font-semibold mb-8">Другие товары автора</h2>
 
             <ProductsList initialParams={initialParams} updateQueryParams={updateQueryParams} />
         </div>
