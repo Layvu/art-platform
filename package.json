@@ -19,6 +19,7 @@
         "payload": "payload generate:types"
     },
     "dependencies": {
+        "@base-ui/react": "^1.4.1",
         "@hookform/resolvers": "^5.2.2",
         "@payloadcms/db-postgres": "3.75.0",
         "@payloadcms/email-nodemailer": "3.75.0",

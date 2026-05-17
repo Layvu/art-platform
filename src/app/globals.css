@@ -168,6 +168,10 @@
     }
 }
 
+html {
+    scrollbar-gutter: stable;
+}
+
 .slick-prev:before,
 .slick-next:before {
     color: black;

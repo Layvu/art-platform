@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { XMLParser } from 'fast-xml-parser';
 import fs, { createWriteStream, writeFileSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';

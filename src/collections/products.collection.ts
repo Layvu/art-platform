@@ -297,5 +297,48 @@ export const ProductsCollection: CollectionConfig = {
                 return data;
             },
         ],
+
+        beforeDelete: [
+            // Каскадная очистка накладных перед удалением товара
+            async ({ req, id }) => {
+                const { payload } = req;
+
+                const invoices = await payload.find({
+                    collection: COLLECTION_SLUGS.INVOICES,
+                    where: { 'items.product': { equals: id } },
+                    limit: 10000,
+                    depth: 0,
+                    overrideAccess: true,
+                });
+                if (invoices.totalDocs === 0) return;
+
+                await Promise.all(
+                    invoices.docs.map((invoice) => {
+                        const filteredItems = invoice.items.filter((item) => {
+                            const productId = typeof item.product === 'object' ? item.product?.id : item.product;
+                            return productId !== Number(id);
+                        });
+
+                        if (filteredItems.length === 0) {
+                            // Удаляем накладную, если все товары были удалены
+                            return payload.delete({
+                                collection: COLLECTION_SLUGS.INVOICES,
+                                id: invoice.id,
+                                req,
+                                overrideAccess: true,
+                            });
+                        }
+
+                        return payload.update({
+                            collection: COLLECTION_SLUGS.INVOICES,
+                            id: invoice.id,
+                            data: { items: filteredItems },
+                            req,
+                            overrideAccess: true,
+                        });
+                    }),
+                );
+            },
+        ],
     },
 };
