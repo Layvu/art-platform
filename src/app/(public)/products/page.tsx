@@ -1,10 +1,17 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
+import type { Metadata } from 'next';
 
 import ProductsUI from '@/components/products/ProductsUI';
 import { toQueryParams } from '@/services/api/utils';
 import type { ProductsQueryParams } from '@/shared/types/query-params.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getCategoriesQueryOptions, getProductsQueryOptions } from '@/shared/utils/getDataQueryOptions';
+
+export const metadata: Metadata = {
+    title: 'Каталог товаров | МИНТО — Магазин авторской продукции',
+    description:
+        'Каталог уникальных авторских работ от художников и мастеров Екатеринбурга. Найдите то, что вдохновляет именно вас.',
+};
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<ProductsQueryParams> }) {
     // Получаем параметры из поисковой строки
@@ -29,4 +36,3 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
     );
 }
 
-// TODO: Метатеги

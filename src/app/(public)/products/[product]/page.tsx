@@ -17,7 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<ProductQuer
     }
 
     return {
-        title: productData.title,
+        title: `${productData.title} | МИНТО`,
+        description: productData.description?.slice(0, 160) ?? 'Авторская работа от мастера в магазине МИНТО.',
     };
 }
 

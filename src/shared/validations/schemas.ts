@@ -50,7 +50,7 @@ export const authorStep2Schema = z.object({
 
 export const authorFullSchema = authorStep2Schema.extend({
     shelves: z.array(z.string()).min(1, 'Выберите хотя бы одну полку'),
-    needRail: z.string().min(1, 'Please select an option'),
+    needRail: z.string().min(1, 'Выберете вариант'),
 });
 
 export type AuthorWelcomeValues = z.infer<typeof authorFullSchema>;
