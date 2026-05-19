@@ -17,12 +17,13 @@ export function Timer({
     className = '',
     onExpire,
 }: TimerProps) {
-    const expiryDate = useMemo(
-        () => new Date(startTime).getTime() + durationMinutes * 60 * 1000,
-        [startTime, durationMinutes],
-    );
+    const expiryTime = useMemo(() => {
+        return new Date(startTime).getTime() + durationMinutes * 60 * 1000;
+    }, [startTime, durationMinutes]);
 
-    const [timeLeft, setTimeLeft] = useState(() => Math.max(0, expiryDate - Date.now()));
+    const [now, setNow] = useState(Date.now());
+
+    const timeLeft = Math.max(0, expiryTime - now);
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -31,16 +32,11 @@ export function Timer({
         }
 
         const interval = setInterval(() => {
-            const remaining = Math.max(0, expiryDate - Date.now());
-            setTimeLeft(remaining);
-            if (remaining <= 0) {
-                clearInterval(interval);
-                onExpire?.();
-            }
+            setNow(Date.now());
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [expiryDate, timeLeft, onExpire]);
+    }, [timeLeft, onExpire]);
 
     if (timeLeft <= 0) {
         return <span className={`text-destructive font-bold ${className}`}>{expiredText}</span>;
@@ -50,7 +46,7 @@ export function Timer({
     const seconds = Math.floor((timeLeft % 60000) / 1000);
 
     return (
-        <span className={`text-orange-600 font-medium ${className}`}>
+        <span className={className}>
             {minutes}:{seconds.toString().padStart(2, '0')}
         </span>
     );

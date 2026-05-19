@@ -73,13 +73,18 @@ function mapInvoiceItems(latestInvoice: Invoice | null): InvoiceItemWithProduct[
 
 function getInvoiceRowMeta(item: InvoiceItemWithProduct, errors?: { quantity?: boolean; price?: boolean }) {
     const hasInitialPrice = (item.product.price ?? 0) > 0;
+    const baseConditions = hasInitialPrice ? CONDITIONS_WITH_PRICE : CONDITIONS_WITHOUT_PRICE;
+
+    const conditionsToShow = (baseConditions as string[]).includes(item.condition)
+        ? baseConditions
+        : [item.condition, ...baseConditions];
 
     return {
         hasInitialPrice,
         isPriceDisabled: item.condition === INVOICE_ITEM_CONDITION.OLD,
         isQuantityDisabled: item.condition === INVOICE_ITEM_CONDITION.REVALUATION,
         errors: errors || {},
-        conditionsToShow: hasInitialPrice ? CONDITIONS_WITH_PRICE : CONDITIONS_WITHOUT_PRICE,
+        conditionsToShow,
     };
 }
 

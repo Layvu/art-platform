@@ -127,8 +127,8 @@ function createDocumentTemplate(items: IInvoiceItem[]) {
                                         createCell(prod.title),
                                         createCell(item.quantity),
                                         createCell(item.condition),
-                                        createCell(prod.price ?? 0),
-                                        createCell(prod.price ?? 0),
+                                        createCell(item.price ?? 0),
+                                        createCell(item.price ?? 0),
                                     ],
                                 });
                             }),
@@ -209,6 +209,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         }
 
         const items = (invoice.items || []) as unknown as IInvoiceItem[];
+
+        console.log('items', items);
 
         // Генерация DOCX
         const doc = createDocumentTemplate(items);
