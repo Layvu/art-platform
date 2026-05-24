@@ -10,7 +10,7 @@ export const InvoicesCollection: CollectionConfig = {
     labels: { singular: 'Накладная', plural: 'Накладные' },
     admin: {
         useAsTitle: 'id',
-        defaultColumns: ['id', 'author', 'isConfirmed', 'createdAt'],
+        defaultColumns: ['id', 'author', 'createdAt'],
     },
 
     access: {

@@ -36,4 +36,4 @@ export const getOrderStatusText = (status: IOrderStatus): string => {
     }
 };
 
-export const PICKUP_ADDRESS = 'улица Горького, 33, Екатеринбург, Свердловская область, 620075';
+export const PICKUP_ADDRESS = 'улица Горького, 33, Екатеринбург';
