@@ -62,7 +62,7 @@ export default function ProductSlider({ gallery }: Props) {
             </div>
 
             {/* Основной слайдер */}
-            <div className="relative flex-1 pt-3">
+            <div className="relative flex-1 pt-3 min-w-0">
                 <Slider ref={mainSlider} {...mainSettings}>
                     {gallery.map((img) => (
                         <div key={img.id}>

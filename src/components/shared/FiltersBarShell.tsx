@@ -6,6 +6,7 @@ import { debounce } from 'lodash';
 import type { ReactNode } from 'react';
 
 import SearchBar from '../shared/SearchBar';
+import { ScrollArea, ScrollBar } from '../ui/scroll-area';
 
 interface FiltersBarShellProps {
     search?: string;
@@ -35,10 +36,25 @@ export function FiltersBarShell({
     };
 
     return (
-        <div className="flex items-start gap-3 mb-6">
-            <div className="flex gap-3">{children}</div>
-            <SearchBar value={searchValue} onChange={handleSearchChange} placeholder={searchPlaceholder} />
-            <div className="">{sortBar}</div>
+        <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-start">
+            <div className="order-1 lg:order-2 w-full px-3 lg:px-0">
+                <SearchBar value={searchValue} onChange={handleSearchChange} placeholder={searchPlaceholder} />
+            </div>
+
+            {/* Десктоп */}
+            <div className="hidden lg:contents">
+                <div className="lg:order-3">{sortBar}</div>
+                <div className="flex gap-3 lg:order-1">{children}</div>
+            </div>
+
+            {/* Мобилки */}
+            <ScrollArea className="order-3 w-full lg:hidden whitespace-nowrap">
+                <div className="flex items-center gap-3 w-max p-3 pb-4">
+                    <div className="order-3">{sortBar}</div>
+                    <div className="flex gap-3 order-1">{children}</div>
+                </div>
+                <ScrollBar orientation="horizontal" />
+            </ScrollArea>
         </div>
     );
 }

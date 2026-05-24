@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Footer() {
     return (
-        <footer className="mt-20 bg-gray-50">
+        <footer className="mt-24 bg-gray-50">
             <div className="wrap py-8 px-4 md:py-18 lg:py-18 flex flex-col gap-10 md:gap-14">
                 {/* Навигация */}
                 <div className="flex flex-col gap-4">
@@ -99,14 +99,14 @@ export default function Footer() {
                                 aria-label="Telegram"
                                 className="text-my-secondary hover:text-my-accent transition-colors cursor-pointer"
                             >
-                                <Image src="/icons/telegram--gray.svg" alt="Telegram" width={20} height={20}/>
+                                <Image src="/icons/telegram--gray.svg" alt="Telegram" width={20} height={20} />
                             </Link>
                             <Link
                                 href="#"
                                 aria-label="TikTok"
                                 className="text-my-secondary hover:text-my-accent transition-colors cursor-pointer"
                             >
-                                <Image src="/icons/tiktok--gray.svg" alt="TikTok" width={20} height={20}/>
+                                <Image src="/icons/tiktok--gray.svg" alt="TikTok" width={20} height={20} />
                             </Link>
                         </div>
                     </div>

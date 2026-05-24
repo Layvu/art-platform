@@ -2,7 +2,6 @@
 
 import React from 'react';
 
-import { Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';

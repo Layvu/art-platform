@@ -55,7 +55,7 @@ export default function HomeUI() {
                     </div>
                 </div>
             </div>
-            <div className="md:mt-20 lg:mt-26">
+            <div className="mt-12 md:mt-20 lg:mt-26">
                 <JoinTeamSection />
             </div>
         </div>

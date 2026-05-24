@@ -37,7 +37,7 @@ export default function ProductsList({ initialParams, updateQueryParams }: Produ
         <>
             <div
                 className={cn(
-                    'grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
+                    'grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-3 lg:px-0',
                     isPlaceholderData && 'opacity-50',
                 )}
             >

@@ -2,7 +2,6 @@
 
 import React from 'react';
 
-import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -18,7 +17,7 @@ import { Button, CounterButton } from '../ui/button';
 import { Card } from '../ui/card';
 
 export default function CartItem({ item, available }: { item: ICartItem; available: boolean }) {
-    const { toggleChecked, increase, decrease, removeItem } = useCartStore();
+    const { toggleChecked, increase, decrease } = useCartStore();
 
     const product = item.product;
 
@@ -29,68 +28,139 @@ export default function CartItem({ item, available }: { item: ICartItem; availab
     const stock = product.quantity ?? 0;
 
     const mainImage = product.gallery && isImageData(product.gallery[0]?.image) ? product.gallery[0].image : '';
+    const imageSrc = (typeof mainImage === 'object' && mainImage?.url) || '/placeholder.png';
 
     return (
-        <Card className="flex flex-row gap-4 w-full p-0 overflow-hidden items-center">
-            <div className="relative shrink-0 w-30 h-30">
-                <Link href={PAGES.PRODUCT(product.slug)}>
-                    <Image
-                        src={(typeof mainImage === 'object' && mainImage?.url) || '/placeholder.png'}
-                        alt={product.title}
-                        fill
-                        className="object-cover rounded-lg"
-                    />
-                </Link>
-            </div>
-
-            <div className="grid grid-cols-4 md:grid-cols-3 flex-row h-full w-full p-4 gap-6">
-                <div className="col-span-2 md:col-span-1 flex flex-col flex-1 gap-4 justify-between">
+        <Card className="flex w-full p-0 overflow-hidden flex-col md:flex-row md:items-center md:gap-4">
+            {/* Mobile uses this wrapper as a flex row (image + content).
+                On desktop it becomes display:contents so children participate
+                in Card's md:flex-row directly — preserving the original layout. */}
+            <div className="flex flex-row items-center w-full gap-3 p-3 md:contents">
+                {/* Image (общая для обоих лейаутов) */}
+                <div className="relative shrink-0 w-20 h-20 md:w-30 md:h-30">
                     <Link href={PAGES.PRODUCT(product.slug)}>
-                        <div className="font-semibold leading-tight text-my-primary line-clamp-2">{product.title}</div>
+                        <Image
+                            src={imageSrc}
+                            alt={product.title}
+                            fill
+                            className="object-cover rounded-lg"
+                        />
                     </Link>
-                    {available && (
-                        <div
-                            className={cn(
-                                'flex items-center gap-2 cursor-pointer select-none transition-colors',
-                                item.checked ? 'text-my-accent' : 'text-my-primary',
-                            )}
-                            onClick={() => toggleChecked(productId)}
-                        >
-                            <Checkbox checked={item.checked ?? false} onCheckedChange={() => {}} />
-                            <span className="text-sm font-medium">Выбрать</span>
-                        </div>
-                    )}
                 </div>
 
-                <div className="col-span-1 flex flex-col gap-2 justify-center items-center text-center">
-                    {available && (
-                        <div className="text-xl font-bold text-my-primary">
-                            {(price * item.quantity).toLocaleString()} ₽
-                        </div>
-                    )}
-                    <div className="text-my-tertriary text-sm">{price.toLocaleString()} ₽ / шт.</div>
-                </div>
-
-                <div className="col-span-1 flex flex-col gap-2 justify-center items-center">
+                {/* MOBILE: правая колонка */}
+                <div className="flex md:hidden flex-col flex-1 min-w-0 gap-1.5">
                     {available ? (
-                        <>
-                            <CounterButton
-                                variant="secondary"
-                                quantity={item.quantity}
-                                boundary={stock}
-                                handleMinus={() => decrease(productId)}
-                                handlePlus={() => increase(productId)}
-                            />
-
-                            <div className="text-[15px] text-my-accent font-[450]">В наличии {stock} шт.</div>
-                        </>
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className="text-lg font-bold text-my-primary leading-none">
+                                {(price * item.quantity).toLocaleString()} ₽
+                            </span>
+                            <span className="text-xs text-my-tertriary">
+                                ({price.toLocaleString()} ₽ / шт)
+                            </span>
+                        </div>
                     ) : (
-                        <Button className="w-full" variant={'pagination'} disabled>
-                            Нет в наличии
-                        </Button>
+                        <div className="text-xs text-my-tertriary">
+                            ({price.toLocaleString()} ₽ / шт)
+                        </div>
                     )}
+
+                    <Link href={PAGES.PRODUCT(product.slug)}>
+                        <div className="font-semibold leading-tight text-my-primary line-clamp-2 text-sm">
+                            {product.title}
+                        </div>
+                    </Link>
+
+                    {available && (
+                        <>
+                            <div className="text-xs text-my-accent font-medium">
+                                В наличии {stock} шт.
+                            </div>
+                            <div className="flex items-center justify-between gap-2 mt-1">
+                                <div
+                                    className={cn(
+                                        'flex items-center gap-2 cursor-pointer select-none transition-colors',
+                                        item.checked ? 'text-my-accent' : 'text-my-primary',
+                                    )}
+                                    onClick={() => toggleChecked(productId)}
+                                >
+                                    <Checkbox checked={item.checked ?? false} onCheckedChange={() => {}} />
+                                    <span className="text-sm font-medium">Выбрать</span>
+                                </div>
+                                <CounterButton
+                                    variant="secondary"
+                                    quantity={item.quantity}
+                                    boundary={stock}
+                                    handleMinus={() => decrease(productId)}
+                                    handlePlus={() => increase(productId)}
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* DESKTOP: оригинальная сетка, без изменений */}
+                <div className="hidden md:grid grid-cols-4 md:grid-cols-3 flex-row h-full w-full p-4 gap-6">
+                    <div className="col-span-2 md:col-span-1 flex flex-col flex-1 gap-4 justify-between">
+                        <Link href={PAGES.PRODUCT(product.slug)}>
+                            <div className="font-semibold leading-tight text-my-primary line-clamp-2">
+                                {product.title}
+                            </div>
+                        </Link>
+                        {available && (
+                            <div
+                                className={cn(
+                                    'flex items-center gap-2 cursor-pointer select-none transition-colors',
+                                    item.checked ? 'text-my-accent' : 'text-my-primary',
+                                )}
+                                onClick={() => toggleChecked(productId)}
+                            >
+                                <Checkbox checked={item.checked ?? false} onCheckedChange={() => {}} />
+                                <span className="text-sm font-medium">Выбрать</span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="col-span-1 flex flex-col gap-2 justify-center items-center text-center">
+                        {available && (
+                            <div className="text-xl font-bold text-my-primary">
+                                {(price * item.quantity).toLocaleString()} ₽
+                            </div>
+                        )}
+                        <div className="text-my-tertriary text-sm">{price.toLocaleString()} ₽ / шт.</div>
+                    </div>
+
+                    <div className="col-span-1 flex flex-col gap-2 justify-center items-center">
+                        {available ? (
+                            <>
+                                <CounterButton
+                                    variant="secondary"
+                                    quantity={item.quantity}
+                                    boundary={stock}
+                                    handleMinus={() => decrease(productId)}
+                                    handlePlus={() => increase(productId)}
+                                />
+                                <div className="text-[15px] text-my-accent font-[450]">В наличии {stock} шт.</div>
+                            </>
+                        ) : (
+                            <Button className="w-full" variant={'pagination'} disabled>
+                                Нет в наличии
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* MOBILE-only: «Нет в наличии» во всю ширину карточки внизу */}
+            {!available && (
+                <Button
+                    className="md:hidden w-full rounded-none"
+                    variant={'pagination'}
+                    disabled
+                >
+                    Нет в наличии
+                </Button>
+            )}
         </Card>
     );
 }

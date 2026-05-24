@@ -13,6 +13,7 @@ import type { AuthorQueryParams, ProductsQueryParams } from '@/shared/types/quer
 import { isImageData } from '../../shared/guards/image.guard';
 import ProductsUI from '../products/ProductsUI';
 import { Button } from '../ui/button';
+import { Card } from '../ui/card';
 
 export default function AuthorUI({
     initialParams,
@@ -37,7 +38,7 @@ export default function AuthorUI({
     const { name, avatar, bio, externalLink, cover } = data;
 
     return (
-        <div className="mt-8 relative">
+        <div className="relative">
             {cover && (
                 <div className="absolute top-0 left-0 w-full h-30 z-0 overflow-hidden">
                     <Image
@@ -49,7 +50,37 @@ export default function AuthorUI({
                     />
                 </div>
             )}
-            <div className="relative z-10 p-9 flex mb-12 wrap">
+            {/* mobile */}
+            <div className="sm:hidden w-full h-13" />
+            <Card className="relative z-10 flex flex-col sm:hidden w-[80%] p-4 mx-auto mb-8">
+                <div className="relative flex flex-col items-center">
+                    <Image
+                        src={isImageData(avatar) ? avatar?.url || '/placeholder.png' : '/placeholder.png'}
+                        alt="avatar"
+                        width={72}
+                        height={72}
+                        className="rounded-full object-cover h-18 w-18 border-4 border-white z-10 absolute bottom-[90%]"
+                    />
+                    <div className="flex flex-col items-center gap-1 pt-8 text-center bg-white">
+                        <h2 className="text-xl font-semibold">{name}</h2>
+                        <p className="text-sm text-my-secondary">{bio}</p>
+                        {externalLink && (
+                            <Link
+                                href={externalLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button variant="secondary">
+                                    Соцсеть автора <ExternalLink size={14} />
+                                </Button>
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            </Card>
+            
+            {/* desktop */}
+            <div className="hidden sm:flex relative z-10 p-9 mb-12">
                 <Image
                     src={isImageData(avatar) ? avatar?.url || '/placeholder.png' : '/placeholder.png'}
                     alt={'avatar'}
@@ -59,7 +90,7 @@ export default function AuthorUI({
                 />
                 <div className="h-fit flex gap-6 flex-1 items-center bg-white pl-4 pt-3 pr-4 pb-5 rounded-tr-xl mt-15 ml-39">
                     <div className="flex flex-col gap-2 flex-1">
-                        <h2 className="text-3xl font-semibold text-black">{name}</h2>
+                        <h2 className="text-3xl font-semibold">{name}</h2>
                         <p className="text-lg text-my-primary font-normal">{bio}</p>
                     </div>
                     {externalLink && (

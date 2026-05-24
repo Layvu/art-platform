@@ -10,10 +10,13 @@ export async function postForm(data: z.infer<typeof authorFullSchema>) {
     try {
         const payload = await getPayload({ config });
 
-        // await payload.create({
-        //     collection: 'forms',
-        //     //data,
-        // });
+        await payload.create({
+            collection: 'forms',
+            data: {
+                ...data,
+                needRail: data.needRail === 'yes',
+            },
+        });
 
         console.log('data: ', data);
 

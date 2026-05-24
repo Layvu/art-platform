@@ -9,16 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { authorFullSchema, authorStep2Schema, type AuthorWelcomeValues } from '@/shared/validations/schemas';
-
-const activityOptions = [
-    { id: 'merch', label: 'Авторский мерч (полиграфия, стикеры, брелоки...)' },
-    { id: 'toys', label: 'Игрушки ручной работы (вязанные, смешанной техники...)' },
-    { id: 'accessories', label: 'Аксессуары ручной работы (серьги, кольца, браслеты...)' },
-    { id: 'decor', label: 'Посуда и декор ручной работы (керамика, гипс...)' },
-    { id: 'perfume', label: 'Парфюмерия и свечи ручной работы' },
-    { id: 'other', label: 'Другое' },
-];
+import { activityOptions } from '@/shared/constants/questionnaire.constants';
+import { authorStep2Schema, type AuthorWelcomeValues } from '@/shared/validations/schemas';
 
 export default function Step2Contacts({
     defaultValues,
@@ -45,7 +37,7 @@ export default function Step2Contacts({
                     <FormField
                         control={form.control}
                         name="email"
-                        render={({ field, fieldState }) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-my-secondary">Электронная почта</FormLabel>
                                 <FormControl>
@@ -59,7 +51,7 @@ export default function Step2Contacts({
                     <FormField
                         control={form.control}
                         name="vkPersonal"
-                        render={({ field, fieldState }) => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel className="text-my-secondary">Ссылка на личную страницу в ВК</FormLabel>
                                 <FormControl>

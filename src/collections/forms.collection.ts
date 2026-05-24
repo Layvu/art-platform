@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload';
 
+import { activityOptions, labelById, shelfOptions } from '@/shared/constants/questionnaire.constants';
 import type { Form } from '@/shared/types/payload-types';
 import { sendEmail } from '@/shared/utils/email';
 import { isAdmin, isCreateOperation } from '@/shared/utils/payload';
@@ -59,9 +60,6 @@ export const FormsCollection: CollectionConfig = {
             type: 'checkbox',
             required: true,
         },
-        // TODO: добавить новые поля:
-        // { name: 'name', type: 'text' },
-        // { name: 'email', type: 'email', required: true },
         {
             name: 'createdAt',
             type: 'date',
@@ -78,14 +76,31 @@ export const FormsCollection: CollectionConfig = {
 
     hooks: {
         afterChange: [
-            async ({ operation, doc }) => {
+            async ({ operation, doc, req }) => {
                 if (isCreateOperation(operation)) {
                     const formDoc = doc as Form;
-                    await sendEmail({
-                        to: process.env.EMAIL_TO || 'zemskyalexey.writer@mail.ru',
-                        subject: 'Новая анкета автора',
-                        text: `Получена анкета автора:\n\nСообщение: ${formDoc.nickname}`,
-                    });
+                    try {
+                        await req.payload.sendEmail({
+                            to: process.env.EMAIL_TO || 'zemskyalexey.writer@mail.ru',
+                            subject: 'Новая анкета автора',
+                            text: `Получена анкета автора:
+                            
+Ник: ${formDoc.nickname}
+Email: ${formDoc.email}
+VK: ${formDoc.vkPersonal}
+Публичная ссылка: ${formDoc.publicLink}
+
+Деятельность:
+- ${labelById(activityOptions, formDoc.activities as string[])}
+${formDoc.otherActivity ? `Другое: ${formDoc.otherActivity}\n` : ''}
+Уровни полок:
+- ${labelById(shelfOptions, formDoc.shelves as string[])}
+
+Нужен рейл: ${formDoc.needRail ? 'Да' : 'Нет'}`,
+                        });
+                    } catch (error) {
+                        console.error('Email notification failed:', error);
+                    }
                 }
             },
         ],

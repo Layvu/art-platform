@@ -70,22 +70,22 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
     const handleCheckout = () => {
         handleDeleteUnavailableItems();
         if (isUserAuthorized) {
-            // удалить товары из корзины котырые недоступны
             router.push(PAGES.ORDER);
         } else {
             router.push(`${PAGES.LOGIN}?redirect=${PAGES.ORDER}`);
         }
     };
+
     return (
-        <div className="wrap mt-8 mb-10 grid gap-6 grid-cols-12">
-            <div className="flex flex-col col-span-8">
-                <h1 className="text-[28px] font-semibold mb-8">Корзина</h1>
+        <div className="wrap mt-6 md:mt-8 mb-10 grid gap-6 grid-cols-1 md:grid-cols-12 px-3 lg:px-0">
+            <div className="flex flex-col md:col-span-8">
+                <h1 className="text-2xl md:text-[28px] font-semibold mb-6 md:mb-8">Корзина</h1>
 
                 {availableItems.length > 0 && (
                     <>
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-semibold">Доступны для заказа</h2>
-                            <div className="flex gap-6">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between items-start gap-3 md:gap-0 mb-6">
+                            <h2 className="text-lg md:text-xl font-semibold">Доступны для заказа</h2>
+                            <div className="flex gap-3 md:gap-6 items-center flex-wrap">
                                 <div
                                     className={cn(
                                         'flex gap-2 items-center cursor-pointer select-none transition-colors duration-200',
@@ -94,15 +94,15 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
                                     onClick={() => toggleAll(!isAllChecked)}
                                 >
                                     <Checkbox checked={isAllChecked} onCheckedChange={() => {}} />
-                                    <span className="font-medium">Выбрать все</span>
+                                    <span className="font-medium text-sm md:text-base">Выбрать все</span>
                                 </div>
                                 <Button
-                                    className="font-semibold flex gap-2"
+                                    className="font-semibold flex gap-2 text-sm md:text-base"
                                     variant={'pagination'}
                                     onClick={clearCheckedItems}
                                     disabled={checkedItems.length === 0}
                                 >
-                                    <Trash2 size={24} /> Удалить выбранные
+                                    <Trash2 className="size-5 md:size-6" /> Удалить выбранные
                                 </Button>
                             </div>
                         </div>
@@ -117,14 +117,14 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
 
                 {unavailableItems.length > 0 && (
                     <section className="mt-8">
-                        <div className="flex items-center justify-between mb-6 border-t pt-10">
-                            <h2 className="text-xl font-semibold">Недоступны для заказа</h2>
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between items-start gap-3 md:gap-0 mb-6 border-t pt-6 md:pt-10">
+                            <h2 className="text-lg md:text-xl font-semibold">Недоступны для заказа</h2>
                             <Button
                                 variant="pagination"
-                                className="font-semibold flex gap-2"
+                                className="font-semibold flex gap-2 text-sm md:text-base"
                                 onClick={handleDeleteUnavailableItems}
                             >
-                                <Trash2 size={24} /> Удалить все
+                                <Trash2 className="size-5 md:size-6" /> Удалить все
                             </Button>
                         </div>
                         <ItemGroup className="flex flex-1 w-full flex-col gap-4 opacity-60">
@@ -139,7 +139,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
             </div>
 
             {checkedItems.length > 0 && (
-                <div className="col-span-4 flex flex-col gap-4">
+                <div className="md:col-span-4 flex flex-col gap-4">
                     <div className="p-6 bg-gray-50 flex flex-col gap-6 h-fit w-full rounded-md">
                         <div className="flex justify-between items-center text-xl font-bold text-my-accent">
                             <span>Итого</span>

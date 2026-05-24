@@ -40,10 +40,10 @@ export default function AboutPage() {
 
             {/* Секция с картой */}
             <section className="wrap mb-10 md:mb-16 lg:mb-20">
-                <h2 className="text-2xl md:text-3xl lg:text-[32px] font-semibold mb-6 md:mb-8 px-4 md:px-0">
+                <h2 className="text-2xl md:text-3xl lg:text-[32px] font-semibold mb-6 md:mb-8 px-4 lg:px-0">
                     Как нас найти?
                 </h2>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 px-4 md:px-0">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 px-4 lg:px-0">
                     {/* Контакты */}
                     <ul className="lg:col-span-4 flex flex-col gap-4">
                         <li className="flex flex-col gap-3 md:gap-4 bg-gray-50 p-4 md:p-6 rounded-xl">

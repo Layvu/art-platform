@@ -27,7 +27,7 @@ export function Header() {
 
     return (
         // hidden на мобильных, flex на md+
-        <header className="hidden md:flex items-center justify-between py-4 mb-8 wrap">
+        <header className="hidden md:flex items-center justify-between py-4 mb-8 wrap px-3 lg:px-0">
             <Link href={PAGES.HOME} className="flex items-center gap-2">
                 <Image src="/logo.svg" alt="Minto Logo" width={80} height={40} priority />
             </Link>

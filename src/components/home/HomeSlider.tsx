@@ -48,7 +48,7 @@ export default function HomeSlider({ slides }: Props) {
     };
 
     return (
-        <div className="relative home-slider w-full h-100 md:h-130 lg:h-156">
+        <div className="relative home-slider w-full h-100 md:h-130 lg:h-156 overflow-hidden">
             <Slider ref={sliderRef} {...settings} className="h-full">
                 {slides.map((slide) => {
                     const src = (typeof slide.image === 'object' && slide.image?.url) || '/placeholder.png';

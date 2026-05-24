@@ -1,3 +1,5 @@
+import { HomeLoader } from '@/components/shared/Skeleton';
+
 export default function loading() {
-    return <div>loading from app/authors/[author]/loading.tsx</div>;
+    return <HomeLoader />;
 }
