@@ -2,12 +2,20 @@
 
 import React, { useState } from 'react';
 
-import { X } from 'lucide-react';
-
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { isValidPrice } from '@/shared/utils/isValidPrice';
 
+import { FilterTrigger } from '../shared/FilterTrigger';
 import { Input } from '../ui/input';
 
 type PriceFilterProps = {
@@ -21,7 +29,9 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
     const [priceFromValue, setPriceFromValue] = useState(priceFrom);
     const [priceToValue, setPriceToValue] = useState(priceTo);
 
-    const isActive = priceFrom || priceTo;
+    const isDesktop = useMediaQuery('(min-width: 1024px)');
+    const isActive = !!(priceFrom || priceTo);
+    const isValid = isValidPrice(priceFromValue) || isValidPrice(priceToValue);
 
     const onSaveClick = () => {
         onPriceChange(priceFromValue, priceToValue);
@@ -36,73 +46,58 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
         setOpen(false);
     };
 
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
-                    Цена
-                    {isActive && (
-                        <Button variant="default" size="icon" className="rounded-full w-6 h-6" onClick={onResetClick}>
-                            <X />
-                        </Button>
-                    )}
-                    {/* {open ? <ChevronUpIcon /> : <ChevronDownIcon />} */}
+    const trigger = (
+       <FilterTrigger label="Цена" isActive={isActive} onReset={onResetClick} />
+    );
+
+    const content = (
+        <div className="flex flex-col gap-5">
+            <div className="flex gap-2 h-10">
+                <Input
+                    type="number"
+                    placeholder="от"
+                    value={priceFromValue}
+                    onChange={(e) => setPriceFromValue(Number(e.target.value))}
+                />
+                <Input
+                    type="number"
+                    placeholder="до"
+                    value={priceToValue}
+                    onChange={(e) => setPriceToValue(Number(e.target.value))}
+                />
+            </div>
+            <div className="flex gap-5">
+                <Button onClick={onResetClick} className="flex-1" variant="secondary" disabled={!isValid}>
+                    Сбросить
                 </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="start">
-                <div className="flex flex-col gap-5">
-                    <div className="flex gap-2 h-10">
-                        <Input
-                            type="number"
-                            placeholder="от"
-                            value={priceFromValue}
-                            onChange={(e) => setPriceFromValue(Number(e.target.value))}
-                        />
+                <Button className="flex-1" onClick={onSaveClick} disabled={!isValid}>
+                    Применить
+                </Button>
+            </div>
+        </div>
+    );
 
-                        <Input
-                            type="number"
-                            placeholder="до"
-                            value={priceToValue}
-                            onChange={(e) => setPriceToValue(Number(e.target.value))}
-                        />
-                    </div>
-                    {/* <RadioGroup
-                        value={priceToValue?.toString()}
-                        onValueChange={(price) => setPriceToValue(Number(price))}
-                    >
-                        <div className="flex items-center gap-3">
-                            <RadioGroupItem value="100" id="r1" />
-                            <Label htmlFor="r1">До 100 Р</Label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <RadioGroupItem value="500" id="r2" />
-                            <Label htmlFor="r2">До 500 Р</Label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <RadioGroupItem value="1000" id="r3" />
-                            <Label htmlFor="r3">До 1000 Р</Label>
-                        </div>
-                    </RadioGroup> */}
+    if (isDesktop) {
+        return (
+            <Popover open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+                <PopoverContent className="w-80 p-4" align="start">
+                    {content}
+                </PopoverContent>
+            </Popover>
+        );
+    }
 
-                    <div className="flex gap-5">
-                        <Button
-                            onClick={onResetClick}
-                            className="flex-1"
-                            variant="secondary"
-                            disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
-                        >
-                            Сбросить
-                        </Button>
-                        <Button
-                            className="flex-1"
-                            onClick={onSaveClick}
-                            disabled={!isValidPrice(priceFromValue) && !isValidPrice(priceToValue)}
-                        >
-                            Применить
-                        </Button>
-                    </div>
-                </div>
-            </PopoverContent>
-        </Popover>
+    return (
+        <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>{trigger}</SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-2xl px-4 pb-8 pt-6">
+                <SheetHeader className="mb-4">
+                    <SheetTitle className="text-left">Цена</SheetTitle>
+                    <SheetDescription className="sr-only">Фильтр по цене</SheetDescription>
+                </SheetHeader>
+                {content}
+            </SheetContent>
+        </Sheet>
     );
 }

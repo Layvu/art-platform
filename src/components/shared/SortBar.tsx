@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ArrowDownUp, ChevronDownIcon, ChevronUpIcon, X } from 'lucide-react';
+import { ArrowDownUp, X } from 'lucide-react';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -24,7 +24,6 @@ export default function SortBar<T extends string>({ sort, options, onSortChange 
         setOpen(false);
     };
 
-    console.log(sort);
     return (
         <Select
             value={sort ?? 'default'}
@@ -33,20 +32,23 @@ export default function SortBar<T extends string>({ sort, options, onSortChange 
             onOpenChange={setOpen}
         >
             <SelectTrigger>
-                <Button variant={`${isActive ? 'activeFilter' : 'filter'}`}>
+                <Button variant={isActive ? 'activeFilter' : 'filter'}>
                     <ArrowDownUp />
                     <SelectValue placeholder="По умолчанию" />
                     {isActive && (
-                        <Button
-                            variant="default"
-                            size="icon"
-                            className="rounded-full w-6 h-6"
+                        <span
+                            role="button"
+                            tabIndex={0}
+                            className="inline-flex items-center justify-center rounded-full w-6 h-6 bg-my-button-primary-default text-white hover:bg-button-primary-hover cursor-pointer"
                             onPointerDown={onResetClick}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ')
+                                    onResetClick(e as unknown as React.PointerEvent);
+                            }}
                         >
-                            <X />
-                        </Button>
+                            <X className="w-4 h-4" />
+                        </span>
                     )}
-                    {/* {open ? <ChevronUpIcon /> : <ChevronDownIcon />} */}
                 </Button>
             </SelectTrigger>
 

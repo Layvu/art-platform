@@ -151,7 +151,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
                             disabled={checkedItems.length === 0}
                             variant={'default'}
                         >
-                            Перейти к оформлению
+                            К оформлению
                         </Button>
                     </div>
 

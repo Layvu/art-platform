@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import CounterButton, { Button } from '@/components/ui/button';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
 export default function ProductCard({ id, title, slug, price, author, gallery, quantity }: Product) {
+    const router = useRouter();
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 
@@ -24,24 +26,27 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
     const productInCart = cart?.items?.find((item) =>
         isProductData(item.product) ? item?.product.id == id : item.product == id,
     );
+
+    const mainImage = gallery && isImageData(gallery[0]?.image) ? gallery[0].image : '';
+    const isAvailable = price && price > 0;
+
+    const handleCardClick = () => router.push(PAGES.PRODUCT(slug));
+
     const handleCardActionClick = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
     };
 
-    const mainImage = gallery && isImageData(gallery[0]?.image) ? gallery[0].image : '';
-
-    const isAvailable = price && price > 0;
-
     return (
-        <Link
+        <div
+            className="cursor-pointer"
+            onClick={handleCardClick}
             onMouseEnter={() =>
                 (timerRef.current = setTimeout(() => {
                     queryClient.prefetchQuery(getProductQueryOptions({ slug }));
                 }, 300))
             }
             onMouseLeave={() => timerRef.current && clearTimeout(timerRef.current)}
-            href={PAGES.PRODUCT(slug)}
         >
             <Card className="p-0 overflow-hidden h-full">
                 <CardHeader className="relative w-full aspect-square overflow-hidden">
@@ -59,7 +64,11 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
                         <CardTitle>{title}</CardTitle>
                         <CardDescription>
                             {isAuthorData(author) && (
-                                <Link href={PAGES.AUTHOR(author.slug!)} className="text-my-tertriary hover:underline">
+                                <Link
+                                    href={PAGES.AUTHOR(author.slug!)}
+                                    className="text-my-tertriary hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     {author.name}
                                 </Link>
                             )}
@@ -87,6 +96,6 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
                     </CardAction>
                 </CardContent>
             </Card>
-        </Link>
+        </div>
     );
 }
