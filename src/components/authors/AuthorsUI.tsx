@@ -36,8 +36,7 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
     return (
         <>
             <div className="wrap">
-                <h1 className="text-[28px] font-semibold mb-8">Авторы</h1>
-                {/* Поиск, фильтры и сортировка */}
+                <h1 className="text-3xl font-semibold mb-8 px-3 lg:px-0">Авторы</h1>
                 <AuthorsFiltersBar
                     filters={{
                         category: initialParams.category,
@@ -53,7 +52,7 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                     onSortChange={(value) => updateQueryParams({ sort: value })}
                 />
 
-                <div className={`grid grid-cols-6 gap-6 mb-8 ${isPlaceholderData && 'opacity-50'}`}>
+                <div className={`grid grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-6 mb-8 px-3 lg:px-0${isPlaceholderData && 'opacity-50'}`}>
                     {authors.map((author) => (
                         <AuthorCard key={author.id} {...author} />
                     ))}
@@ -63,7 +62,6 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                     <div>Авторов не найдено.</div>
                 ) : (
                     <div className="flex gap-2 justify-center items-center mt-8">
-                        {/* Кнопка "Назад" */}
                         <Button
                             variant="ghost"
                             size="icon"
@@ -74,7 +72,6 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
 
-                        {/* Номера страниц */}
                         {getPageNumbers(totalPages, page).map((pageNum, idx) =>
                             typeof pageNum === 'number' ? (
                                 <Button
@@ -92,7 +89,6 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                             ),
                         )}
 
-                        {/* Кнопка "Вперед" */}
                         <Button
                             variant="ghost"
                             size="icon"

@@ -1,4 +1,4 @@
-export const AUTHORS_PER_PAGE = 6;
+export const AUTHORS_PER_PAGE = 36;
 
 export const AUTHORS_SORT_OPTIONS = [
     { value: 'default', label: 'По умолчанию' },

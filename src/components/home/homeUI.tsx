@@ -26,7 +26,7 @@ export default function HomeUI() {
                 {isSliderLoading ? <Skeleton className="h-screen w-full mb-4" /> : <HomeSlider slides={slides?.docs} />}
 
                 {/* Новые товары */}
-                <div className="flex flex-col gap-4 md:gap-6">
+                <div className="flex flex-col gap-4 md:gap-6 px-3 lg:px-0">
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl md:text-3xl font-semibold">Новые товары</h2>
                         <Button className="w-fit" asChild>
@@ -41,7 +41,7 @@ export default function HomeUI() {
                 </div>
 
                 {/* Новые авторы */}
-                <div className="flex flex-col gap-4 md:gap-6">
+                <div className="flex flex-col gap-4 md:gap-6 px-3 lg:px-0">
                     <div className="flex items-center justify-between">
                         <h2 className="text-2xl md:text-3xl font-semibold">Новые авторы</h2>
                         <Button className="w-fit" asChild>

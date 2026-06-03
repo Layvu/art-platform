@@ -33,19 +33,21 @@ export default function Footer() {
                     {/* Юридические ссылки */}
                     <nav className="flex flex-wrap gap-x-6 gap-y-1">
                         <Link
-                            href="/cooperation"
+                            href="/questionnaire"
                             className="text-sm text-my-secondary hover:text-my-accent transition-colors"
                         >
                             Сотрудничество
                         </Link>
                         <Link
-                            href="/offer"
+                            href=""
+                            // href="/offer"
                             className="text-sm text-my-secondary hover:text-my-accent transition-colors"
                         >
                             Публичная оферта
                         </Link>
                         <Link
-                            href="/privacy"
+                            href=""
+                            // href="/privacy"
                             className="text-sm text-my-secondary hover:text-my-accent transition-colors"
                         >
                             Политика конфиденциальности
@@ -113,7 +115,10 @@ export default function Footer() {
                 </div>
 
                 {/* Копирайт */}
-                <p className="text-sm text-my-disabled">© МИНТО 2026 Все права защищены</p>
+                <p className="text-sm text-my-disabled">
+                    © МИНТО 2026 Все права защищены
+                    <span style={{ fontSize: '6px', marginLeft: '16px' }}>v 1.0.7</span>
+                </p>
             </div>
         </footer>
     );

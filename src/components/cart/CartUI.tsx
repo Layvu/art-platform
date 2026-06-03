@@ -140,7 +140,7 @@ export default function CartUI({ isUserAuthorized }: ICartUIProps) {
 
             {checkedItems.length > 0 && (
                 <div className="md:col-span-4 flex flex-col gap-4">
-                    <div className="p-6 bg-gray-50 flex flex-col gap-6 h-fit w-full rounded-md">
+                    <div className="p-6 bg-gray-50 flex flex-col gap-6 h-fit w-full rounded-md order-1 md:order-0">
                         <div className="flex justify-between items-center text-xl font-bold text-my-accent">
                             <span>Итого</span>
                             <span>{total.toLocaleString()} ₽</span>

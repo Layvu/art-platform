@@ -28,7 +28,7 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
     );
 
     const mainImage = gallery && isImageData(gallery[0]?.image) ? gallery[0].image : '';
-    const isAvailable = price && price > 0;
+    const isAvailable = price && price > 0 && quantity && quantity > 0;
 
     const handleCardClick = () => router.push(PAGES.PRODUCT(slug));
 
@@ -61,12 +61,12 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
 
                 <CardContent className="flex flex-col flex-1 mb-auto p-3 md:p-4">
                     <div className="flex flex-col gap-2 md:gap-3 mb-auto">
-                        <CardTitle>{title}</CardTitle>
+                        <CardTitle className="text-sm lg:text-lg">{title}</CardTitle>
                         <CardDescription>
                             {isAuthorData(author) && (
                                 <Link
                                     href={PAGES.AUTHOR(author.slug!)}
-                                    className="text-my-tertriary hover:underline"
+                                    className="text-my-tertriary hover:underline text-xs lg:text-base"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     {author.name}

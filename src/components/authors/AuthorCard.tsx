@@ -38,8 +38,8 @@ export default function AuthorCard({ name, slug, avatar }: Author) {
                     />
                 </div>
 
-                <CardContent className="flex flex-col gap-2">
-                    <CardTitle className="font-semibold hover:underline">{name}</CardTitle>
+                <CardContent className="flex flex-col gap-2 px-3 lg:px-4">
+                    <CardTitle className="font-semibold hover:underline text-sm lg:text-lg">{name}</CardTitle>
                 </CardContent>
             </Link>
         </Card>

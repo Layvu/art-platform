@@ -80,7 +80,7 @@ export default function AuthorUI({
             </Card>
             
             {/* desktop */}
-            <div className="hidden sm:flex relative z-10 p-9 mb-12">
+            <div className="hidden wrap sm:flex relative z-10 py-9 mb-12">
                 <Image
                     src={isImageData(avatar) ? avatar?.url || '/placeholder.png' : '/placeholder.png'}
                     alt={'avatar'}
