@@ -39,7 +39,7 @@ export default function AboutSlider() {
         ],
     };
 
-    const images = ['/homeslider/1.png'];
+    const images = ['/homeslider/minto.png'];
 
     return (
         <div className="w-full h-full overflow-hidden rounded-xl md:rounded-2xl">

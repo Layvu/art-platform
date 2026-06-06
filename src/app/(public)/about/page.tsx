@@ -17,7 +17,6 @@ export const metadata: Metadata = {
 export default function AboutPage() {
     return (
         <section className="flex flex-col gap-8 md:gap-20 lg:gap-30">
-            {/* Первая секция - приветствие */}
             <section className="wrap">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 lg:gap-16 p-4 md:p-6 lg:p-8 shadow-[0_3px_40px_0_rgba(39,39,42,0.05)] rounded-xl">
                     <div className="lg:col-span-5 flex flex-col gap-4 md:gap-6">
@@ -38,23 +37,21 @@ export default function AboutPage() {
 
             <JoinTeamSection />
 
-            {/* Секция с картой */}
             <section className="wrap mb-10 md:mb-16 lg:mb-20">
                 <h2 className="text-2xl md:text-3xl lg:text-[32px] font-semibold mb-6 md:mb-8 px-4 lg:px-0">
                     Как нас найти?
                 </h2>
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 px-4 lg:px-0">
-                    {/* Контакты */}
                     <ul className="lg:col-span-4 flex flex-col gap-4">
                         <li className="flex flex-col gap-3 md:gap-4 bg-gray-50 p-4 md:p-6 rounded-xl">
                             <h3 className="text-lg md:text-xl font-semibold">Месторасположение</h3>
                             <div className="flex flex-col gap-3 md:gap-4">
                                 <div className="flex items-start gap-3">
-                                    <MapPin className="text-primary size-5 flex-shrink-0 mt-0.5" />
+                                    <MapPin className="text-primary size-5 shrink-0 mt-0.5" />
                                     <span className="text-sm md:text-base">улица Горького, 33, Екатеринбург</span>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Clock className="text-primary size-5 flex-shrink-0" />
+                                    <Clock className="text-primary size-5 shrink-0" />
                                     <span className="text-sm md:text-base">10:00 — 22:00</span>
                                 </div>
                             </div>
@@ -63,7 +60,7 @@ export default function AboutPage() {
                         <li className="flex flex-col gap-3 md:gap-4 bg-gray-50 p-4 md:p-6 rounded-xl">
                             <h3 className="text-lg md:text-xl font-semibold">Контакты</h3>
                             <div className="flex items-center gap-3">
-                                <Phone className="text-primary size-5 flex-shrink-0" />
+                                <Phone className="text-primary size-5 shrink-0" />
                                 <a
                                     href="tel:+79995619915"
                                     className="text-sm md:text-base hover:text-primary transition-colors"
@@ -101,11 +98,10 @@ export default function AboutPage() {
                         </li>
                     </ul>
 
-                    {/* Карта */}
-                    <div className="lg:col-span-8 h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden rounded-xl">
+                     <div className="lg:col-span-8 h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden rounded-xl">
                         <YandexMap />
-                    </div>
-                </div>
+                    </div> 
+                </div> 
             </section>
         </section>
     );

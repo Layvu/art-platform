@@ -1,4 +1,4 @@
-// node .\scripts\create-initial-data.mjs
+// node ./scripts/create-initial-data.mjs
 
 import { exit } from 'process';
 import { appendFileSync, writeFileSync } from 'fs';
@@ -9,93 +9,27 @@ import { config } from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
-config({ path: path.resolve(__dirname, '../', envFile) }); // Путь к корню проекта
+//const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+const envFile = '.env.production';
+config({ path: path.resolve(__dirname, '../', envFile) });
 
 const CATEGORIES_LIST = [
-    '3D стикер',
-    'Акриловый значок',
-    'Аксессуар',
-    'Билет',
-    'Блок для заметок',
-    'Блокнот',
-    'Браслет',
-    'Брелки парные',
-    'Брелок',
-    'Брелок-конфета',
-    'Брелок-кучеряшка',
-    'Брелок-пищалка',
-    'Брелок-шейкер',
-    'Брошь',
-    'Гача',
-    'Гирлянда',
-    'Зажигалка',
-    'Закладка',
-    'Заколка',
-    'Зеркало',
-    'Зин',
-    'Значок',
-    'Игрушка',
-    'Календарь',
-    'Карта',
-    'Карточки',
-    'Картхолдер',
-    'Коврик для мыши',
-    'Колье',
-    'Кольцо',
-    'Комикс',
-    'Кошелек',
-    'Кружка',
-    'Кубарики',
-    'Лайтбук',
-    'Лента',
-    'Линогравюра',
-    'Ловец солнца',
-    'Ловец радуги',
-    'Магнит',
-    'Магнитик',
-    'Моносерьга',
-    'Набор значков',
-    'Набор принтов',
-    'Набор стикеров',
-    'Наклейка на карту',
-    'Нашивка',
-    'Носочки',
-    'Обложка на паспорт',
-    'Обложка на студенческий',
-    'Открытка',
-    'Пенал',
-    'Переводное тату',
-    'Переливашка',
-    'Пиала',
-    'Пин',
-    'Плакат',
-    'Плюшевый брелок',
-    'Плюшевый брелок-конфета',
-    'Повязка на голову',
-    'Подвес',
-    'Подвеска',
-    'Подсвечник',
-    'Постер',
-    'Принт',
-    'Своп карта',
-    'Секретный конверт',
-    'Сережки',
-    'Сквиш',
-    'Скетчбук',
-    'Скотч',
-    'Соусник',
-    'Стенд',
-    'Стикер',
-    'Стикерпак',
-    'Стикеры парные',
-    'СТМ',
-    'Тарелка',
-    'Фигурка',
-    'Футболка',
-    'Холст',
-    'Шкатулка',
-    'Шоппер',
+    '3D стикер', 'Акриловый значок', 'Аксессуар', 'Билет', 'Блок для заметок',
+    'Блокнот', 'Браслет', 'Брелки парные', 'Брелок', 'Брелок-конфета',
+    'Брелок-кучеряшка', 'Брелок-пищалка', 'Брелок-шейкер', 'Брошь', 'Гача',
+    'Гирлянда', 'Зажигалка', 'Закладка', 'Заколка', 'Зеркало', 'Зин', 'Значок',
+    'Игрушка', 'Календарь', 'Карта', 'Карточки', 'Картхолдер', 'Коврик для мыши',
+    'Колье', 'Кольцо', 'Комикс', 'Кошелек', 'Кружка', 'Кубарики', 'Лайтбук',
+    'Лента', 'Линогравюра', 'Ловец солнца', 'Ловец радуги', 'Магнит', 'Магнитик',
+    'Моносерьга', 'Набор значков', 'Набор принтов', 'Набор стикеров',
+    'Наклейка на карту', 'Нашивка', 'Носочки', 'Обложка на паспорт',
+    'Обложка на студенческий', 'Открытка', 'Пенал', 'Переводное тату',
+    'Переливашка', 'Пиала', 'Пин', 'Плакат', 'Плюшевый брелок',
+    'Плюшевый брелок-конфета', 'Повязка на голову', 'Подвес', 'Подвеска',
+    'Подсвечник', 'Постер', 'Принт', 'Своп карта', 'Секретный конверт',
+    'Сережки', 'Сквиш', 'Скетчбук', 'Скотч', 'Соусник', 'Стенд', 'Стикер',
+    'Стикерпак', 'Стикеры парные', 'СТМ', 'Тарелка', 'Фигурка', 'Футболка',
+    'Холст', 'Шкатулка', 'Шоппер',
 ];
 
 const CONFIG = {
@@ -123,39 +57,47 @@ let sessionCookie = null;
 const authorCache = new Map();
 const categoryCache = new Map();
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const generatePassword = () => Math.random().toString(36).slice(-10) + 'A1!';
 
-async function request(method, path, body = null) {
+async function request(method, path, body = null, retries = 3) {
     const headers = { 'Content-Type': 'application/json' };
     if (sessionCookie) headers['Cookie'] = sessionCookie;
 
-    try {
-        const res = await fetch(`${CONFIG.baseUrl}${path}`, {
-            method,
-            headers,
-            body: body ? JSON.stringify(body) : undefined,
-        });
-
-        const setCookie = res.headers.getSetCookie?.() || [res.headers.get('set-cookie')];
-        const token = setCookie.find((c) => c?.includes('payload-token'));
-        if (token) sessionCookie = token.split(';')[0];
-
-        let data = {};
+    for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            data = await res.json();
-        } catch {
-            data = { text: await res.text() };
+            const res = await fetch(`${CONFIG.baseUrl}${path}`, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined,
+            });
+
+            const setCookie = res.headers.getSetCookie?.() || [res.headers.get('set-cookie')];
+            const token = setCookie.find((c) => c?.includes('payload-token'));
+            if (token) sessionCookie = token.split(';')[0];
+
+            let data = {};
+            try {
+                data = await res.json();
+            } catch {
+                data = { text: await res.text() };
+            }
+            return { status: res.status, data };
+        } catch (e) {
+            if (attempt < retries) {
+                console.log(`  ${CONFIG.colors.yellow}⟳ Попытка ${attempt}/${retries} не удалась, повтор через 2с...${CONFIG.colors.reset}`);
+                await sleep(2000);
+            } else {
+                return { status: 0, data: { error: e.message } };
+            }
         }
-        return { status: res.status, data };
-    } catch (e) {
-        return { status: 0, data: { error: e.message } };
     }
 }
 
 async function seedCategories() {
     console.log(`${CONFIG.colors.cyan}=== ЗАПУСК СКРИПТА ИМПОРТА КАТЕГОРИЙ ===${CONFIG.colors.reset}\n`);
 
-    // 1. Вход под админом
     console.log(`[1/2] Авторизация админа (${CONFIG.adminCredentials.email})...`);
     const adminLogin = await request('POST', '/api/users/login', CONFIG.adminCredentials);
 
@@ -165,36 +107,33 @@ async function seedCategories() {
     }
     console.log(`${CONFIG.colors.green}  [+] Сессия получена${CONFIG.colors.reset}\n`);
 
-    // 2. Создание категорий
     console.log(`[2/2] Создание категорий (${CATEGORIES_LIST.length} шт.)...`);
 
     let createdCount = 0;
     let errorCount = 0;
 
     for (const categoryLabel of CATEGORIES_LIST) {
-        const payload = {
-            label: categoryLabel,
-            // Поле 'value' сгенерируется автоматически вашим hook: beforeChange
-        };
+        const payload = { label: categoryLabel };
 
         const res = await request('POST', '/api/categories', payload);
+        await sleep(300); // задержка между запросами
 
         if (res.status === 201) {
             console.log(`  ${CONFIG.colors.green}✔${CONFIG.colors.reset} ${categoryLabel}`);
             createdCount++;
+        } else if (res.status === 400) {
+            // Дубль — уже существует, не считаем за ошибку
+            console.log(`  ${CONFIG.colors.yellow}~${CONFIG.colors.reset} ${categoryLabel} (уже существует)`);
         } else {
-            // Если категория уже существует (unique constraint), Payload вернет 400 или 422
-            const errorMsg = res.data.errors?.[0]?.message || 'Ошибка';
+            const errorMsg = res.data.errors?.[0]?.message || res.data.error || 'Ошибка';
             console.log(`  ${CONFIG.colors.red}✘${CONFIG.colors.reset} ${categoryLabel} (${res.status}: ${errorMsg})`);
             errorCount++;
         }
     }
 
-    console.log(`\n${CONFIG.colors.cyan}=== ИТОГИ ===${CONFIG.colors.reset}`);
+    console.log(`\n${CONFIG.colors.cyan}=== ИТОГИ КАТЕГОРИЙ ===${CONFIG.colors.reset}`);
     console.log(`Создано: ${CONFIG.colors.green}${createdCount}${CONFIG.colors.reset}`);
-    console.log(`Ошибок/Дублей: ${CONFIG.colors.red}${errorCount}${CONFIG.colors.reset}`);
-
-    exit(0);
+    console.log(`Ошибок: ${CONFIG.colors.red}${errorCount}${CONFIG.colors.reset}`);
 }
 
 async function getCategoryId(label) {
@@ -203,6 +142,7 @@ async function getCategoryId(label) {
     if (categoryCache.has(cleanLabel)) return categoryCache.get(cleanLabel);
 
     const res = await request('GET', `/api/categories?where[label][equals]=${encodeURIComponent(cleanLabel)}`);
+    await sleep(100);
     if (res.status === 200 && res.data.docs?.length > 0) {
         const id = res.data.docs[0].id;
         categoryCache.set(cleanLabel, id);
@@ -232,10 +172,10 @@ async function createProduct(row, authorId) {
         quantity: stockBalance,
         author: authorId,
         category: categoryId,
-        //status: 'published'
     };
 
     const res = await request('POST', '/api/products', productData);
+    await sleep(300); // задержка между запросами
     if (res.status === 201) {
         console.log(`${CONFIG.colors.green}  ✔ Товар: ${title}${CONFIG.colors.reset}`);
     } else {
@@ -270,14 +210,13 @@ async function runSeed() {
             email = CONFIG.fallbackUser.email;
         }
 
-        // ПРОВЕРКА КЭША (чтобы не обрабатывать одного автора дважды за проход)
         if (authorCache.has(fullName)) {
             await createProduct(row, authorCache.get(fullName));
             continue;
         }
 
-        // 1. ПОИСК СУЩЕСТВУЮЩЕГО АВТОРА (на случай перезапуска скрипта)
         const findAuthor = await request('GET', `/api/authors?where[fullName][equals]=${encodeURIComponent(fullName)}`);
+        await sleep(100);
 
         if (findAuthor.status === 200 && findAuthor.data.docs?.length > 0) {
             const authorId = findAuthor.data.docs[0].id;
@@ -287,13 +226,13 @@ async function runSeed() {
             continue;
         }
 
-        // 2. ИЩЕМ ИЛИ СОЗДАЕМ ПОЛЬЗОВАТЕЛЯ
         if (!email) {
             const safeName = Buffer.from(fullName).toString('hex').slice(0, 8);
             email = `user_${safeName}@minto-store.ru`;
         }
 
         const findUser = await request('GET', `/api/users?where[email][equals]=${encodeURIComponent(email)}`);
+        await sleep(100);
         let userId = null;
 
         if (findUser.status === 200 && findUser.data.docs?.length > 0) {
@@ -307,57 +246,50 @@ async function runSeed() {
                 fullName,
                 role: 'author',
             });
+            await sleep(300);
 
             if (newUser.status === 201) {
                 userId = newUser.data.doc.id;
                 appendFileSync(CONFIG.credsFile, `ФИО: ${fullName} | Email: ${email} | Pass: ${password}\n`);
-                console.log(
-                    `${CONFIG.colors.green}Создан пользователь и авто-запись автора: ${email}${CONFIG.colors.reset}`,
-                );
+                console.log(`${CONFIG.colors.green}Создан пользователь: ${email}${CONFIG.colors.reset}`);
             } else {
-                console.log(
-                    `${CONFIG.colors.red}Ошибка создания пользователя ${email}: ${newUser.status}${CONFIG.colors.reset}`,
-                );
+                console.log(`${CONFIG.colors.red}Ошибка создания пользователя ${email}: ${newUser.status}${CONFIG.colors.reset}`);
                 continue;
             }
         }
 
-        // 3. ОБНОВЛЕНИЕ АВТОРА (связываем данные из Excel с записью, созданной хуком)
         if (userId) {
-            // Ищем автора, которого создал хук (по связи с user)
             const autoAuthorRes = await request('GET', `/api/authors?where[user][equals]=${userId}`);
+            await sleep(100);
 
             if (autoAuthorRes.status === 200 && autoAuthorRes.data.docs?.length > 0) {
                 const authorId = autoAuthorRes.data.docs[0].id;
 
-                // Обновляем пустую запись данными из Excel
                 const updateRes = await request('PATCH', `/api/authors/${authorId}`, {
                     name: serialNumber || fullName,
                     fullName: fullName,
                 });
+                await sleep(300);
 
                 if (updateRes.status === 200) {
                     authorCache.set(fullName, authorId);
                     console.log(`${CONFIG.colors.green}[~] Данные автора заполнены: ${fullName}${CONFIG.colors.reset}`);
                     await createProduct(row, authorId);
                 } else {
-                    console.log(
-                        `${CONFIG.colors.red}Ошибка обновления автора ${authorId}: ${updateRes.status}${CONFIG.colors.reset}`,
-                    );
+                    console.log(`${CONFIG.colors.red}Ошибка обновления автора ${authorId}: ${updateRes.status}${CONFIG.colors.reset}`);
                 }
             } else {
-                // Если вдруг хук не сработал, создаем вручную как fallback
                 const manualAuthor = await request('POST', '/api/authors', {
                     name: serialNumber || fullName,
                     fullName: fullName,
                     user: userId,
                 });
+                await sleep(300);
+
                 if (manualAuthor.status === 201) {
                     const authorId = manualAuthor.data.doc.id;
                     authorCache.set(fullName, authorId);
-                    console.log(
-                        `${CONFIG.colors.cyan}[+] Автор создан вручную (хук не сработал): ${fullName}${CONFIG.colors.reset}`,
-                    );
+                    console.log(`${CONFIG.colors.cyan}[+] Автор создан вручную: ${fullName}${CONFIG.colors.reset}`);
                     await createProduct(row, authorId);
                 }
             }
@@ -367,12 +299,8 @@ async function runSeed() {
 }
 
 async function main() {
-    // Сначала создаём категории
     await seedCategories();
-
-    // Затем импортируем товары
     await runSeed();
-
     console.log('Готово!');
     exit(0);
 }

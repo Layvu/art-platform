@@ -8,9 +8,9 @@ export default function Layout({ children }: PropsWithChildren<unknown>) {
     return (
         <body>
             <Header />
-            <main className="mt-2 sm:mt-0">{children}</main>
-            <Footer />
+            <main className="mt-2 sm:mt-0 min-h-[85vh]">{children}</main>
             <MobileNav />
+            <Footer />
         </body>
     );
 }

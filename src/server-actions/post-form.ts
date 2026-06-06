@@ -18,8 +18,6 @@ export async function postForm(data: z.infer<typeof authorFullSchema>) {
             },
         });
 
-        console.log('data: ', data);
-
         return { success: true };
     } catch (error) {
         console.error(error);
