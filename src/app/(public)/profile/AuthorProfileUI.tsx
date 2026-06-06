@@ -204,7 +204,7 @@ export default function AuthorProfileUI({
     ];
 
     return (
-        <div className="wrap grid grid-cols-12 gap-16">
+        <div className="wrap px-3 lg:px-0 grid grid-cols-12 gap-16">
             <aside className="col-span-12 md:col-span-3 space-y-6 h-fit bg-gray-50 p-6 pb-4 pt-4 rounded-md">
                 <nav className="flex flex-col space-y-2">
                     {tabs.map((tab) => {

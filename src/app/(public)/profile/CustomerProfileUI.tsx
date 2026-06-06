@@ -142,7 +142,7 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
     // TODO: loading и error компоненты
 
     return (
-        <div className="wrap">
+        <div className="wrap px-3 lg:px-0">
             <h1 className={cn('text-xl font-semibold text-my-primary mb-6 md:hidden', showMobileContent && 'hidden')}>
                 Профиль
             </h1>

@@ -140,7 +140,7 @@ export default function OrderUI({ customer }: OrderUIProps) {
     };
 
     return (
-        <div className="wrap mx-auto p-6">
+        <div className="wrap px-3 lg:px-0">
             {isLoading && <div>Загрузка товаров...</div>}
 
             {!isLoading && isError && <div>Ошибка загрузки товаров</div>}
