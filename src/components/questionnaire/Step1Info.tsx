@@ -2,7 +2,6 @@ import { ChevronRight } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { Card } from '../ui/card';
 import { Separator } from '../ui/separator';
 
 export default function Step1Info({ onNext }: { onNext: () => void }) {
@@ -13,14 +12,14 @@ export default function Step1Info({ onNext }: { onNext: () => void }) {
                     <div>
                         <h3 className="font-bold text-base mb-5">Как это работает?</h3>
                         <p>
-                            Minto — это место, где каждый автор может арендовать полочку и представить свои работы. Мы
+                            Минто — это место, где каждый автор может арендовать полочку и представить свои работы. Мы
                             поддерживаем талантливых художников и мастеров, помогая им находить покупателей и
                             вдохновляться на создание нового и уникального.
                         </p>
                     </div>
 
                     <div>
-                        <h3 className="font-bold text-base mb-5">Почему Minto?</h3>
+                        <h3 className="font-bold text-base mb-5">Почему Минто?</h3>
                         <ol className="list-decimal ml-4 space-y-1">
                             <li>Только авторские и уникальные товары.</li>
                             <li>Поддержка талантливых авторов.</li>

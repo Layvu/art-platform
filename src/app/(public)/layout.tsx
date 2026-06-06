@@ -8,7 +8,7 @@ export default function Layout({ children }: PropsWithChildren<unknown>) {
     return (
         <body>
             <Header />
-            <main className="mt-2 sm:mt-0">{children}</main>
+            <main className="pb-20 sm:pb-0 mt-2 sm:mt-0 px-4 sm:px-0">{children}</main>
             <Footer />
             <MobileNav />
         </body>

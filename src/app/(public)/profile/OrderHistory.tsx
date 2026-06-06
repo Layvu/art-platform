@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation';
 import { Timer } from '@/components/shared/Timer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PAGES } from '@/config/public-pages.config';
 import { orderClientService } from '@/services/api/client/order-client.service';
 import { DELIVERY_TYPES, getOrderStatusText, ORDER_STATUS, PICKUP_ADDRESS } from '@/shared/constants/order.constants';
@@ -17,8 +16,19 @@ import { PAYMENT_STATUS } from '@/shared/constants/payment.constants';
 import { isImageData } from '@/shared/guards/image.guard';
 import { useProductsByIds, useProductSlugs } from '@/shared/hooks/useFetchData';
 import type { Order } from '@/shared/types/payload-types';
-import type { IYookassaPaymentResponse, IYookassaWebhookEvent } from '@/shared/types/yookassa.interface';
 import { canOrderBeCancelled } from '@/shared/utils/orders.utils';
+import { cn } from '@/shared/utils/tailwind';
+
+function getStatusBadgeClass(status: string): string {
+    switch (status) {
+        case ORDER_STATUS.COMPLETED:
+            return 'bg-green-50 text-green-700';
+        case ORDER_STATUS.CANCELLED:
+            return 'bg-gray-100 text-my-tertriary';
+        default:
+            return 'bg-gray-100 text-my-secondary';
+    }
+}
 
 interface OrderHistoryProps {
     customerId: number;
@@ -39,13 +49,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
             .filter((id, index, self) => self.indexOf(id) === index); // Уникальные ID
     }, [orders]);
 
-    const {
-        data: products,
-        isLoading: isProductLoading,
-        isError: isProductError,
-        error: productError,
-    } = useProductsByIds(allProductIds);
-
+    const { data: products } = useProductsByIds(allProductIds);
     // Загружаем slug для всех productId
     const { slugMap } = useProductSlugs(allProductIds);
 
@@ -77,22 +81,27 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
         setExpiredOrders((prev) => ({ ...prev, [orderId]: true }));
     }, []);
 
-    if (loading) return <div>Загрузка заказов...</div>;
+    if (loading) {
+        return (
+            <div className="rounded-xl bg-gray-50 py-10 px-6 text-center">
+                <p className="text-base text-my-secondary">Загрузка заказов...</p>
+            </div>
+        );
+    }
 
     if (orders.length === 0) {
         return (
             <div className="text-center py-8">
-                <p className="text-muted-foreground">У вас пока нет заказов</p>
+                <p className="text-base text-my-secondary">У вас пока нет заказов</p>
                 <Button onClick={() => router.push(PAGES.PRODUCTS)} className="mt-4">
                     Перейти к покупкам
                 </Button>
             </div>
         );
     }
-    console.log(orders);
 
     return (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-2 md:gap-6">
             {orders.map((order) => {
                 const status = order.status as (typeof ORDER_STATUS)[keyof typeof ORDER_STATUS];
                 const paymentStatus = order.paymentStatus;
@@ -101,68 +110,64 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                 const showPayLink =
                     status === ORDER_STATUS.PREPARED && paymentStatus === PAYMENT_STATUS.PENDING && !!paymentLink;
 
-                const getStatusStyles = (status: string) => {
-                    switch (status) {
-                        case ORDER_STATUS.COMPLETED:
-                            return 'bg-[#F0F9E8] text-[#71B542]';
-                        case ORDER_STATUS.CANCELLED:
-                            return 'bg-red-50 text-red-600';
-                        default:
-                            return 'bg-[#F3F4F6] text-[#4B5563]';
-                    }
-                };
+                const isCancellable = canOrderBeCancelled(order);
+                const isExpired = expiredOrders[order.id];
 
                 return (
-                    <Card key={order.id}>
-                        {/* Header: Номер и кнопка отмены */}
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-semibold">{order.orderNumber}</h3>
-                            {canOrderBeCancelled(order) && (
+                    <article
+                        key={order.id}
+                        className="rounded-xl shadow-[0px_5px_30px_0px_#11182714] p-3 md:p-5 flex flex-col gap-3"
+                    >
+                        <div className="flex items-center justify-between gap-3">
+                            <h3 className="text-base md:text-xl font-semibold text-my-primary tabular-nums">
+                                {order.orderNumber}
+                            </h3>
+
+                            {isCancellable && (
                                 <button
+                                    type="button"
                                     onClick={() => handleCancelOrder(order.id)}
-                                    className="text-[#E53E3E] bg-[#FFF5F5] px-4 py-1.5 rounded-lg text-base font-medium hover:bg-red-100 transition-colors"
+                                    className="px-3 py-1 rounded-lg text-sm font-[450] bg-red-50 text-red-500 hover:bg-red-100 transition-colors cursor-pointer"
                                 >
                                     Отменить
                                 </button>
                             )}
                         </div>
 
-                        {/* Info: Дата и Доставка */}
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-2">
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 md:gap-4">
                             <div>
-                                <p className="text-[#9CA3AF] text-base mb-1">Дата заказа</p>
-                                <p className="text-[#1A1A1A] font-medium">
+                                <p className="text-sm md:text-base font-medium text-my-tertriary mb-2">Дата заказа</p>
+                                <p className="text-sm md:text-base font-semibold text-my-primary">
                                     {new Date(order.createdAt).toLocaleDateString('ru-RU')}
                                 </p>
                             </div>
                             <div className="md:col-span-4">
-                                <p className="text-[#9CA3AF] text-base mb-1">
+                                <p className="text-sm md:text-base font-medium text-my-tertriary mb-2">
                                     {order.deliveryType === DELIVERY_TYPES.PICKUP
                                         ? 'Самовывоз'
                                         : 'Доставка СДЭК, курьер'}
                                 </p>
-                                <p className="font-medium leading-tight">
+                                <p className="text-sm md:text-base font-semibold text-my-primary leading-tight">
                                     {order.deliveryType === DELIVERY_TYPES.PICKUP
                                         ? PICKUP_ADDRESS
                                         : order.cdekData?.address || 'Адрес не указан'}
                                 </p>
                             </div>
                         </div>
-                        {/* Product Images */}
-                        <div className="flex flex-wrap mb-4 gap-2">
+
+                        <div className="flex flex-wrap gap-2 md:mb-2">
                             {order.items.map((item, idx) => {
                                 const currentProduct = products.find((p) => p.id === item.productSnapshot.productId);
                                 const mainImage =
-                                    currentProduct &&
-                                    currentProduct.gallery &&
-                                    isImageData(currentProduct.gallery[0]?.image)
+                                    currentProduct?.gallery?.[0]?.image && isImageData(currentProduct.gallery[0].image)
                                         ? currentProduct.gallery[0].image
                                         : '/placeholder.png';
+
                                 return (
                                     <Link
                                         href={PAGES.PRODUCT(slugMap[item.productSnapshot.productId] || '')}
                                         key={idx}
-                                        className="relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer"
+                                        className="relative w-20 h-20 rounded-xl overflow-hidden cursor-pointer shrink-0"
                                     >
                                         <Image
                                             src={
@@ -182,25 +187,30 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                             })}
                         </div>
 
-                        <div className="flex justify-between items-center pt-6 border-t border-gray-100">
-                            <div className="flex items-baseline gap-4">
-                                <span className="text-[24px] font-bold text-[#1A1A1A]">
+                        <div className="flex items-center justify-between gap-3 pt-3 md:pt-5 border-t border-gray-100">
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <span className="text-base md:text-xl font-semibold text-my-primary tabular-nums">
                                     {order.total.toLocaleString('ru-RU')} ₽
                                 </span>
-                                {showPayLink && !expiredOrders[order.id] && (
+
+                                {showPayLink && !isExpired && (
                                     <a href={paymentLink} target="_blank" rel="noopener noreferrer">
-                                        <Button
-                                            size="sm"
-                                            className="bg-[#4FB0AF] hover:bg-[#3d8c8b] text-white rounded-lg px-6"
-                                        >
+                                        <Button size="sm" className="rounded-lg">
                                             Оплатить
                                         </Button>
                                     </a>
                                 )}
                             </div>
 
-                            <div className={`px-4 py-2 rounded-xl text-base ${getStatusStyles(status)}`}>
-                                {showPayLink && !expiredOrders[order.id] ? (
+                            <div
+                                className={cn(
+                                    'px-3 py-1.5 rounded-xl text-sm md:text-base shrink-0',
+                                    showPayLink && !isExpired
+                                        ? 'text-xs md:text-base text-gray-600 md:text-my-tertriary max-md:bg-gray-100 max-md:rounded-full'
+                                        : getStatusBadgeClass(status),
+                                )}
+                            >
+                                {showPayLink && !isExpired ? (
                                     <>
                                         Ожидает оплаты{' '}
                                         <Timer
@@ -208,7 +218,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                                             durationMinutes={10}
                                             expiredText=""
                                             onExpire={() => handleExpire(order.id)}
-                                            className={`text-base ${getStatusStyles(status)}`}
+                                            className="inline"
                                         />
                                     </>
                                 ) : (
@@ -217,7 +227,7 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                             </div>
                         </div>
 
-                        {/* TODO: уничтожить после теста */}
+                        {/* TODO: уничтожить после окончательного теста */}
                         {/*
                                                 
                             {process.env.NODE_ENV === 'development' && (
@@ -247,9 +257,8 @@ export default function OrderHistory({ customerId }: OrderHistoryProps) {
                                     </div>
                                 </div>
                             )}
-
-        */}
-                    </Card>
+                            */}
+                    </article>
                 );
             })}
         </div>

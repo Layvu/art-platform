@@ -3,26 +3,26 @@
 import React, { useState } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CircleUserRound, Lock, LockKeyhole, LogOut, ShoppingBag, User } from 'lucide-react';
+import { ChevronLeft, CircleUserRound, LockKeyhole, LogOut, ShoppingBag, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import OrderHistory from '@/app/(public)/profile/OrderHistory';
 import { PhoneInput } from '@/components/shared/PhoneInput';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PAGES } from '@/config/public-pages.config';
 import { customerClientService } from '@/services/api/client/customer-client.service';
 import { useAuthStore } from '@/services/store/auth/store';
 import type { CustomerProfileUIProps, ICustomerUpdateInput } from '@/shared/types/customer.interface';
 import { cn } from '@/shared/utils/tailwind';
 import { emailSchema, fullNameSchema, phoneSchema } from '@/shared/validations/schemas';
-
-import OrderHistory from './OrderHistory';
 
 const profileSchema = z.object({
     fullName: fullNameSchema,
@@ -37,36 +37,52 @@ const securitySchema = z.object({
 
 type TabType = 'profile' | 'orders' | 'security';
 
+const TAB_TITLES: Record<TabType, string> = {
+    profile: 'Личные данные',
+    orders: 'Заказы',
+    security: 'Параметры входа',
+};
+
 export default function CustomerProfileUI({ customerData }: CustomerProfileUIProps) {
+    const router = useRouter();
+    const logout = useAuthStore((state) => state.logout);
+
     const [activeTab, setActiveTab] = useState<TabType>('profile');
+    const [showMobileContent, setShowMobileContent] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [resetLoading, setResetLoading] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    const router = useRouter();
-    const logout = useAuthStore((state) => state.logout);
-    const handleLogout = async () => {
-        await logout();
-
-        // Принудительно обновляем страницу, чтобы все компоненты перерисовались
-        router.refresh();
-    };
-    // Формы
     const profileForm = useForm({
         resolver: zodResolver(profileSchema),
         defaultValues: { fullName: customerData.fullName || '', phone: customerData.phone || '' },
     });
+
     const securityForm = useForm({
         resolver: zodResolver(securitySchema),
         defaultValues: { email: customerData.email || '', password: '' },
     });
 
-    // Обработчик обновления основных данных (без пароля)
-    const onProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
-        setLoading(true);
+    const resetAlerts = () => {
         setError('');
         setSuccess('');
+    };
+
+    const selectTab = (tab: TabType) => {
+        setActiveTab(tab);
+        setShowMobileContent(true);
+        resetAlerts();
+    };
+    const handleBack = () => {
+        setShowMobileContent(false);
+        resetAlerts();
+    };
+
+    const onProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
+        setLoading(true);
+        resetAlerts();
 
         try {
             // TODO: по хорошему формировать updated исходя из того, что изменилось, делать проверки
@@ -74,8 +90,10 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
             const updated: ICustomerUpdateInput = { ...data, addresses: customerData.addresses };
 
             const result = await customerClientService.updateProfile(updated);
-            if (result.success) setSuccess('Данные успешно обновлены');
-            else setError(result.error || 'Ошибка при обновлении профиля');
+            if (result.success) {
+                setSuccess('Данные успешно обновлены');
+                profileForm.reset(data);
+            } else setError(result.error || 'Ошибка при обновлении профиля');
         } finally {
             setLoading(false);
         }
@@ -84,13 +102,11 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
     // Обработчик обновления Email (требует пароль)
     const onSecuritySubmit = async (data: z.infer<typeof securitySchema>) => {
         setLoading(true);
-        setError('');
-        setSuccess('');
-
+        resetAlerts();
         try {
             const result = await customerClientService.updateProfile(data);
             if (result.success) {
-                setSuccess('Email успешно изменен.');
+                setSuccess('Email успешно изменён.');
                 securityForm.setValue('password', '');
             } else setError(result.error || 'Ошибка при изменении Email');
         } finally {
@@ -100,325 +116,394 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
 
     const handlePasswordReset = async () => {
         setResetLoading(true);
-        setError('');
-        setSuccess('');
+        resetAlerts();
 
         try {
             const result = await customerClientService.requestPasswordReset(customerData.email);
-            if (result.success) {
+            if (result.success)
                 setSuccess('Ссылка для изменения пароля отправлена на вашу почту. Проверьте входящие или спам.');
-            } else {
-                setError(result.error || 'Ошибка при запросе смены пароля');
-            }
+            else setError(result.error || 'Ошибка при запросе смены пароля');
         } finally {
             setResetLoading(false);
         }
     };
 
-    const tabs = [
-        { id: 'profile', label: 'Личные данные', icon: CircleUserRound },
-        { id: 'orders', label: 'Заказы', icon: ShoppingBag },
-        { id: 'security', label: 'Параметры входа', icon: LockKeyhole },
-    ] as const;
+    const handleLogout = async () => {
+        await logout();
+        router.replace(PAGES.LOGIN);
+    };
 
-    const currentTabLabel = tabs.find((t) => t.id === activeTab)?.label;
+    const tabs = [
+        { id: 'profile' as const, label: 'Личные данные', icon: CircleUserRound },
+        { id: 'orders' as const, label: 'Заказы', icon: ShoppingBag },
+        { id: 'security' as const, label: 'Параметры входа', icon: LockKeyhole },
+    ];
 
     // TODO: loading и error компоненты
 
     return (
-        <div className="wrap grid grid-cols-12 gap-16">
-            <aside className="col-span-12 md:col-span-3 space-y-6 h-fit bg-gray-50 p-6 rounded-xl">
-                <nav className="flex flex-col space-y-2">
-                    {tabs.map((tab) => {
-                        const Icon = tab.icon;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={cn(
-                                    'flex gap-2.5 py-1.5 cursor-pointer',
-                                    activeTab === tab.id ? 'text-my-accent font-medium' : '',
-                                )}
-                            >
-                                <Icon size={24} strokeWidth={1.5} />
-                                {tab.label}
-                            </button>
-                        );
-                    })}
-                </nav>
+        <div className="wrap">
+            <h1 className={cn('text-xl font-semibold text-my-primary mb-6 md:hidden', showMobileContent && 'hidden')}>
+                Профиль
+            </h1>
 
-                <Separator color="gray-200" />
-
-                <button
-                    onClick={handleLogout}
-                    className="flex gap-2.5 py-1.5 cursor-pointer hover:text-red-500 transition-colors w-full text-left"
+            <div className="grid grid-cols-12 gap-0 md:gap-16">
+                <aside
+                    className={cn(
+                        'col-span-12 h-fit md:col-span-3',
+                        'md:bg-gray-50 md:p-6 md:pb-4 md:pt-4 md:rounded-md',
+                        showMobileContent && 'hidden md:block',
+                    )}
                 >
-                    <LogOut size={24} strokeWidth={1.5} />
-                    Выйти
-                </button>
-            </aside>
+                    <nav className={cn('flex flex-col space-y-2', 'mb-8 md:mb-0', 'md:pb-[1.625rem]')}>
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => selectTab(tab.id)}
+                                    className={cn(
+                                        'flex gap-2 py-2 md:py-2.5 cursor-pointer items-center transition-colors',
+                                        'text-sm md:text-base',
+                                        isActive ? 'md:text-my-accent md:font-medium' : 'hover:text-my-accent',
+                                    )}
+                                >
+                                    <Icon size={24} strokeWidth={1.5} />
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </nav>
 
-            {/* Правая колонка: Контент */}
-            <main className="col-span-12 md:col-span-9">
-                {activeTab === 'profile' && (
-                    <div className="flex flex-col gap-10">
-                        <div className="flex justify-between items-center">
-                            <h1 className="text-3xl font-semibold">{currentTabLabel}</h1>
-                            <Button
-                                variant="secondary"
-                                onClick={() => {
-                                    profileForm.handleSubmit(onProfileSubmit)();
-                                }}
-                                disabled={loading}
-                            >
-                                Сохранить изменения
-                            </Button>
-                        </div>
+                    <Separator className="hidden md:block bg-gray-200" />
 
-                        <Alert variant={'infoBlue'}>
-                            Указанные ниже данные используются для оформления доставки. При необходимости, данные можно
-                            будет изменить на этапе оформления заказа.
+                    <button
+                        onClick={() => setIsLogoutModalOpen(true)}
+                        className={cn(
+                            'flex gap-2 cursor-pointer hover:text-red-500 transition-colors w-full text-left items-center',
+                            'text-sm md:text-base',
+                            'py-3 md:py-0 md:pt-[1.625rem]',
+                        )}
+                    >
+                        <LogOut size={24} strokeWidth={1.5} />
+                        Выйти
+                    </button>
+                </aside>
+
+                <main
+                    className={cn(
+                        'col-span-12 md:col-span-9 space-y-6 md:space-y-8',
+                        !showMobileContent && 'hidden md:block',
+                    )}
+                >
+                    <Breadcrumb className="md:hidden">
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbLink
+                                    onClick={handleBack}
+                                    className="flex items-center gap-2 p-1.5 cursor-pointer text-base font-semibold text-my-secondary hover:text-my-primary"
+                                >
+                                    <ChevronLeft className="size-6" strokeWidth={1.5} />
+                                    Профиль
+                                </BreadcrumbLink>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                    </Breadcrumb>
+
+                    <h2
+                        className={cn(
+                            'font-semibold text-my-primary text-xl md:text-[1.75rem]',
+                            activeTab === 'profile' && 'md:hidden',
+                        )}
+                    >
+                        {TAB_TITLES[activeTab]}
+                    </h2>
+
+                    {activeTab === 'profile' && (
+                        <ProfileSection form={profileForm} loading={loading} onSubmit={onProfileSubmit} />
+                    )}
+
+                    {activeTab === 'orders' && <OrderHistory customerId={customerData.id} />}
+
+                    {activeTab === 'security' && (
+                        <SecuritySection
+                            customerEmail={customerData.email}
+                            securityForm={securityForm}
+                            loading={loading}
+                            resetLoading={resetLoading}
+                            onSecuritySubmit={onSecuritySubmit}
+                            onPasswordReset={handlePasswordReset}
+                        />
+                    )}
+
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertDescription>{error}</AlertDescription>
                         </Alert>
+                    )}
+                    {success && (
+                        <Alert className="bg-green-50 border-green-200 text-green-800">
+                            <AlertDescription>{success}</AlertDescription>
+                        </Alert>
+                    )}
+                </main>
+            </div>
 
-                        <Form {...profileForm}>
-                            <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <FormField
-                                    control={profileForm.control}
-                                    name="fullName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>ФИО</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} placeholder="Введите ФИО" className="" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={profileForm.control}
-                                    name="phone"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Телефон</FormLabel>
-                                            <FormControl>
-                                                <PhoneInput {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </form>
-                        </Form>
-                    </div>
-                )}
-
-                {activeTab === 'orders' && <OrderHistory customerId={customerData.id} />}
-
-                {activeTab === 'security' && (
-                    <div className="space-y-8">
-                        <div className="flex justify-between items-center">
-                            <h1 className="text-3xl font-semibold">{currentTabLabel}</h1>
-                            <Button
-                                variant="secondary"
-                                onClick={() => {
-                                    securityForm.handleSubmit(onSecuritySubmit)();
-                                }}
-                                disabled={loading}
-                            >
-                                Сохранить изменения
-                            </Button>
-                        </div>
-                        <Form {...securityForm}>
-                            <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField
-                                    control={securityForm.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Новый Email</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={securityForm.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Текущий пароль для подтверждения</FormLabel>
-                                            <FormControl>
-                                                <Input type="password" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </form>
-                        </Form>
-                        <Separator color="gray-200" />
-                        <div className="">
-                            <h3 className="text-lg font-medium mb-2">Безопасность</h3>
-                            <p className="text-sm text-my-secondary mb-4">
-                                Смена пароля производится через подтверждение по email.
-                            </p>
-                            <Button variant="outline" onClick={handlePasswordReset} disabled={resetLoading}>
-                                {resetLoading ? 'Отправка...' : 'Запросить смену пароля'}
-                            </Button>
-                        </div>
-                    </div>
-                )}
-
-                {error && (
-                    <Alert variant="destructive">
-                        <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                )}
-                {success && (
-                    <Alert className="bg-green-50 border-green-200 text-green-800">
-                        <AlertDescription>{success}</AlertDescription>
-                    </Alert>
-                )}
-            </main>
+            <LogoutConfirmDialog
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleLogout}
+            />
         </div>
-        // <Card className='wrap w-4xl space-y-4'>
-        //     <CardHeader className='space-y-4'>
-        //         <CardTitle className="text-2xl">Профиль пользователя</CardTitle>
-        //         <CardDescription>Управление вашими персональными данными и настройками аккаунта</CardDescription>
-        //     </CardHeader>
+    );
+}
 
-        //     <CardContent>
-        //         <Tabs defaultValue="orders" className="space-y-4">
-        //             <TabsList className="grid w-full grid-cols-3">
-        //                 <TabsTrigger value="orders">Мои заказы</TabsTrigger>
-        //                 <TabsTrigger value="profile">Основные данные</TabsTrigger>
-        //                 <TabsTrigger value="security">Параметры входа</TabsTrigger>
-        //             </TabsList>
+function ProfileSection({
+    form,
+    loading,
+    onSubmit,
+}: {
+    form: ReturnType<typeof useForm<{ fullName: string; phone: string }>>;
+    loading: boolean;
+    onSubmit: (data: { fullName: string; phone: string }) => void;
+}) {
+    const isDirty = form.formState.isDirty;
 
-        //             <TabsContent value="orders" className="space-y-4">
-        //                 <OrderHistory customerId={customerData.id} />
-        //             </TabsContent>
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4 md:gap-8">
+                <div className="hidden md:flex justify-between items-center">
+                    <h1 className="text-[1.75rem] font-semibold">Личные данные</h1>
+                    <Button type="submit" disabled={loading || !isDirty}>
+                        {loading ? 'Сохранение...' : 'Сохранить изменения'}
+                    </Button>
+                </div>
 
-        //             {/* Основные данные (без Email) */}
-        //             <TabsContent value="profile" className="space-y-4">
-        //                 <Form {...profileForm}>
-        //                     <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-        //                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        //                             <FormField
-        //                                 control={profileForm.control}
-        //                                 name="phone"
-        //                                 render={({ field }) => (
-        //                                     <FormItem>
-        //                                         <FormLabel>Телефон</FormLabel>
-        //                                         <FormControl>
-        //                                             <PhoneInput {...field} />
-        //                                         </FormControl>
-        //                                         <FormMessage />
-        //                                     </FormItem>
-        //                                 )}
-        //                             />
-        //                             <FormField
-        //                                 control={profileForm.control}
-        //                                 name="fullName"
-        //                                 render={({ field }) => (
-        //                                     <FormItem>
-        //                                         <FormLabel>ФИО</FormLabel>
-        //                                         <FormControl>
-        //                                             <Input {...field} />
-        //                                         </FormControl>
-        //                                         <FormMessage />
-        //                                     </FormItem>
-        //                                 )}
-        //                             />
-        //                         </div>
-        //                         <Button type="submit" disabled={loading} className="w-full">
-        //                             Обновить данные
-        //                         </Button>
-        //                     </form>
-        //                 </Form>
-        //             </TabsContent>
+                <Alert variant="infoBlue" className="py-2 px-3">
+                    <AlertDescription className="text-base font-[450] text-my-secondary">
+                        Указанные ниже данные используются для оформления доставки. При необходимости, данные можно
+                        будет изменить на этапе оформления заказа.
+                    </AlertDescription>
+                </Alert>
 
-        //             {/* Смена Email + cброс пароля */}
-        //             <TabsContent value="security" className="space-y-4 pb-4">
-        //                 <Form {...securityForm}>
-        //                     <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-4">
-        //                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        //                             <FormField
-        //                                 control={securityForm.control}
-        //                                 name="email"
-        //                                 render={({ field }) => (
-        //                                     <FormItem>
-        //                                         <FormLabel>Новый Email</FormLabel>
-        //                                         <FormControl>
-        //                                             <Input {...field} />
-        //                                         </FormControl>
-        //                                         <FormMessage />
-        //                                     </FormItem>
-        //                                 )}
-        //                             />
-        //                             <FormField
-        //                                 control={securityForm.control}
-        //                                 name="password"
-        //                                 render={({ field }) => (
-        //                                     <FormItem>
-        //                                         <FormLabel>Текущий пароль</FormLabel>
-        //                                         <FormControl>
-        //                                             <Input
-        //                                                 type="password"
-        //                                                 {...field}
-        //                                                 disabled={
-        //                                                     securityForm.watch('email') === customerData.email
-        //                                                 }
-        //                                             />
-        //                                         </FormControl>
-        //                                         <FormMessage />
-        //                                     </FormItem>
-        //                                 )}
-        //                             />
-        //                         </div>
-        //                         <Button
-        //                             type="submit"
-        //                             disabled={loading || securityForm.watch('email') === customerData.email}
-        //                             className="w-full"
-        //                         >
-        //                             Обновить Email
-        //                         </Button>
-        //                     </form>
-        //                 </Form>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-1.5 space-y-0">
+                                <FormLabel className="text-base font-[450] text-my-secondary">ФИО</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Введите ФИО" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="phone"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-1.5 space-y-0">
+                                <FormLabel className="text-base font-[450] text-my-secondary">Телефон</FormLabel>
+                                <FormControl>
+                                    <PhoneInput {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
-        //                 <div className="mt-8 pt-6 border-t">
-        //                     <h3 className="text-lg font-medium mb-2">Смена пароля</h3>
-        //                     <p className="text-sm text-muted-foreground mb-4">
-        //                         В целях безопасности смена пароля производится через подтверждение по электронной
-        //                         почте. Мы отправим специальную ссылку на ваш текущий email.
-        //                     </p>
-        //                     <Button
-        //                         type="button"
-        //                         variant="outline"
-        //                         onClick={handlePasswordReset}
-        //                         disabled={resetLoading}
-        //                         className="w-full md:w-auto"
-        //                     >
-        //                         {resetLoading ? 'Отправка...' : 'Отправить ссылку для смены пароля'}
-        //                     </Button>
-        //                 </div>
-        //             </TabsContent>
-        //         </Tabs>
+                <Button type="submit" disabled={loading || !isDirty} className="md:hidden w-full mt-2">
+                    {loading ? 'Сохранение...' : 'Сохранить изменения'}
+                </Button>
+            </form>
+        </Form>
+    );
+}
 
-        //         {error && (
-        //             <Alert variant="destructive" className="mt-4">
-        //                 <AlertDescription>{error}</AlertDescription>
-        //             </Alert>
-        //         )}
-        //         {success && (
-        //             <Alert className="mt-4">
-        //                 <AlertDescription>{success}</AlertDescription>
-        //             </Alert>
-        //         )}
-        //     </CardContent>
-        // </Card>
+function SecuritySection({
+    customerEmail,
+    securityForm,
+    loading,
+    resetLoading,
+    onSecuritySubmit,
+    onPasswordReset,
+}: {
+    customerEmail: string;
+    securityForm: ReturnType<typeof useForm<{ email: string; password: string }>>;
+    loading: boolean;
+    resetLoading: boolean;
+    onSecuritySubmit: (data: { email: string; password: string }) => void;
+    onPasswordReset: () => void;
+}) {
+    const watchedEmail = securityForm.watch('email');
+    const watchedPassword = securityForm.watch('password');
+    const isEmailButtonDisabled = loading || watchedEmail === customerEmail || !watchedPassword;
+
+    return (
+        <div className="flex flex-col gap-6 md:gap-8">
+            <Form {...securityForm}>
+                <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="flex flex-col gap-4 md:">
+                    <div className="flex items-center justify-between">
+                        <p className="text-base md:text-xl font-semibold text-my-primary">Email</p>
+                        <Button
+                            type="submit"
+                            disabled={isEmailButtonDisabled}
+                            className="hidden md:flex h-auto min-h-0 py-2 px-3"
+                        >
+                            {loading ? 'Сохранение...' : 'Изменить email'}
+                        </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                            control={securityForm.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col gap-1.5 space-y-0">
+                                    <FormControl>
+                                        <Input placeholder="Новый email" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={securityForm.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col gap-1.5 space-y-0">
+                                    <FormControl>
+                                        <Input
+                                            type="password"
+                                            placeholder="Текущий пароль для подтверждения"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <Button type="submit" disabled={isEmailButtonDisabled} className="md:hidden w-full">
+                        {loading ? 'Сохранение...' : 'Изменить email'}
+                    </Button>
+                </form>
+            </Form>
+
+            <Separator color="gray-200" />
+
+            <div className="flex flex-col gap-4 md:gap-6">
+                <div className="flex items-center justify-between">
+                    <p className="text-base md:text-xl font-semibold text-my-primary">Пароль</p>
+                    <Button
+                        type="button"
+                        onClick={onPasswordReset}
+                        disabled={resetLoading}
+                        className="hidden md:flex h-auto min-h-0 py-2 px-3"
+                    >
+                        {resetLoading ? 'Отправка...' : 'Изменить пароль'}
+                    </Button>
+                </div>
+
+                <Alert variant="infoBlue" className="py-3">
+                    <AlertDescription className="text-base font-[450] text-my-secondary">
+                        Смена пароля производится через подтверждение по электронной почте. Мы отправим письмо со
+                        специальной ссылкой на ваш текущий email. Проверьте «Входящие» и «Спам».
+                    </AlertDescription>
+                </Alert>
+
+                <Button type="button" onClick={onPasswordReset} disabled={resetLoading} className="md:hidden w-full">
+                    {resetLoading ? 'Отправка...' : 'Изменить пароль'}
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+function ConfirmDialogHeader({ title }: { title: string }) {
+    return (
+        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-6 shrink-0">
+            <DialogTitle className="text-xl font-semibold text-my-primary leading-none">{title}</DialogTitle>
+            <DialogClose asChild>
+                <button
+                    type="button"
+                    aria-label="Закрыть"
+                    className="flex items-center justify-center w-6 h-6 shrink-0 opacity-70 hover:opacity-100 transition-opacity cursor-pointer"
+                >
+                    <X size={24} strokeWidth={1.5} />
+                </button>
+            </DialogClose>
+        </div>
+    );
+}
+
+function ConfirmDialogFooter({
+    onCancel,
+    onConfirm,
+    cancelLabel = 'Отмена',
+    confirmLabel,
+    confirmVariant = 'destructive',
+    loading,
+    loadingLabel,
+}: {
+    onCancel: () => void;
+    onConfirm: () => void;
+    cancelLabel?: string;
+    confirmLabel: string;
+    confirmVariant?: 'destructive' | 'default' | 'secondary';
+    loading?: boolean;
+    loadingLabel?: string;
+}) {
+    return (
+        <div className="border-t border-gray-200 p-5 flex items-center justify-between shrink-0">
+            <Button
+                type="button"
+                variant="empty"
+                onClick={onCancel}
+                disabled={loading}
+                className="text-my-accent hover:text-my-accent-hover font-semibold h-auto min-h-0 py-2.5 px-2"
+            >
+                {cancelLabel}
+            </Button>
+            <Button
+                type="button"
+                variant={confirmVariant}
+                onClick={onConfirm}
+                disabled={loading}
+                className="h-auto min-h-0 py-2.5 px-2"
+            >
+                {loading && loadingLabel ? loadingLabel : confirmLabel}
+            </Button>
+        </div>
+    );
+}
+
+function LogoutConfirmDialog({
+    isOpen,
+    onClose,
+    onConfirm,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+}) {
+    return (
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-md flex flex-col p-0 gap-0" showCloseButton={false}>
+                <ConfirmDialogHeader title="Выход из аккаунта" />
+                <div className="p-5">
+                    <DialogDescription className="text-base font-[450] text-my-primary leading-snug">
+                        Вы действительно хотите выйти из аккаунта?
+                    </DialogDescription>
+                </div>
+                <ConfirmDialogFooter onCancel={onClose} onConfirm={onConfirm} confirmLabel="Выйти" />
+            </DialogContent>
+        </Dialog>
     );
 }

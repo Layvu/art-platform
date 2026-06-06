@@ -48,7 +48,6 @@ export function Header() {
                     isRegistered={!!user}
                     isActive={checkIsActive(PAGES.LOGIN, pathName) || checkIsActive(PAGES.PROFILE, pathName)}
                 />
-                <span style={{ fontSize: '6px' }}>v 1.0.6</span>
             </nav>
         </header>
     );

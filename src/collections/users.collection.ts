@@ -26,13 +26,13 @@ export const UsersCollection: CollectionConfig = {
         // Включаем встроенную верификацию email
         verify: {
             generateEmailHTML: ({ token }) => generateVerificationEmailHTML(token, baseUrl),
-            generateEmailSubject: () => 'Подтверждение регистрации на Minto',
+            generateEmailSubject: () => 'Подтверждение регистрации на Минто',
         },
 
         // Сброс пароля
         forgotPassword: {
             generateEmailHTML: ({ token } = {}) => generateForgotPasswordEmailHTML(token, baseUrl),
-            generateEmailSubject: () => 'Сброс пароля на Minto',
+            generateEmailSubject: () => 'Сброс пароля на Минто',
         },
     },
     labels: { singular: 'Учётная запись', plural: 'Учётные записи' },
