@@ -37,7 +37,7 @@ const generateEmailHTML = ({
 export const generateVerificationEmailHTML = (token: string, baseUrl: string): string => {
     const url = `${baseUrl}/verify?token=${token}`;
     return generateEmailHTML({
-        title: 'Добро пожаловать в MINTO!',
+        title: 'Добро пожаловать в Минто!',
         instructions: 'Пожалуйста, подтвердите вашу электронную почту, перейдя по ссылке ниже:',
         buttonText: 'Подтвердить почту',
         buttonUrl: url,
