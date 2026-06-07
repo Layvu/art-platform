@@ -11,7 +11,6 @@ export default function Layout({ children }: PropsWithChildren<unknown>) {
             <main className="mt-2 sm:mt-0 min-h-[85vh]">{children}</main>
             <Footer />
             <MobileNav />
-            <Footer />
         </body>
     );
 }
