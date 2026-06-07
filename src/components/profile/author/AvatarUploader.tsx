@@ -74,9 +74,9 @@ export default function AvatarUploader({ value, onChange }: AvatarUploaderProps)
         <div className="flex items-center gap-6">
             <div
                 {...dropzoneProps}
-                className={`relative group flex shrink-0 items-center justify-center w-32 h-32 rounded-full overflow-hidden cursor-pointer transition-colors
-                    ${!hasAvatar && (isDragActive ? 'border-primary bg-primary/5' : 'border-2 border-dashed border-muted-foreground/50 hover:border-my-accent')}
-                    ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
+                className={`relative group flex shrink-0 items-center justify-center w-32 h-32 max-md:w-24 max-md:h-24 rounded-full overflow-hidden cursor-pointer transition-colors
+                ${!hasAvatar && (isDragActive ? 'border-primary bg-primary/5' : 'border-2 border-dashed border-muted-foreground/50 hover:border-my-accent')}
+                ${uploading ? 'opacity-50 pointer-events-none' : ''}`}
             >
                 <input {...getInputProps()} />
 

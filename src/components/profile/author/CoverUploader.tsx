@@ -76,7 +76,7 @@ export default function CoverUploader({ value, onChange }: CoverUploaderProps) {
         <div
             {...dropzoneProps}
             className={cn(
-                'relative w-full h-32 rounded-lg overflow-hidden flex items-center justify-center transition-colors group',
+                'relative w-full h-32 max-md:h-24 rounded-lg overflow-hidden flex items-center justify-center transition-colors group',
                 hasCover ? '' : 'border-2 border-dashed cursor-pointer',
                 !hasCover &&
                     (isDragActive

@@ -59,11 +59,11 @@ export default function GalleryUploader({ value, onChange }: GalleryUploaderProp
     };
 
     return (
-        <div className="flex flex-col gap-9">
+        <div className="flex flex-col gap-[1.5rem] md:gap-9">
             <div
                 {...getRootProps()}
                 className={cn(
-                    'relative flex items-center justify-center w-full min-h-36 rounded-lg border-2 border-dashed transition-colors cursor-pointer px-6 py-8',
+                    'relative flex items-center justify-center w-full min-h-24 md:min-h-36 rounded-lg border-2 border-dashed transition-colors cursor-pointer px-6 py-3.5 md:py-8',
                     isDragActive
                         ? 'border-my-accent bg-my-secondary-background'
                         : 'border-my-disabled hover:border-my-accent',

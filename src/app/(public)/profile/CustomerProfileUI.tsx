@@ -165,7 +165,7 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
                                     onClick={() => selectTab(tab.id)}
                                     className={cn(
                                         'flex gap-2 py-2 md:py-2.5 cursor-pointer items-center transition-colors',
-                                        'text-sm md:text-base',
+                                        'text-sm md:text-base font-medium',
                                         isActive ? 'md:text-my-accent md:font-medium' : 'hover:text-my-accent',
                                     )}
                                 >
@@ -182,8 +182,8 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
                         onClick={() => setIsLogoutModalOpen(true)}
                         className={cn(
                             'flex gap-2 cursor-pointer hover:text-red-500 transition-colors w-full text-left items-center',
-                            'text-sm md:text-base',
-                            'py-3 md:py-0 md:pt-[1.625rem]',
+                            'text-sm md:text-base ',
+                            'py-3 py-0 md:pt-[1.625rem]',
                         )}
                     >
                         <LogOut size={24} strokeWidth={1.5} />
@@ -213,7 +213,7 @@ export default function CustomerProfileUI({ customerData }: CustomerProfileUIPro
 
                     <h2
                         className={cn(
-                            'font-semibold text-my-primary text-xl md:text-[1.75rem]',
+                            'font-semibold text-my-primary font-medium text-xl md:text-[1.75rem]',
                             activeTab === 'profile' && 'md:hidden',
                         )}
                     >

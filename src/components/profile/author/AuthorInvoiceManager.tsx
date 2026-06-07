@@ -2,10 +2,11 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Search, Trash2 } from 'lucide-react';
+import { Download, Search, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,10 +48,10 @@ const CONDITIONS_WITH_PRICE = [INVOICE_ITEM_CONDITION.OLD, INVOICE_ITEM_CONDITIO
 const CONDITIONS_WITHOUT_PRICE = [INVOICE_ITEM_CONDITION.NEW];
 
 const SELECT_TRIGGER_CLASS =
-    'h-auto py-2 w-full flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-transparent px-2 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-100 disabled:text-my-primary disabled:bg-gray-50';
+    'h-auto py-2 w-full flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-transparent px-2 text-sm md:text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-100 disabled:text-my-primary disabled:bg-gray-50';
 
 const INPUT_CELL_CLASS =
-    'h-auto py-2 px-2 border-gray-200 text-base bg-transparent disabled:cursor-not-allowed disabled:opacity-100 disabled:text-my-primary disabled:bg-gray-50';
+    'h-auto py-2 px-2 border-gray-200 text-sm md:text-base bg-transparent disabled:cursor-not-allowed disabled:opacity-100 disabled:text-my-primary disabled:bg-gray-50';
 
 // soft deleted
 function isProductPopulated(product: Product | number | null | undefined): product is Product {
@@ -88,6 +89,15 @@ function getInvoiceRowMeta(item: InvoiceItemWithProduct, errors?: { quantity?: b
     };
 }
 
+// Форматирует id накладной в строку вида "invoice-002" для отображения в диалоге
+function formatInvoiceName(id: number | null): string {
+    if (!id) return 'накладную';
+    return `invoice-${String(id).padStart(3, '0')}`;
+}
+
+const MOBILE_ICON_BTN =
+    'w-10 h-10 flex items-center justify-center rounded-md bg-my-button-secondary-disabled text-my-secondary transition-opacity cursor-pointer hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shrink-0';
+
 export default function AuthorInvoiceManager({ authorId, products, latestInvoice }: AuthorInvoiceManagerProps) {
     const router = useRouter();
 
@@ -99,6 +109,9 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
     const [validationErrors, setValidationErrors] = useState<Record<number, { quantity?: boolean; price?: boolean }>>(
         {},
     );
+
+    // Диалог подтверждения удаления накладной
+    const [isDeleteInvoiceOpen, setIsDeleteInvoiceOpen] = useState(false);
 
     useEffect(() => {
         if (!latestInvoice) return;
@@ -268,7 +281,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
         setInvoiceItems([]);
         setSavedInvoiceId(null);
         setValidationErrors({});
-
+        setIsDeleteInvoiceOpen(false);
         clearMessages();
     };
 
@@ -279,10 +292,43 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
     };
 
     return (
-        <div className="flex flex-col gap-8">
-            <h1 className="text-3xl font-semibold">Накладная</h1>
+        <div className="flex flex-col gap-0 md:gap-8">
+            <div className="md:hidden">
+                <h1 className="text-xl font-semibold">Накладная</h1>
 
-            <div className="flex flex-col gap-4">
+                <div className="mt-[1rem] flex items-center gap-[15px]">
+                    <button
+                        type="button"
+                        aria-label="Удалить накладную"
+                        onClick={() => setIsDeleteInvoiceOpen(true)}
+                        className={MOBILE_ICON_BTN}
+                    >
+                        <Trash2 className="w-5 h-5" strokeWidth={1.5} />
+                    </button>
+
+                    <button
+                        type="button"
+                        aria-label="Скачать накладную"
+                        onClick={handleDownload}
+                        disabled={!savedInvoiceId}
+                        className={MOBILE_ICON_BTN}
+                    >
+                        <Download className="w-5 h-5" strokeWidth={1.5} />
+                    </button>
+
+                    <Button
+                        onClick={handleSaveInvoice}
+                        disabled={loading}
+                        className="w-auto text-[0.875rem] font-semibold h-10 px-4"
+                    >
+                        {loading ? 'Сохранение...' : 'Сохранить'}
+                    </Button>
+                </div>
+            </div>
+
+            <h1 className="hidden md:block text-3xl font-semibold">Накладная</h1>
+
+            <div className="mt-[1.5rem] md:mt-0 flex flex-col gap-[1.5rem] md:gap-4">
                 <Combobox items={availableProducts.map((product) => product.title)} onValueChange={handleValueChange}>
                     <div className="relative w-full">
                         <ComboboxInput placeholder="Найти товар по названию или артикулу" />
@@ -312,25 +358,29 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                         </p>
                     </div>
                 ) : (
-                    <div className="rounded-md border border-gray-200 overflow-hidden">
-                        <Table className="[font-family:'Wix_Madefor_Display',sans-serif] text-base leading-[100%] font-[450] tracking-[0px] [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]">
+                    <div className="rounded-md border border-gray-200 overflow-x-auto">
+                        <Table className="min-w-[720px] [font-family:'Wix_Madefor_Display',sans-serif] text-sm md:text-base leading-relaxed font-medium font-medium tracking-[0px] [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]">
                             <TableHeader>
                                 <TableRow className="hover:bg-transparent border-b border-gray-200">
-                                    <TableHead className="w-12 text-my-primary font-[450] py-4 pr-2 pl-3">№</TableHead>
+                                    <TableHead className="w-12 text-my-primary font-medium py-4 pr-2 pl-3">№</TableHead>
 
-                                    <TableHead className="w-32 text-my-primary font-[450] py-4 px-2">Артикул</TableHead>
+                                    <TableHead className="w-32 text-my-primary font-medium py-4 px-2">
+                                        Артикул
+                                    </TableHead>
 
-                                    <TableHead className="text-my-primary font-[450] py-4 px-2">Наименование</TableHead>
+                                    <TableHead className="text-my-primary font-medium py-4 px-2">
+                                        Наименование
+                                    </TableHead>
 
-                                    <TableHead className="w-32 text-my-primary font-[450] py-4 px-2">
+                                    <TableHead className="w-32 text-my-primary font-medium py-4 px-2">
                                         Количество
                                     </TableHead>
 
-                                    <TableHead className="w-44 text-my-primary font-[450] py-4 px-2">
+                                    <TableHead className="w-44 text-my-primary font-medium py-4 px-2">
                                         Состояние
                                     </TableHead>
 
-                                    <TableHead className="w-32 text-my-primary font-[450] py-4 px-2">Цена</TableHead>
+                                    <TableHead className="w-32 text-my-primary font-medium py-4 px-2">Цена</TableHead>
 
                                     <TableHead className="w-12 py-4 px-2" />
                                 </TableRow>
@@ -353,7 +403,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                                                 {item.product.article1C || '—'}
                                             </TableCell>
 
-                                            <TableCell className="py-5 px-2 text-my-primary font-[450]">
+                                            <TableCell className="py-5 px-2 text-my-primary font-medium">
                                                 {item.product.title}
                                             </TableCell>
 
@@ -363,6 +413,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                                                     min={0}
                                                     value={item.quantity}
                                                     disabled={meta.isQuantityDisabled}
+                                                    onFocus={(e) => e.target.select()}
                                                     onChange={(e) =>
                                                         handleItemChange(
                                                             item.product.id,
@@ -410,6 +461,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                                                     min={0}
                                                     value={item.price ?? 0}
                                                     disabled={meta.isPriceDisabled}
+                                                    onFocus={(e) => e.target.select()}
                                                     onChange={(e) =>
                                                         handleItemChange(
                                                             item.product.id,
@@ -445,19 +497,19 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
             </div>
 
             {error && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="mt-4 md:mt-0">
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
 
             {success && (
-                <Alert className="bg-green-50 border-green-200 text-green-800">
+                <Alert className="bg-green-50 border-green-200 text-green-800 mt-4 md:mt-0">
                     <AlertDescription>{success}</AlertDescription>
                 </Alert>
             )}
 
             {invoiceItems.length > 0 && (
-                <div className="flex flex-wrap items-center justify-between">
+                <div className="hidden md:flex md:flex-row md:flex-wrap md:items-center md:justify-between gap-3">
                     <div className="flex items-center gap-4">
                         <Button onClick={handleSaveInvoice} disabled={loading}>
                             {loading ? 'Сохранение...' : 'Сохранить'}
@@ -475,7 +527,7 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
 
                     <Button
                         type="button"
-                        onClick={handleClearAll}
+                        onClick={() => setIsDeleteInvoiceOpen(true)}
                         className="bg-gray-200 hover:bg-gray-200 text-my-secondary font-semibold pl-2"
                     >
                         <Trash2 className="!size-6" strokeWidth={1.5} />
@@ -483,6 +535,23 @@ export default function AuthorInvoiceManager({ authorId, products, latestInvoice
                     </Button>
                 </div>
             )}
+
+            <ConfirmDeleteDialog
+                isOpen={isDeleteInvoiceOpen}
+                onClose={() => setIsDeleteInvoiceOpen(false)}
+                onConfirm={handleClearAll}
+                title="Удаление накладной"
+                description={
+                    <>
+                        Вы действительно хотите удалить накладную{' '}
+                        <span className="font-semibold">{formatInvoiceName(savedInvoiceId)}</span>? Отменить данное
+                        действие будет невозможно.
+                    </>
+                }
+                confirmLabel="Удалить"
+                loadingLabel="Удаление..."
+                loading={loading}
+            />
         </div>
     );
 }
