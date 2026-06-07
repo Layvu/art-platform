@@ -20,6 +20,7 @@ import {
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import type { Category, Product } from '@/shared/types/payload-types';
 import type { ProductFormValues } from '@/shared/types/product.type';
@@ -27,14 +28,14 @@ import { productSchema } from '@/shared/validations/schemas';
 
 import GalleryUploader from './GalleryUploader';
 
-const DEFAULT_PRODUCT_VALUES: ProductFormValues = {
+export const DEFAULT_PRODUCT_VALUES: ProductFormValues = {
     title: '',
     description: '',
     gallery: [],
     category: null,
 };
 
-interface AuthorProductModalProps {
+export interface AuthorProductModalProps {
     open: boolean;
     product?: Product | null;
     onOpenChange: (open: boolean) => void;
@@ -51,6 +52,7 @@ const LABEL_CLS =
 const INPUT_CLS =
     'text-base md:text-base font-[450] placeholder:text-base placeholder:font-[450] placeholder:text-muted-foreground [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]';
 
+// Десктоп - модальное окно
 export function AuthorProductModal({ open, onOpenChange, product, onSubmit, categories }: AuthorProductModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -104,7 +106,7 @@ export function AuthorProductModal({ open, onOpenChange, product, onSubmit, cate
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="flex flex-col max-h-[92vh] p-0 gap-0 overflow-hidden" showCloseButton={false}>
                 <div className="flex items-center justify-between border-b border-gray-200 px-5 py-6 shrink-0">
-                    <DialogTitle className="text-2xl font-semibold text-my-primary leading-none">
+                    <DialogTitle className="text-xl md:text-2xl font-semibold text-my-primary leading-none">
                         {labels.title}
                     </DialogTitle>
 
@@ -216,13 +218,13 @@ export function AuthorProductModal({ open, onOpenChange, product, onSubmit, cate
                             </div>
                         </div>
 
-                        <div className="border-t border-gray-200 p-5 flex items-center justify-between shrink-0">
+                        <div className="border-t border-gray-200 p-5 flex flex-col-reverse gap-2 md:flex-row md:items-center md:justify-between shrink-0">
                             <Button
                                 type="button"
                                 variant="empty"
                                 onClick={() => onOpenChange(false)}
                                 disabled={isSubmitting}
-                                className="text-my-accent hover:text-my-accent-hover text-base font-semibold h-auto min-h-0 py-2.5 px-2"
+                                className="text-my-accent hover:text-my-accent-hover text-base font-semibold h-auto min-h-0 py-2.5 px-2 w-full md:w-auto"
                             >
                                 Отмена
                             </Button>
@@ -230,7 +232,7 @@ export function AuthorProductModal({ open, onOpenChange, product, onSubmit, cate
                             <Button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="text-base font-[600] h-auto min-h-0 py-2.5 px-2"
+                                className="text-base font-[600] h-auto min-h-0 py-2.5 px-2 w-full md:w-auto"
                             >
                                 {isSubmitting ? labels.submitting : labels.submit}
                             </Button>
@@ -242,7 +244,171 @@ export function AuthorProductModal({ open, onOpenChange, product, onSubmit, cate
     );
 }
 
-function CategoryCombobox({
+// Мобильная версия
+export interface MobileProductFormProps {
+    product: Product | null;
+    categories: Category[];
+    onSubmit: (data: ProductFormValues) => Promise<void>;
+    onClose: () => void;
+}
+
+export function MobileProductForm({ product, categories, onSubmit, onClose }: MobileProductFormProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const form = useForm<ProductFormValues>({
+        resolver: zodResolver(productSchema),
+        defaultValues: DEFAULT_PRODUCT_VALUES,
+    });
+
+    const isEditing = !!product;
+
+    useEffect(() => {
+        if (product) {
+            form.reset({
+                title: product.title,
+                description: product.description || '',
+                category: typeof product.category === 'object' ? product.category?.id : product.category,
+                gallery: product.gallery ?? [],
+            });
+        } else {
+            form.reset(DEFAULT_PRODUCT_VALUES);
+        }
+    }, [product, form]);
+
+    const handleSubmitForm = form.handleSubmit(async (formData) => {
+        setIsSubmitting(true);
+        try {
+            await onSubmit(formData);
+            onClose();
+        } finally {
+            setIsSubmitting(false);
+        }
+    });
+
+    const labels = isEditing
+        ? {
+              submit: 'Сохранить',
+              submitting: 'Сохранение...',
+              infoText: 'Цена и количество отобразятся после подтверждения накладной по факту поставки.',
+          }
+        : {
+              submit: 'Добавить',
+              submitting: 'Добавление...',
+              infoText: 'Цена и количество отобразятся после добавления товара в 1С по факту поставки.',
+          };
+
+    const M_SECTION_TITLE = 'text-[0.875rem] font-semibold text-my-primary leading-none';
+    const M_LABEL = 'text-[0.875rem] text-my-secondary leading-none';
+    const M_INPUT =
+        'text-base font-[450] placeholder:text-base placeholder:font-[450] placeholder:text-muted-foreground [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]';
+
+    return (
+        <Form {...form}>
+            <form onSubmit={handleSubmitForm}>
+                <div className="flex flex-col">
+                    <p className={M_SECTION_TITLE}>Основная информация</p>
+
+                    <Alert variant="infoBlue" className="py-3 mt-[1.5rem]">
+                        <AlertDescription className="text-[0.875rem] font-[450] text-my-secondary leading-snug [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]">
+                            {labels.infoText}
+                        </AlertDescription>
+                    </Alert>
+
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2 space-y-0 mt-[1.5rem]">
+                                <FormLabel className={M_LABEL}>Название товара</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Введите название товара" className={M_INPUT} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="category"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2 space-y-0 mt-[1.5rem]">
+                                <FormLabel className={M_LABEL}>Категория товара</FormLabel>
+                                <FormControl>
+                                    <CategoryCombobox
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        categories={categories}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2 space-y-0 mt-[1.5rem]">
+                                <FormLabel className={M_LABEL}>Описание товара</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Введите описание товара"
+                                        rows={4}
+                                        className="text-base font-[450] resize-none placeholder:text-base placeholder:font-[450] placeholder:text-muted-foreground [font-variant-numeric:lining-nums_tabular-nums_stacked-fractions]"
+                                        {...field}
+                                        value={field.value || ''}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <Separator className="mt-[1.5rem]" />
+
+                    <p className={`${M_SECTION_TITLE} mt-[1.5rem]`}>Фотографии товара</p>
+
+                    <FormField
+                        control={form.control}
+                        name="gallery"
+                        render={({ field }) => (
+                            <FormItem className="space-y-0 mt-[1.5rem]">
+                                <FormControl>
+                                    <GalleryUploader value={field.value} onChange={field.onChange} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <div className="border-t border-gray-200 p-5 flex flex-col-reverse gap-2 mt-[1.5rem]">
+                    <Button
+                        type="button"
+                        variant="empty"
+                        onClick={onClose}
+                        disabled={isSubmitting}
+                        className="text-my-accent hover:text-my-accent-hover text-base font-semibold h-auto min-h-0 py-2.5 px-2 w-full"
+                    >
+                        Отмена
+                    </Button>
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="text-base font-[600] h-auto min-h-0 py-2.5 px-2 w-full"
+                    >
+                        {isSubmitting ? labels.submitting : labels.submit}
+                    </Button>
+                </div>
+            </form>
+        </Form>
+    );
+}
+
+// Вспомогательный компонент
+export function CategoryCombobox({
     value,
     onChange,
     categories,
