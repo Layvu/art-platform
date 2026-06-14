@@ -117,7 +117,7 @@ export default function Footer() {
                 {/* Копирайт */}
                 <p className="text-sm text-my-disabled">
                     © МИНТО 2026 Все права защищены
-                    <span style={{ fontSize: '6px', marginLeft: '16px' }}>v 1.0.10</span>
+                    <span style={{ fontSize: '6px', marginLeft: '16px' }}>v 1.0.11</span>
                 </p>
             </div>
         </footer>
