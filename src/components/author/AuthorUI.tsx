@@ -65,11 +65,7 @@ export default function AuthorUI({
                         <h2 className="text-xl font-semibold">{name}</h2>
                         <p className="text-sm text-my-secondary">{bio}</p>
                         {externalLink && (
-                            <Link
-                                href={externalLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
+                            <Link href={externalLink} target="_blank" rel="noopener noreferrer">
                                 <Button variant="secondary">
                                     Соцсеть автора <ExternalLink size={14} />
                                 </Button>
@@ -78,7 +74,7 @@ export default function AuthorUI({
                     </div>
                 </div>
             </Card>
-            
+
             {/* desktop */}
             <div className="hidden wrap sm:flex relative z-10 py-9 mb-12">
                 <Image

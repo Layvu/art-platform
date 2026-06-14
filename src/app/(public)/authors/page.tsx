@@ -1,11 +1,30 @@
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
+import type { Metadata } from 'next';
 
 import { toAuthorsQueryParams } from '@/services/api/utils';
 import type { AuthorsQueryParams } from '@/shared/types/query-params.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorsQueryOptions } from '@/shared/utils/getDataQueryOptions';
+import { buildMetadata } from '@/shared/utils/seo';
 
 import AuthorsUI from '../../../components/authors/AuthorsUI';
+
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<AuthorsQueryParams>;
+}): Promise<Metadata> {
+    const sp = await searchParams;
+    // Фильтры/пагинацию не индексируем, чтобы не было дублей
+    const hasFilters = Object.keys(sp ?? {}).length > 0;
+
+    return buildMetadata({
+        title: 'Авторы',
+        description: 'Художники и мастера магазина Минто — авторы уникальных изделий ручной работы.',
+        path: '/authors',
+        noindex: hasFilters,
+    });
+}
 
 export default async function AuthorsPage({ searchParams }: { searchParams: Promise<AuthorsQueryParams> }) {
     // Получаем параметры из поисковой строки
@@ -27,5 +46,3 @@ export default async function AuthorsPage({ searchParams }: { searchParams: Prom
         </HydrationBoundary>
     );
 }
-
-// TODO: Метатеги

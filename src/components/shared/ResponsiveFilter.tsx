@@ -31,7 +31,6 @@ export function ResponsiveFilterShell({
 
     const trigger = <FilterTrigger label={triggerLabel} isActive={isActive} onReset={onReset} />;
 
-
     if (isDesktop) {
         return (
             <Popover open={open} onOpenChange={onOpenChange}>
@@ -55,5 +54,4 @@ export function ResponsiveFilterShell({
             </SheetContent>
         </Sheet>
     );
-
 }

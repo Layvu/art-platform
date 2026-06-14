@@ -35,7 +35,7 @@ export default function HomeUI() {
                     </div>
                     <div className="grid gap-4 md:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {products?.docs?.map((product) => (
-                            <ProductCard key={product.id} {...product} />
+                            <ProductCard key={product.id} {...product} priority={product === products.docs[0]} />
                         ))}
                     </div>
                 </div>
@@ -50,7 +50,7 @@ export default function HomeUI() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                         {authors?.docs?.map((author) => (
-                            <AuthorCard key={author.id} {...author} />
+                            <AuthorCard key={author.id} {...author} priority={author === authors.docs[0]} />
                         ))}
                     </div>
                 </div>

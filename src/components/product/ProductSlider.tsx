@@ -20,7 +20,13 @@ export default function ProductSlider({ gallery }: Props) {
         return (
             <div className="relative w-full aspect-square">
                 <div className="relative w-full h-full overflow-hidden rounded-lg bg-gray-100">
-                    <Image src="/placeholder.png" alt="Placeholder" fill priority className="object-cover" />
+                    <Image
+                        src="/placeholder.png"
+                        alt="Placeholder"
+                        fill
+                        sizes="(max-width: 767px) 100vw, 55vw"
+                        className="object-cover"
+                    />
                 </div>
             </div>
         );
@@ -54,7 +60,13 @@ export default function ProductSlider({ gallery }: Props) {
                     {gallery.map((img) => (
                         <div key={img.id} className="px-0 py-1.5 md:py-3 outline-none">
                             <div className="relative w-20 h-20 lg:w-24 lg:h-24 overflow-hidden rounded-lg cursor-pointer">
-                                <Image src={img.url!} alt={img.filename ?? ''} fill className="object-cover" />
+                                <Image
+                                    src={img.url!}
+                                    alt={img.filename ?? ''}
+                                    fill
+                                    sizes="96px"
+                                    className="object-cover"
+                                />
                             </div>
                         </div>
                     ))}
@@ -64,10 +76,18 @@ export default function ProductSlider({ gallery }: Props) {
             {/* Основной слайдер */}
             <div className="relative flex-1 pt-3 min-w-0">
                 <Slider ref={mainSlider} {...mainSettings}>
-                    {gallery.map((img) => (
+                    {gallery.map((img, index) => (
                         <div key={img.id}>
                             <div className="relative w-full aspect-square overflow-hidden rounded-lg">
-                                <Image src={img.url!} alt={img.filename ?? ''} fill priority className="object-cover" />
+                                <Image
+                                    src={img.url!}
+                                    alt={img.filename ?? ''}
+                                    fill
+                                    sizes="(max-width: 767px) 100vw, 55vw"
+                                    priority={index === 0}
+                                    loading={index === 0 ? undefined : 'lazy'}
+                                    className="object-cover"
+                                />
                             </div>
                         </div>
                     ))}

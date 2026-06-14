@@ -39,12 +39,7 @@ export default function CartItem({ item, available }: { item: ICartItem; availab
                 {/* Image (общая для обоих лейаутов) */}
                 <div className="relative shrink-0 w-20 h-20 md:w-30 md:h-30">
                     <Link href={PAGES.PRODUCT(product.slug)}>
-                        <Image
-                            src={imageSrc}
-                            alt={product.title}
-                            fill
-                            className="object-cover rounded-lg"
-                        />
+                        <Image src={imageSrc} alt={product.title} fill className="object-cover rounded-lg" />
                     </Link>
                 </div>
 
@@ -55,14 +50,10 @@ export default function CartItem({ item, available }: { item: ICartItem; availab
                             <span className="text-lg font-bold text-my-primary leading-none">
                                 {(price * item.quantity).toLocaleString()} ₽
                             </span>
-                            <span className="text-xs text-my-tertriary">
-                                ({price.toLocaleString()} ₽ / шт)
-                            </span>
+                            <span className="text-xs text-my-tertriary">({price.toLocaleString()} ₽ / шт)</span>
                         </div>
                     ) : (
-                        <div className="text-xs text-my-tertriary">
-                            ({price.toLocaleString()} ₽ / шт)
-                        </div>
+                        <div className="text-xs text-my-tertriary">({price.toLocaleString()} ₽ / шт)</div>
                     )}
 
                     <Link href={PAGES.PRODUCT(product.slug)}>
@@ -73,9 +64,7 @@ export default function CartItem({ item, available }: { item: ICartItem; availab
 
                     {available && (
                         <>
-                            <div className="text-xs text-my-accent font-medium">
-                                В наличии {stock} шт.
-                            </div>
+                            <div className="text-xs text-my-accent font-medium">В наличии {stock} шт.</div>
                             <div className="flex items-center justify-between gap-2 mt-1">
                                 <div
                                     className={cn(
@@ -153,11 +142,7 @@ export default function CartItem({ item, available }: { item: ICartItem; availab
 
             {/* MOBILE-only: «Нет в наличии» во всю ширину карточки внизу */}
             {!available && (
-                <Button
-                    className="md:hidden w-full rounded-none"
-                    variant={'pagination'}
-                    disabled
-                >
+                <Button className="md:hidden w-full rounded-none" variant={'pagination'} disabled>
                     Нет в наличии
                 </Button>
             )}

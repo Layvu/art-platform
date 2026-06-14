@@ -12,7 +12,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ScrollArea } from '../ui/scroll-area';
 import { Spinner } from '../ui/spinner';
 
-
 type AuthorFilterProps = {
     initialAuthor?: string;
     onAuthorChange: (author?: string) => void;

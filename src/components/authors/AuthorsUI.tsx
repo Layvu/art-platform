@@ -52,7 +52,9 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
                     onSortChange={(value) => updateQueryParams({ sort: value })}
                 />
 
-                <div className={`grid grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-6 mb-8 px-3 lg:px-0${isPlaceholderData && 'opacity-50'}`}>
+                <div
+                    className={`grid grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-6 mb-8 px-3 lg:px-0${isPlaceholderData && 'opacity-50'}`}
+                >
                     {authors.map((author) => (
                         <AuthorCard key={author.id} {...author} />
                     ))}
@@ -104,5 +106,3 @@ export default function AuthorsUI({ initialParams }: { initialParams: AuthorsQue
         </>
     );
 }
-
-// TODO: Метатеги

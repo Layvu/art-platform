@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
@@ -145,6 +146,36 @@ export const AuthorsCollection: CollectionConfig = {
     ],
 
     hooks: {
+        afterChange: [
+            ({ doc }) => {
+                try {
+                    revalidateTag(COLLECTION_SLUGS.AUTHORS);
+                    if (doc?.slug) {
+                        revalidateTag(`author:${doc.slug}`);
+                    }
+                    revalidatePath('/sitemap.xml');
+                } catch {
+                    /* empty */
+                }
+                return doc;
+            },
+        ],
+
+        afterDelete: [
+            ({ doc }) => {
+                try {
+                    revalidateTag(COLLECTION_SLUGS.AUTHORS);
+                    if (doc?.slug) {
+                        revalidateTag(`author:${doc.slug}`);
+                    }
+                    revalidatePath('/sitemap.xml');
+                } catch {
+                    /* empty */
+                }
+                return doc;
+            },
+        ],
+
         beforeChange: [
             // Генерируем уникальный slug
             async ({ data, originalDoc, req }) => {

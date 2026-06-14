@@ -13,6 +13,7 @@ export const MediaCollection: CollectionConfig = {
         imageSizes: [
             { name: 'thumbnail', width: 300, height: 300, position: 'centre' },
             { name: 'medium', width: 800 },
+            { name: 'og', width: 1200, height: 1200, position: 'centre' },
         ],
         adminThumbnail: 'thumbnail',
     },
@@ -85,4 +86,33 @@ export const MediaCollection: CollectionConfig = {
             return false;
         },
     },
+
+    hooks: {
+        beforeOperation: [
+            ({ req, operation }) => {
+                if (operation !== 'create') return;
+
+                const file = req.file;
+                if (!file?.name) return;
+
+                file.name = sanitizeFilename(file.name);
+            },
+        ],
+    },
 };
+
+function sanitizeFilename(name: string): string {
+    const lastDot = name.lastIndexOf('.');
+    const ext = lastDot >= 0 ? name.slice(lastDot) : '';
+    const base = lastDot >= 0 ? name.slice(0, lastDot) : name;
+
+    const cleanBase = base
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9-_]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase();
+
+    return `${cleanBase || 'file'}${ext.toLowerCase()}`;
+}

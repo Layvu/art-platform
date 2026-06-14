@@ -13,4 +13,3 @@ export const PAGES = {
 };
 
 // api.config.ts
-// seo.config.ts

@@ -17,7 +17,16 @@ import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getProductQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-export default function ProductCard({ id, title, slug, price, author, gallery, quantity }: Product) {
+export default function ProductCard({
+    id,
+    title,
+    slug,
+    price,
+    author,
+    gallery,
+    quantity,
+    priority = false,
+}: Product & { priority?: boolean }) {
     const router = useRouter();
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
@@ -54,8 +63,10 @@ export default function ProductCard({ id, title, slug, price, author, gallery, q
                         alt="Картинка"
                         src={(typeof mainImage === 'object' && mainImage?.url) || '/placeholder.png'}
                         fill
+                        sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 25vw"
                         className="object-cover hover:scale-110 transition-transform duration-300"
-                        priority
+                        priority={priority}
+                        loading={priority ? undefined : 'lazy'}
                     />
                 </CardHeader>
 

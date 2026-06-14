@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { PAGES } from '@/config/public-pages.config';
@@ -5,9 +6,12 @@ import { authServerService } from '@/services/api/server/auth-server.service';
 import { authorServerService } from '@/services/api/server/author-server.service';
 import { customerServerService } from '@/services/api/server/customer-server.service';
 import { UserType } from '@/shared/types/auth.interface';
+import { buildMetadata } from '@/shared/utils/seo';
 
 import AuthorProfileUI from './AuthorProfileUI';
 import CustomerProfileUI from './CustomerProfileUI';
+
+export const metadata: Metadata = buildMetadata({ title: 'Личный кабинет', noindex: true });
 
 export default async function ProfilePage() {
     // Получаем текущего пользователя через серверный метод
@@ -55,5 +59,3 @@ export default async function ProfilePage() {
     // Если роль неизвестна или это админ
     redirect(PAGES.LOGIN);
 }
-
-// TODO: Метатеги

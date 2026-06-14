@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { type CollectionConfig } from 'payload';
 import slugify from 'slugify';
 
@@ -247,6 +248,36 @@ export const ProductsCollection: CollectionConfig = {
     ],
 
     hooks: {
+        afterChange: [
+            ({ doc }) => {
+                try {
+                    revalidateTag(COLLECTION_SLUGS.PRODUCTS);
+                    if (doc?.slug) {
+                        revalidateTag(`product:${doc.slug}`);
+                    }
+                    revalidatePath('/sitemap.xml');
+                } catch {
+                    /* empty */
+                }
+                return doc;
+            },
+        ],
+
+        afterDelete: [
+            ({ doc }) => {
+                try {
+                    revalidateTag(COLLECTION_SLUGS.PRODUCTS);
+                    if (doc?.slug) {
+                        revalidateTag(`product:${doc.slug}`);
+                    }
+                    revalidatePath('/sitemap.xml');
+                } catch {
+                    /* empty */
+                }
+                return doc;
+            },
+        ],
+
         beforeChange: [
             async ({ data, req, operation }) => {
                 const { user, payload } = req;

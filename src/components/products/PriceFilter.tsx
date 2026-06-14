@@ -4,14 +4,7 @@ import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery';
 import { isValidPrice } from '@/shared/utils/isValidPrice';
 
@@ -46,9 +39,7 @@ export default function PriceFilter({ priceFrom, priceTo, onPriceChange }: Price
         setOpen(false);
     };
 
-    const trigger = (
-       <FilterTrigger label="Цена" isActive={isActive} onReset={onResetClick} />
-    );
+    const trigger = <FilterTrigger label="Цена" isActive={isActive} onReset={onResetClick} />;
 
     const content = (
         <div className="flex flex-col gap-5">

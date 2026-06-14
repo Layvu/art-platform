@@ -98,10 +98,10 @@ export default function AboutPage() {
                         </li>
                     </ul>
 
-                     <div className="lg:col-span-8 h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden rounded-xl">
+                    <div className="lg:col-span-8 h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden rounded-xl">
                         <YandexMap />
-                    </div> 
-                </div> 
+                    </div>
+                </div>
             </section>
         </section>
     );

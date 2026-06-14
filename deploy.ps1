@@ -60,7 +60,6 @@ Write-Host "DONE!" -ForegroundColor Green
 
 # Сертификаты:
 # /etc/nginx/sites-enabled/polki-minto.ru
-# /etc/nginx/sites-enabled/polki-minto.ru
 
 # .env
 # nano /var/app/.env

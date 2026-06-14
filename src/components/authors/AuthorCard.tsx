@@ -13,7 +13,7 @@ import type { Timer } from '@/shared/types/timer.type';
 import { getQueryClient } from '@/shared/utils/get-query-client';
 import { getAuthorQueryOptions } from '@/shared/utils/getDataQueryOptions';
 
-export default function AuthorCard({ name, slug, avatar }: Author) {
+export default function AuthorCard({ name, slug, avatar, priority = false }: Author & { priority?: boolean }) {
     const timerRef = useRef<Timer | null>(null);
     const queryClient = getQueryClient();
 
@@ -33,8 +33,10 @@ export default function AuthorCard({ name, slug, avatar }: Author) {
                         alt="Картинка"
                         src={isImageData(avatar) ? (avatar?.url ? avatar.url : '/placeholder.png') : '/placeholder.png'}
                         fill
+                        sizes="(max-width: 1023px) 33vw, 16vw"
                         className="object-cover "
-                        priority
+                        priority={priority}
+                        loading={priority ? undefined : 'lazy'}
                     />
                 </div>
 

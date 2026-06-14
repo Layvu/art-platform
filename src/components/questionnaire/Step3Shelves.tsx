@@ -72,7 +72,7 @@ export default function Step3Shelves({
                     name="needRail"
                     control={form.control}
                     render={({ field }) => (
-                        <FormItem className='space-y-1'>
+                        <FormItem className="space-y-1">
                             <FormLabel className="font-normal leading-tight text-my-secondary">
                                 Нужен ли рейл?
                             </FormLabel>
@@ -80,13 +80,17 @@ export default function Step3Shelves({
                             <FormControl>
                                 <RadioGroup onValueChange={field.onChange} value={field.value} className="w-fit">
                                     <Field orientation="horizontal">
-                                        <RadioGroupItem value="yes" id="need-rail-yes" className='cursor-pointer' />
-                                        <FieldLabel htmlFor="need-rail-yes" className='py-1 border-none'>Да</FieldLabel>
+                                        <RadioGroupItem value="yes" id="need-rail-yes" className="cursor-pointer" />
+                                        <FieldLabel htmlFor="need-rail-yes" className="py-1 border-none">
+                                            Да
+                                        </FieldLabel>
                                     </Field>
 
                                     <Field orientation="horizontal">
                                         <RadioGroupItem value="no" id="need-rail-no" />
-                                        <FieldLabel htmlFor="need-rail-no" className='py-1 border-none'>Нет</FieldLabel>
+                                        <FieldLabel htmlFor="need-rail-no" className="py-1 border-none">
+                                            Нет
+                                        </FieldLabel>
                                     </Field>
                                 </RadioGroup>
                             </FormControl>

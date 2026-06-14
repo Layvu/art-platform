@@ -1,3 +1,4 @@
+import { REVALIDATE_TIME } from '@/config/seo.config';
 import { COLLECTION_SLUGS } from '@/shared/constants/constants';
 import type { Author, Category, HomeSlider, Product } from '@/shared/types/payload-types';
 import type { QueryParams } from '@/shared/types/query-params.type';
@@ -28,8 +29,8 @@ export class PayloadDataService {
     private async getCollection<T>(
         slug: CollectionSlug,
         params: QueryParams = {},
-        //    fetchOptions: RequestInit = { cache: 'force-cache', next: { revalidate: 0 } }, // ISR
-        fetchOptions: RequestInit = { cache: 'no-store' }, // SSR
+        fetchOptions: RequestInit = { next: { revalidate: REVALIDATE_TIME, tags: [slug] } }, // ISR по умолчанию
+        // fetchOptions: RequestInit = { cache: 'no-store' }, // SSR для разработки, всегда свежие данные
     ): Promise<PaginatedResponse<T>> {
         const url = apiUrl.collection(slug, params);
         const response = await fetch(url, fetchOptions);
@@ -55,8 +56,8 @@ export class PayloadDataService {
     private async getItem<T>(
         slug: CollectionSlug,
         id: number,
-        //    fetchOptions: RequestInit = { cache: 'force-cache', next: { revalidate: 0 } }, // ISR
-        fetchOptions: RequestInit = { cache: 'no-store' }, // SSR
+        fetchOptions: RequestInit = { next: { revalidate: REVALIDATE_TIME, tags: [slug] } },
+        // fetchOptions: RequestInit = { cache: 'no-store' }, // SSR для разработки, всегда свежие данные
     ): Promise<T> {
         const url = apiUrl.item(slug, id);
         const response = await fetch(url, fetchOptions);
@@ -106,20 +107,38 @@ export class PayloadDataService {
     }
 
     async getProductBySlug(slug: string): Promise<Product | null> {
-        const result = await this.getCollection<Product>(COLLECTION_SLUGS.PRODUCTS, {
-            where: { slug: { equals: slug } },
-            limit: 1,
-            pagination: false, // Отключаем пагинацию для оптимизации
-        });
+        const result = await this.getCollection<Product>(
+            COLLECTION_SLUGS.PRODUCTS,
+            {
+                where: { slug: { equals: slug } },
+                limit: 1,
+                pagination: false, // Отключаем пагинацию для оптимизации
+            },
+            {
+                next: {
+                    revalidate: REVALIDATE_TIME,
+                    tags: [COLLECTION_SLUGS.PRODUCTS, `product:${slug}`],
+                },
+            },
+        );
         return result.docs[0] ?? null;
     }
 
     async getAuthorBySlug(slug: string): Promise<Author | null> {
-        const result = await this.getCollection<Author>(COLLECTION_SLUGS.AUTHORS, {
-            where: { slug: { equals: slug } },
-            limit: 1,
-            pagination: false,
-        });
+        const result = await this.getCollection<Author>(
+            COLLECTION_SLUGS.AUTHORS,
+            {
+                where: { slug: { equals: slug } },
+                limit: 1,
+                pagination: false,
+            },
+            {
+                next: {
+                    revalidate: REVALIDATE_TIME,
+                    tags: [COLLECTION_SLUGS.AUTHORS, `author:${slug}`],
+                },
+            },
+        );
         return result.docs[0] ?? null;
     }
 
